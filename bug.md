@@ -4,11 +4,10 @@
     - Thêm lệnh xóa màn hình khi chuyển menu
     - Thêm màu đồ họa
 # Fix bug: 
-    - lỗi chạy APT khi đăng nhập tài khoản Patient và sau khi chạy các chức năng
-![alt text](image.png) 
-    - Không tạo file txt appointment sau khi đặt lịch khám
     - Không hiện mã bác sĩ
-    - Chưa thay đổi username thành CCCD
+    - Lỗi CCCD nhập không đủ số nhưng vẫn không báo lỗi và bắt nhập lại
+    - Lỗi chức năng xem lịch khám sắp tới
+    - Lỗi chức năng hủy lịch khám: khi chọn chức năng hủy lịch khám thì in ra chưa có lịch khám nào, sửa lại in ra các lịch khám đã đặt mà chưa hủy
 
 
 

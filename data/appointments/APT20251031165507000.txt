@@ -1,8 +1,0 @@
-appointmentID:APT20251031165507000
-patientId:01004
-doctorId:01002
-date:01/01/2026
-time:10:30
-reason:dau dau
-bookStatus:Booked
-visitStatus:Not Done

@@ -1,11 +1,9 @@
 ID:02001
-CCCD:045306003111
-Mật khẩu:111
-Họ và tên:
-Ngày sinh:
-Giới tính:
-Email:
-Số điện thoại:
-Địa chỉ:
-Chuyên khoa:
-Vai trò:
+CCCD:01234567
+Mật khẩu:123456
+Họ và tên:Vlong
+Ngày sinh:01/01/2000
+Giới tính:Nam
+Email:aifha@gmail.com
+Số điện thoại:0123456789
+Địa chỉ:22 ahga ajfia
