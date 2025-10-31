@@ -3,39 +3,24 @@
 
 #include "User.h"
 #include "DataStore.h"
-#include <vector>
 
-class Patient : public User {
-private:
-    string dateOfBirth;
-    string phoneNumber;
-    string address;
-
+class Patient :public User {
 public:
     // Constructor
     Patient();
-    Patient(string id, string username, string password, string email);
-    Patient(string id, string username, string password, string email, string fullName,
-            string dateOfBirth, string phoneNumber, string address);
+    Patient(string id, string identicalCard, string password);
+    Patient(string id, string identicalCard, string password,string fullName,string dateofbirth, string gender, string email, string phoneNumber, string address);
     
     // Destructor
     ~Patient();
     
-    // Getters
-    string getDateOfBirth() const;
-    string getPhoneNumber() const;
-    string getAddress() const;
-    
-    // Setters
-    void setDateOfBirth(string dateOfBirth);
-    void setPhoneNumber(string phoneNumber);
-    void setAddress(string address);
+    friend ostream& operator<<(ostream&, const Patient&);
+    friend istream& operator>>(istream&, Patient&);
     
     // Override methods
     void displayInfo() const override;
-    string serialize() const override;
-    bool updateProfile() override;
-    
+    // bool updateProfile() override;
+
     // Appointment methods
     bool bookAppointment(const string& doctorId, const string& date, const string& time, const string& reason);
     bool viewMyAppointments() const;

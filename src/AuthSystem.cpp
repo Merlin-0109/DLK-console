@@ -1,6 +1,6 @@
 #include "AuthSystem.h"
 #include <sstream>
-#include <algorithm>
+#include <algorithm> 
 #include <iostream>
 #include <iomanip>
 
@@ -27,19 +27,8 @@ void AuthSystem::loadUsersFromDataStore() {
         string data = dataStore->loadPatientData(id);
         if (!data.empty()) {
             stringstream ss(data);
-            string type, userId, username, password, email, fullName, dob, phone, address;
-            
-            getline(ss, type);       // userType
-            getline(ss, userId);     // id
-            getline(ss, username);   // username
-            getline(ss, password);   // password
-            getline(ss, email);      // email
-            getline(ss, fullName);   // fullName
-            getline(ss, dob);        // dateOfBirth
-            getline(ss, phone);      // phoneNumber
-            getline(ss, address);    // address
-            
-            Patient* patient = new Patient(userId, username, password, email, fullName, dob, phone, address);
+            Patient* patient = new Patient;
+            ss >> *patient;
             users.push_back(patient);
         }
     }
@@ -49,27 +38,18 @@ void AuthSystem::loadUsersFromDataStore() {
     for (const string& id : doctorIDs) {
         string data = dataStore->loadDoctorData(id);
         if (!data.empty()) {
-            stringstream ss(data);
-            string type, userId, username, password, email, fullName, specialization;
-            
-            getline(ss, type);              // userType
-            getline(ss, userId);            // id
-            getline(ss, username);          // username
-            getline(ss, password);          // password
-            getline(ss, email);             // email
-            getline(ss, fullName);          // fullName
-            getline(ss, specialization);    // specialization
-            
-            Doctor* doctor = new Doctor(userId, username, password, email, fullName, specialization);
+            stringstream ss(data); // stringstream tao ra mot luong input ao - luc nay data chua co gi ne
+            Doctor* doctor = new Doctor;
+            ss >> *doctor;
             users.push_back(doctor);
         }
     }
 }
 
 // Tìm user theo username
-User* AuthSystem::findUser(string username) {
+User* AuthSystem::findUser(string identicalCard) {
     for (User* user : users) {
-        if (user->getUsername() == username) {
+        if (user->getIdenticalCard() == identicalCard) {
             return user;
         }
     }
@@ -86,53 +66,49 @@ User* AuthSystem::findUserByID(string id) {
     return nullptr;
 }
 
-// Kiểm tra username đã tồn tại
-bool AuthSystem::usernameExists(string username) {
-    return findUser(username) != nullptr;
+// Kiểm tra số CCCD đã tồn tại
+bool AuthSystem::usernameExists(string identicalCard) {
+    return findUser(identicalCard) != nullptr;
 }
 
 // Đăng ký Doctor
-bool AuthSystem::registerDoctor(string username, string password, string email) {
-    if (usernameExists(username)) {
-        cout << "Lỗi: Tên đăng nhập đã tồn tại!" << endl;
+bool AuthSystem::registerDoctor(string identicalCard, string password) {
+    if (usernameExists(identicalCard)) {
+        cout << "Lỗi: Số căn cước công dân đăng ký đã tồn tại!" << endl;
         return false;
     }
-    
-    // Generate ID
+   
     string id = dataStore->generateDoctorID();
-    
-    // Tạo đối tượng Doctor
-    Doctor* doctor = new Doctor(id, username, password, email);
-    
+    Doctor* doctor = new Doctor(id, identicalCard, password);
+    // cin >> *doctor;
+    ostringstream oss;
+    oss << *doctor;
     // Lưu vào DataStore
-    if (dataStore->saveDoctorData(id, doctor->serialize())) {
+    if (dataStore->saveDoctorData(id,oss.str())) {
         users.push_back(doctor);
-        cout << "Đăng ký thành công! Mã số của bạn là: " << id << endl;
+        cout << "Đăng ký thành công! ID của bạn là: " << id << endl;
         cout << "Vui lòng đăng nhập để cập nhật thông tin cá nhân." << endl;
         return true;
     }
-    
     delete doctor;
     return false;
 }
 
 // Đăng ký Patient
-bool AuthSystem::registerPatient(string username, string password, string email) {
-    if (usernameExists(username)) {
-        cout << "Lỗi: Tên đăng nhập đã tồn tại!" << endl;
+bool AuthSystem::registerPatient(string identicalCard, string password) {
+    if (usernameExists(identicalCard)) {
+        cout << "Lỗi: CCCD đã tồn tại!" << endl;
         return false;
     }
     
-    // Generate ID
     string id = dataStore->generatePatientID();
-    
-    // Tạo đối tượng Patient
-    Patient* patient = new Patient(id, username, password, email);
-    
+    Patient* patient = new Patient(id, identicalCard, password);
+    ostringstream ss;
+    ss << *patient;
     // Lưu vào DataStore
-    if (dataStore->savePatientData(id, patient->serialize())) {
+    if (dataStore->savePatientData(id,ss.str())) {
         users.push_back(patient);
-        cout << "Đăng ký thành công! Mã số của bạn là: " << id << endl;
+        cout << "Đăng ký thành công! ID của bạn là: " << id << endl;
         cout << "Vui lòng cập nhật thông tin cá nhân sau khi đăng nhập." << endl;
         return true;
     }
@@ -142,8 +118,8 @@ bool AuthSystem::registerPatient(string username, string password, string email)
 }
 
 // Đăng nhập
-User* AuthSystem::login(string username, string password) {
-    User* user = findUser(username);
+User* AuthSystem::login(string identicalCard, string password) {
+    User* user = findUser(identicalCard);
     
     if (user == nullptr) {
         cout << "Lỗi: Người dùng không tồn tại!" << endl;
@@ -156,11 +132,11 @@ User* AuthSystem::login(string username, string password) {
     }
     
     currentUser = user;
-    string name = user->getFullName().empty() ? user->getUsername() : user->getFullName();
+    string name = user->getFullName().empty() ? user->getIdenticalCard() : user->getFullName();
     cout << "Đăng nhập thành công! Chào mừng, " << name << "!" << endl;
     
-    // Kiểm tra profile cho Doctor và Patient
-    if (!user->isProfileComplete()) {
+    // Chỉ kiểm tra profile cho Doctor và Patient, không kiểm tra Admin
+    if (user->getUserType() != ADMIN && !user->isProfileComplete()) {
         cout << "⚠ Bạn chưa cập nhật đầy đủ thông tin cá nhân. Vui lòng cập nhật!" << endl;
     }
     
@@ -170,7 +146,7 @@ User* AuthSystem::login(string username, string password) {
 // Đăng xuất
 void AuthSystem::logout() {
     if (currentUser != nullptr) {
-        string name = currentUser->getFullName().empty() ? currentUser->getUsername() : currentUser->getFullName();
+        string name = currentUser->getFullName().empty() ? currentUser->getIdenticalCard() : currentUser->getFullName();
         cout << "Tạm biệt, " << name << "!" << endl;
         currentUser = nullptr;
     }
@@ -180,7 +156,7 @@ void AuthSystem::logout() {
 bool AuthSystem::updateUserProfile(User* user) {
     if (user == nullptr) return false;
     
-    if (user->updateProfile()) {
+    if (user->updateProfile(*user)) {
         return saveUserData(user);
     }
     return false;
@@ -190,14 +166,18 @@ bool AuthSystem::updateUserProfile(User* user) {
 bool AuthSystem::saveUserData(User* user) {
     if (user == nullptr) return false;
     
+    ostringstream oss;
+    oss << *user;
+    string data = oss.str();
     string id = user->getID();
-    string data = user->serialize();
     
     switch (user->getUserType()) {
         case DOCTOR:
-            return dataStore->saveDoctorData(id, data);
+            return dataStore->saveDoctorData(id,data);
         case PATIENT:
-            return dataStore->savePatientData(id, data);
+            return dataStore->savePatientData(id,data);
+        case ADMIN:
+            return dataStore->saveAdminData(id,data);
         default:
             return false;
     }

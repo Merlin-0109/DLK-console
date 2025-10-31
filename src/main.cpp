@@ -89,7 +89,7 @@ void registerDoctor(AuthSystem& authSystem) {
     cout << "Email: ";
     cin >> email;
     
-    authSystem.registerDoctor(username, password, email);
+    authSystem.registerDoctor(username, password);
 }
 
 // Hàm đăng ký Patient
@@ -104,7 +104,7 @@ void registerPatient(AuthSystem& authSystem) {
     cout << "Email: ";
     cin >> email;
     
-    authSystem.registerPatient(username, password, email);
+    authSystem.registerPatient(username, password);
 }
 
 

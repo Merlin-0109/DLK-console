@@ -5,103 +5,50 @@
 #include <iomanip>
 #include <ctime>
 #include <vector>
+#include <limits>
 
 // Constructor mặc định
-Patient::Patient() : User(), dateOfBirth(""), phoneNumber(""), address("") {
+Patient::Patient() :User() {
     userType = PATIENT;
 }
 
 // Constructor đơn giản cho đăng ký
-Patient::Patient(string id, string username, string password, string email)
-    : User(id, username, password, email, PATIENT),
-      dateOfBirth(""), phoneNumber(""), address("") {}
+Patient::Patient(string id, string identicalCard, string password)
+    :User(id, identicalCard, password, PATIENT) {}
 
 // Constructor đầy đủ
-Patient::Patient(string id, string username, string password, string email, string fullName,
-                 string dateOfBirth, string phoneNumber, string address)
-    : User(id, username, password, email, fullName, PATIENT),
-      dateOfBirth(dateOfBirth), phoneNumber(phoneNumber), address(address) {}
+Patient::Patient(string id, string identicalCard, string password,string fullName,string dateofbirth, string gender, string email, string phoneNumber, string address)
+    :User(id,identicalCard,password,fullName,dateofbirth,gender,email,phoneNumber,address,PATIENT) {}
 
 // Destructor
 Patient::~Patient() {}
-
-// Getters
-string Patient::getDateOfBirth() const {
-    return dateOfBirth;
-}
-
-string Patient::getPhoneNumber() const {
-    return phoneNumber;
-}
-
-string Patient::getAddress() const {
-    return address;
-}
-
-// Setters
-void Patient::setDateOfBirth(string dateOfBirth) {
-    this->dateOfBirth = dateOfBirth;
-}
-
-void Patient::setPhoneNumber(string phoneNumber) {
-    this->phoneNumber = phoneNumber;
-}
-
-void Patient::setAddress(string address) {
-    this->address = address;
-}
 
 // Hiển thị thông tin
 void Patient::displayInfo() const {
     cout << "==================================" << endl;
     cout << "THÔNG TIN BỆNH NHÂN" << endl;
     cout << "==================================" << endl;
-    cout << "Mã số: " << id << endl;
-    cout << "Tên đăng nhập: " << username << endl;
-    cout << "Email: " << email << endl;
-    cout << "Họ và tên: " << (fullName.empty() ? "[Chưa cập nhật]" : fullName) << endl;
-    cout << "Ngày sinh: " << (dateOfBirth.empty() ? "[Chưa cập nhật]" : dateOfBirth) << endl;
-    cout << "Số điện thoại: " << (phoneNumber.empty() ? "[Chưa cập nhật]" : phoneNumber) << endl;
-    cout << "Địa chỉ: " << (address.empty() ? "[Chưa cập nhật]" : address) << endl;
+    cout << "ID:" << id << endl;
+    cout << "CCCD:" << username << endl;
+    cout << "Email:" << email << endl;
+    cout << "Họ và tên:" << (fullName.empty() ? "[Chưa cập nhật]" :fullName) << endl;
+    cout << "Ngày sinh:" << (dateOfBirth.empty() ? "[Chưa cập nhật]" :dateOfBirth) << endl;
+    cout << "Số điện thoại:" << (phoneNumber.empty() ? "[Chưa cập nhật]" :phoneNumber) << endl;
+    cout << "Địa chỉ:" << (address.empty() ? "[Chưa cập nhật]" :address) << endl;
     cout << "==================================" << endl;
 }
 
-// Serialize
-string Patient::serialize() const {
-    stringstream ss;
-    ss << userType << "\n"
-       << id << "\n"
-       << username << "\n"
-       << password << "\n"
-       << email << "\n"
-       << fullName << "\n"
-       << dateOfBirth << "\n"
-       << phoneNumber << "\n"
-       << address;
-    return ss.str();
+ostream& operator<<(ostream& o, const Patient& patient){
+    o << static_cast<const User&>(patient);
+    return o;
 }
+istream& operator>>(istream& in, Patient& patient){
+    in >> static_cast<User&>(patient);
+    // in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    if (in.peek() == '\n') in.ignore();
 
-// Update profile
-bool Patient::updateProfile() {
-    cout << "\n=== CẬP NHẬT THÔNG TIN BỆNH NHÂN ===" << endl;
-    
-    cin.ignore();
-    cout << "Họ và tên: ";
-    getline(cin, fullName);
-    
-    cout << "Ngày sinh (DD/MM/YYYY): ";
-    getline(cin, dateOfBirth);
-    
-    cout << "Số điện thoại: ";
-    getline(cin, phoneNumber);
-    
-    cout << "Địa chỉ: ";
-    getline(cin, address);
-    
-    cout << "Cập nhật thông tin thành công!" << endl;
-    return true;
+    return in;
 }
-
 // Book appointment
 bool Patient::bookAppointment(const string& doctorId, const string& date, const string& time, const string& reason) {
     // Kiểm tra thông tin cá nhân đã đầy đủ chưa
@@ -518,7 +465,6 @@ void Patient::displayAppointmentDetails(const DataStore::AppointmentDetails& det
 int Patient::countActiveAppointments() const {
     vector<string> appointments = DataStore::getPatientAppointments(this->id);
     int count = 0;
-    
     for (const string& appointmentId : appointments) {
         DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
         
@@ -531,4 +477,3 @@ int Patient::countActiveAppointments() const {
     
     return count;
 }
-
