@@ -1,0 +1,9 @@
+ID:01002
+CCCD:mer123
+Mật khẩu:123456
+Họ và tên:
+Ngày sinh:
+Giới tính:
+Email:
+Số điện thoại:
+Địa chỉ:
