@@ -1,7 +1,17 @@
 #include <iostream>
 #include <string>
 #include <limits>
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <cstddef>
 #include <windows.h>
+#ifdef byte
+#undef byte
+#endif
 #include <sstream>
 #include "AuthSystem.h"
 #include "Doctor.h"

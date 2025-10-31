@@ -1,0 +1,9 @@
+ID:02002
+CCCD:0123456789
+Mật khẩu:123456
+Họ và tên:pafjag
+Ngày sinh:01/01/2000
+Giới tính:Nam
+Email:gagaegk@gmail.com
+Số điện thoại:0123456778
+Địa chỉ:12 afa aaf

@@ -1,0 +1,9 @@
+ID:01004
+CCCD:0234567891
+Mật khẩu:123456
+Họ và tên:Vlong
+Ngày sinh:01/01/2000
+Giới tính:Nam
+Email:qhfo@gmail.com
+Số điện thoại:0123456782
+Địa chỉ:123 hfahf asf

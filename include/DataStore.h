@@ -6,7 +6,18 @@
 #include <fstream>
 #include <direct.h>  // For _mkdir on Windows
 #include <sys/stat.h>
+// Reduce windows.h pollution and avoid name conflicts (e.g. `byte` macro from RPC headers)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <cstddef>
 #include <windows.h>  // For directory scanning on Windows
+#ifdef byte
+#undef byte
+#endif
 
 using namespace std;
 
