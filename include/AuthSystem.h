@@ -8,7 +8,7 @@
 #include <vector>
 #include <fstream>
 
-class AuthSystem {
+class AuthSystem{
 private:
     vector<User*> users;
     DataStore* dataStore;
@@ -26,8 +26,8 @@ public:
     ~AuthSystem();
     
     // Authentication methods
-    bool registerDoctor(string username, string password, string email);
-    bool registerPatient(string username, string password, string email);
+    bool registerDoctor(string username, string password);
+    bool registerPatient(string username, string password);
     
     User* login(string username, string password);
     void logout();
