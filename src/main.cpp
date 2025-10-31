@@ -18,13 +18,13 @@ void clearInputBuffer() {
 // Hàm hiển thị menu chính
 void displayMainMenu() {
     cout << "\n========================================" << endl;
-    cout << "   HỆ THỐNG QUẢN LÝ BỆNH VIỆN DLK" << endl;
+    cout << "   HỆ THỐNG QUẢN LÝ BỆNH VIỆN" << endl;
     cout << "========================================" << endl;
-    cout << "1. Đăng ký tài khoản" << endl;
+    cout << "1. Đăng ký" << endl;
     cout << "2. Đăng nhập" << endl;
     cout << "3. Thoát" << endl;
     cout << "========================================" << endl;
-    cout << "Nhập lựa chọn của bạn: ";
+    cout << "Nhập lựa chọn của bạn:";
 }
 
 // Hàm hiển thị menu đăng ký
@@ -37,19 +37,25 @@ void displayRegisterMenu() {
     cout << "2. Bệnh nhân" << endl;
     cout << "3. Thoát" << endl;
     cout << "========================================" << endl;
-    cout << "Nhập lựa chọn của bạn: ";
+    cout << "Nhập lựa chọn của bạn:";
 }
 
-// Hàm hiển thị menu sau khi đăng nhập (không còn dùng cho Admin)
+// Hàm hiển thị menu sau khi đăng nhập
 void displayUserMenu(User* user) {
     cout << "\n========================================" << endl;
     cout << "   MENU NGƯỜI DÙNG - " << user->getUserTypeString() << endl;
     cout << "========================================" << endl;
     cout << "1. Xem thông tin cá nhân" << endl;
-    cout << "2. Cập nhật thông tin cá nhân" << endl;
+    
+    // Chỉ hiển thị tùy chọn cập nhật cho Doctor và Patient
+    if (user->getUserType() != ADMIN) {
+        cout << "2. Cập nhật thông tin cá nhân" << endl;
+    } else {
+        cout << "2. Đăng xuất" << endl;
+    }
     cout << "3. Đăng xuất" << endl;
     cout << "========================================" << endl;
-    cout << "Nhập lựa chọn của bạn: ";
+    cout << "Nhập lựa chọn của bạn:";
 }
 
 void displayDoctorChoice(){
@@ -59,8 +65,8 @@ void displayDoctorChoice(){
     cout << "3. Xem thông tin cá nhân" << endl;
     cout << "4. Cập nhật thông tin cá nhân" << endl;
     cout << "5. Đăng xuất" << endl;
+    cout << "Nhập lựa chọn của bạn:" ;
 }
-
 void displayPatientChoice(){
     cout << "\n========================================" << endl;
     cout << "           MENU BENH NHAN" << endl;
@@ -79,34 +85,29 @@ void displayPatientChoice(){
 
 // Hàm đăng ký Doctor
 void registerDoctor(AuthSystem& authSystem) {
-    string username, password, email;
+    string username, password;
     
     cout << "\n--- Đăng ký tài khoản Bác sĩ ---" << endl;
-    cout << "Tên đăng nhập: ";
+    cout << "Số CCCD:";
     cin >> username;
-    cout << "Mật khẩu: ";
+    cout << "Mật khẩu:";
     cin >> password;
-    cout << "Email: ";
-    cin >> email;
-    
+    clearInputBuffer();
     authSystem.registerDoctor(username, password);
 }
 
 // Hàm đăng ký Patient
 void registerPatient(AuthSystem& authSystem) {
-    string username, password, email;
+    string username, password;
     
     cout << "\n--- Đăng ký Bệnh nhân ---" << endl;
-    cout << "Tên đăng nhập: ";
+    cout << "CCCD:";
     cin >> username;
-    cout << "Mật khẩu: ";
+    cout << "Mật khẩu:";
     cin >> password;
-    cout << "Email: ";
-    cin >> email;
-    
+    clearInputBuffer();
     authSystem.registerPatient(username, password);
 }
-
 
 // Hàm xử lý đăng ký
 void handleRegistration(AuthSystem& authSystem) {
@@ -131,7 +132,6 @@ void handleRegistration(AuthSystem& authSystem) {
                 cout << "Lựa chọn không hợp lệ! Vui lòng thử lại." << endl;
                 break;
         }
-    
 }
 
 // Hàm xử lý đăng nhập
@@ -139,9 +139,9 @@ User* handleLogin(AuthSystem& authSystem) {
     string username, password;
     
     cout << "\n--- Đăng nhập ---" << endl;
-    cout << "Tên đăng nhập: ";
+    cout << "CCCD:";
     cin >> username;
-    cout << "Mật khẩu: ";
+    cout << "Mật khẩu:";
     cin >> password;
     
     return authSystem.login(username, password);
@@ -153,18 +153,35 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
     bool logout = false;
     
     while (!logout) {
-        if (user->getUserType() == DOCTOR){
+        if (user->getUserType() == ADMIN) {
+            displayUserMenu(user);
+            cin >> choice;
+            // Menu cho Admin (chỉ có 2 lựa chọn)
+            switch (choice) {
+                case 1:
+                    cout << endl;
+                    user->displayInfo();
+                    break;
+                case 2:
+                    authSystem.logout();
+                    logout = true;
+                    break;
+                default:
+                    cout << "Lựa chọn không hợp lệ! Vui lòng thử lại." << endl;
+            }
+        } 
+        else if (user->getUserType() == DOCTOR){
             displayDoctorChoice();
             cin >> choice;
             switch (choice){
-                case 1: // Xem lịch khám
+                case 1:// Xem lịch khám
                     break;
-                case 2: // Từ chối lịch khám
+                case 2:// Từ chối lịch khám
                     break;
-                case 3: // Xem thông tin cá nhân
+                case 3:// Xem thông tin cá nhân
                     user->displayInfo();
                     break;
-                case 4: // Cập nhật thông tin cá nhân
+                case 4:// Cập nhật thông tin cá nhân
                     if (authSystem.updateUserProfile(user)) 
                             cout << "Đã lưu thông tin thành công!" << endl;
                     else
@@ -303,11 +320,9 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     logout = true;
                     break;
                 default:
-                    cout << "❌ Lựa chọn không hợp lệ! Vui lòng chọn từ 1-8." << endl;
+                    cout << "❌ Lựa chọn không hợp lệ! Vui lòng chọn từ 1-8" << endl;
             }
-        }
-            
-            
+        }   
     }
 }
 
@@ -331,21 +346,20 @@ int main() {
         
         if (cin.fail()) {
             clearInputBuffer();
-            cout << "Đầu vào không hợp lệ! Vui lòng nhập một số." << endl;
+            cout << "Đầu vào không hợp lệ! Vui lòng nhập một số" << endl;
             continue;
         } 
 
         switch (choice) {
-            case 1: {
+            case 1:{
                 handleRegistration(authSystem);
-                // cout << "Vui lòng đăng nhập!" << endl;
                 User* user = handleLogin(authSystem);
                 if (user != nullptr) {
                     handleUserSession(authSystem, user);
                 }
                 break;
             }
-            case 2: {
+            case 2:{
                 User* user = handleLogin(authSystem);
                 if (user != nullptr) {
                     handleUserSession(authSystem, user);
@@ -361,6 +375,5 @@ int main() {
                 break;
         }
     }
-    
     return 0;
 }
