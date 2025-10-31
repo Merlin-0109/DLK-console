@@ -12,11 +12,9 @@
 DataStore::DataStore() :dataFolderPath("data") {
     patientsFolder = dataFolderPath + "/patients";
     doctorsFolder = dataFolderPath + "/doctors";
-    adminsFolder = dataFolderPath + "/admins";
     
     patientIDsFile = dataFolderPath + "/patient_ids.txt";
     doctorIDsFile = dataFolderPath + "/doctor_ids.txt";
-    adminIDsFile = dataFolderPath + "/admin_ids.txt";
     
     initializeDirectories();
     // initializeDefaultAdmins();
@@ -25,11 +23,9 @@ DataStore::DataStore() :dataFolderPath("data") {
 DataStore::DataStore(const string& basePath) :dataFolderPath(basePath) {
     patientsFolder = dataFolderPath + "/patients";
     doctorsFolder = dataFolderPath + "/doctors";
-    adminsFolder = dataFolderPath + "/admins";
     
     patientIDsFile = dataFolderPath + "/patient_ids.txt";
     doctorIDsFile = dataFolderPath + "/doctor_ids.txt";
-    adminIDsFile = dataFolderPath + "/admin_ids.txt";
     
     initializeDirectories();
     // initializeDefaultAdmins();
@@ -48,28 +44,9 @@ void DataStore::initializeDirectories() {
     createDirectoryIfNotExists(dataFolderPath);
     createDirectoryIfNotExists(patientsFolder);
     createDirectoryIfNotExists(doctorsFolder);
-    createDirectoryIfNotExists(adminsFolder);
+    createDirectoryIfNotExists(dataFolderPath + "/appointments");
 }
 
-// Initialize default admin accounts
-// void DataStore::initializeDefaultAdmins() {
-//     // Kiểm tra xem đã có admin chưa
-//     vector<string> adminIDs = getAllAdminIDs();
-    
-//     if (adminIDs.empty()) {
-//         // Tạo admin 001 với password "1"
-//         Admin admin1("001", "admin", "1", "");
-//         saveAdminData("001", admin1.serialize());
-        
-//         // Tạo admin 002 với password "2"
-//         Admin admin2("002", "admin", "2", "");
-//         saveAdminData("002", admin2.serialize());
-        
-//         cout << "Đã khởi tạo 2 tài khoản admin mặc định." << endl;
-//     }
-// }
-
-// Generate Patient ID
 string DataStore::generatePatientID() {
     int lastNumber = getLastPatientNumber();
     int newNumber = lastNumber + 1;
@@ -152,12 +129,6 @@ bool DataStore::doctorIDExists(const string& id) {
     return find(ids.begin(), ids.end(), id) != ids.end();
 }
 
-// Check if admin ID exists
-bool DataStore::adminIDExists(const string& id) {
-    vector<string> ids = getAllAdminIDs();
-    return find(ids.begin(), ids.end(), id) != ids.end();
-}
-
 // Save patient data
 bool DataStore::savePatientData(const string& id, const string& data) {
     string filepath = getPatientFilePath(id);
@@ -175,20 +146,6 @@ bool DataStore::savePatientData(const string& id, const string& data) {
 // Save doctor data
 bool DataStore::saveDoctorData(const string& id, const string& data) {
     string filepath = getDoctorFilePath(id);
-    ofstream file(filepath);
-    
-    if (file.is_open()) {
-        file << data;
-        file.close();
-        return true;
-    }
-    
-    return false;
-}
-
-// Save admin data
-bool DataStore::saveAdminData(const string& id, const string& data) {
-    string filepath = getAdminFilePath(id);
     ofstream file(filepath);
     
     if (file.is_open()) {
@@ -218,21 +175,6 @@ string DataStore::loadPatientData(const string& id) {
 // Load doctor data
 string DataStore::loadDoctorData(const string& id) {
     string filepath = getDoctorFilePath(id);
-    ifstream file(filepath);
-    
-    if (file.is_open()) {
-        stringstream buffer;
-        buffer << file.rdbuf();
-        file.close();
-        return buffer.str();
-    }
-    
-    return "";
-}
-
-// Load admin data
-string DataStore::loadAdminData(const string& id) {
-    string filepath = getAdminFilePath(id);
     ifstream file(filepath);
     
     if (file.is_open()) {
@@ -288,27 +230,6 @@ vector<string> DataStore::getAllDoctorIDs() {
     return ids;
 }
 
-// Get all admin IDs
-vector<string> DataStore::getAllAdminIDs() {
-    vector<string> ids;
-    
-    // Đọc từ các file trong thư mục admins
-    for (int i = 1; i <= 999; i++) {
-        stringstream ss;
-        ss << setfill('0') << setw(3) << i;
-        string id = ss.str();
-        string filepath = getAdminFilePath(id);
-        
-        ifstream file(filepath);
-        if (file.good()) {
-            ids.push_back(id);
-        }
-        file.close();
-    }
-    
-    return ids;
-}
-
 // Delete patient data
 bool DataStore::deletePatientData(const string& id) {
     string filepath = getPatientFilePath(id);
@@ -321,12 +242,6 @@ bool DataStore::deleteDoctorData(const string& id) {
     return remove(filepath.c_str()) == 0;
 }
 
-// Delete admin data
-bool DataStore::deleteAdminData(const string& id) {
-    string filepath = getAdminFilePath(id);
-    return remove(filepath.c_str()) == 0;
-}
-
 // Get patient file path
 string DataStore::getPatientFilePath(const string& id) {
     return patientsFolder + "/" + id + ".txt";
@@ -336,12 +251,7 @@ string DataStore::getPatientFilePath(const string& id) {
 string DataStore::getDoctorFilePath(const string& id) {
     return doctorsFolder + "/" + id + ".txt";
 }
-
-// Get admin file path
-string DataStore::getAdminFilePath(const string& id) {
-    return adminsFolder + "/" + id + ".txt";
-}
-
+// loi appoint
 bool  DataStore::writeAppointment(const  string& appointmentId, const AppointmentDetails& details){
     string filepath = "data/appointments/" + appointmentId + ".txt";
     ofstream file(filepath);
@@ -495,16 +405,24 @@ vector<string> DataStore::getPatientAppointments(const string& patientId) {
     vector<string> appointments;
     string appointmentsFolder = "data/appointments";
     
-    // Quet qua cac file appointment
-    for (int i = 0; i < 10000; i++) {
-        stringstream ss;
-        ss << "APT" << setfill('0') << setw(13) << i;
-        string testId = ss.str();
-        
-        AppointmentDetails details = readAppointment(testId);
-        if (!details.appointmentId.empty() && details.patientId == patientId) {
-            appointments.push_back(details.appointmentId);
-        }
+    // Scan thư mục appointments để lấy tất cả các file
+    WIN32_FIND_DATAA findData;
+    HANDLE hFind = FindFirstFileA((appointmentsFolder + "\\*.txt").c_str(), &findData);
+    
+    if (hFind != INVALID_HANDLE_VALUE) {
+        do {
+            string filename = findData.cFileName;
+            // Loại bỏ extension .txt
+            if (filename.length() > 4) {
+                string appointmentId = filename.substr(0, filename.length() - 4);
+                AppointmentDetails details = readAppointment(appointmentId);
+                
+                if (!details.appointmentId.empty() && details.patientId == patientId) {
+                    appointments.push_back(details.appointmentId);
+                }
+            }
+        } while (FindNextFileA(hFind, &findData) != 0);
+        FindClose(hFind);
     }
     
     return appointments;
@@ -513,17 +431,26 @@ vector<string> DataStore::getPatientAppointments(const string& patientId) {
 // Get doctor appointments
 vector<string> DataStore::getDoctorAppointments(const string& doctorId) {
     vector<string> appointments;
+    string appointmentsFolder = "data/appointments";
     
-    // Quet qua cac file appointment
-    for (int i = 0; i < 10000; i++) {
-        stringstream ss;
-        ss << "APT" << setfill('0') << setw(13) << i;
-        string testId = ss.str();
-        
-        AppointmentDetails details = readAppointment(testId);
-        if (!details.appointmentId.empty() && details.doctorId == doctorId) {
-            appointments.push_back(details.appointmentId);
-        }
+    // Scan thư mục appointments để lấy tất cả các file
+    WIN32_FIND_DATAA findData;
+    HANDLE hFind = FindFirstFileA((appointmentsFolder + "\\*.txt").c_str(), &findData);
+    
+    if (hFind != INVALID_HANDLE_VALUE) {
+        do {
+            string filename = findData.cFileName;
+            // Loại bỏ extension .txt
+            if (filename.length() > 4) {
+                string appointmentId = filename.substr(0, filename.length() - 4);
+                AppointmentDetails details = readAppointment(appointmentId);
+                
+                if (!details.appointmentId.empty() && details.doctorId == doctorId) {
+                    appointments.push_back(details.appointmentId);
+                }
+            }
+        } while (FindNextFileA(hFind, &findData) != 0);
+        FindClose(hFind);
     }
     
     return appointments;

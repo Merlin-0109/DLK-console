@@ -107,7 +107,7 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         cout << "========================================" << endl;
         cout << "Mã lịch khám: " << appointmentId << endl;
         cout << "Bệnh nhân: " << fullName << " (" << id << ")" << endl;
-        cout << "Bác sĩ: " << doctorId << endl;
+        cout << "Bác sĩ: " << getDoctorInfo(doctorId) << endl;
         cout << "Ngày: " << date << endl;
         cout << "Giờ: " << time << endl;
         cout << "Lý do: " << reason << endl;
@@ -139,7 +139,7 @@ bool Patient::viewMyAppointments() const {
         
         if (!details.appointmentId.empty()) {
             cout << "\nMã lịch khám: " << details.appointmentId << endl;
-            cout << "Bác sĩ: " << details.doctorId << endl;
+            cout << "Bác sĩ: " << getDoctorInfo(details.doctorId) << endl;
             cout << "Ngày: " << details.date << endl;
             cout << "Giờ: " << details.time << endl;
             cout << "Lý do: " << details.reason << endl;
@@ -436,7 +436,7 @@ bool Patient::isDateInFuture(const string& date, const string& time) const {
 void Patient::displayAppointmentDetails(const DataStore::AppointmentDetails& details) const {
     cout << "\n----------------------------------------" << endl;
     cout << "Mã lịch khám: " << details.appointmentId << endl;
-    cout << "Bác sĩ: " << details.doctorId << endl;
+    cout << "Bác sĩ: " << getDoctorInfo(details.doctorId) << endl;
     cout << "Ngày: " << details.date << endl;
     cout << "Giờ: " << details.time << endl;
     cout << "Lý do: " << details.reason << endl;
@@ -476,4 +476,48 @@ int Patient::countActiveAppointments() const {
     }
     
     return count;
+}
+
+// Get doctor information for display
+string Patient::getDoctorInfo(const string& doctorId) const {
+    // Read doctor data from file directly
+    string filepath = "data/doctors/" + doctorId + ".txt";
+    ifstream file(filepath);
+    
+    if (!file.is_open()) {
+        return doctorId + " [Không tìm thấy thông tin]";
+    }
+    
+    // Parse doctor data to get name and specialization
+    string line;
+    string name = "";
+    string specialization = "";
+    
+    while (getline(file, line)) {
+        size_t pos = line.find(":");
+        if (pos != string::npos) {
+            string key = line.substr(0, pos);
+            string value = line.substr(pos + 1);
+            
+            if (key == "Họ và tên") {
+                name = value;
+            } else if (key == "Chuyên khoa") {
+                specialization = value;
+            }
+        }
+    }
+    
+    file.close();
+    
+    // Build display string
+    stringstream result;
+    result << doctorId;
+    if (!name.empty()) {
+        result << " - " << name;
+    }
+    if (!specialization.empty()) {
+        result << " (" << specialization << ")";
+    }
+    
+    return result.str();
 }

@@ -6,6 +6,7 @@
 #include <fstream>
 #include <direct.h>  // For _mkdir on Windows
 #include <sys/stat.h>
+#include <windows.h>  // For directory scanning on Windows
 
 using namespace std;
 
@@ -25,11 +26,9 @@ class DataStore {
         string dataFolderPath;
         string patientsFolder;
         string doctorsFolder;
-        string adminsFolder;
         
         string patientIDsFile;
         string doctorIDsFile;
-        string adminIDsFile;
     
         // Helper methods
         void createDirectoryIfNotExists(const string& path);
@@ -53,32 +52,26 @@ class DataStore {
         // Check if ID exists
         bool patientIDExists(const string& id);
         bool doctorIDExists(const string& id);
-        bool adminIDExists(const string& id);
         
         // Save user data
         bool savePatientData(const string& id, const string& data);
         bool saveDoctorData(const string& id, const string& data);
-        bool saveAdminData(const string& id, const string& data);
         
         // Load user data
         string loadPatientData(const string& id);
         string loadDoctorData(const string& id);
-        string loadAdminData(const string& id);
         
         // Get all IDs
         vector<string> getAllPatientIDs();
         vector<string> getAllDoctorIDs();
-        vector<string> getAllAdminIDs();
         
         // Delete user data
         bool deletePatientData(const string& id);
         bool deleteDoctorData(const string& id);
-        bool deleteAdminData(const string& id);
         
         // Get file paths
         string getPatientFilePath(const string& id);
         string getDoctorFilePath(const string& id);
-        string getAdminFilePath(const string& id);
 
         // Lien quan den appointments
         static bool writeAppointment(const  string& appointmentId, const AppointmentDetails& details);

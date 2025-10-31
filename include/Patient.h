@@ -35,6 +35,7 @@ public:
     bool isDateInFuture(const string& date, const string& time) const;
     void displayAppointmentDetails(const DataStore::AppointmentDetails& details) const;
     int countActiveAppointments() const;
+    string getDoctorInfo(const string& doctorId) const;
 };
 
 #endif

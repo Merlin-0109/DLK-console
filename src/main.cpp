@@ -82,7 +82,7 @@ void registerDoctor(AuthSystem& authSystem) {
     string username, password, email;
     
     cout << "\n--- Đăng ký tài khoản Bác sĩ ---" << endl;
-    cout << "Tên đăng nhập: ";
+    cout << "CCCD: ";
     cin >> username;
     cout << "Mật khẩu: ";
     cin >> password;
@@ -97,7 +97,7 @@ void registerPatient(AuthSystem& authSystem) {
     string username, password, email;
     
     cout << "\n--- Đăng ký Bệnh nhân ---" << endl;
-    cout << "Tên đăng nhập: ";
+    cout << "CCCD: ";
     cin >> username;
     cout << "Mật khẩu: ";
     cin >> password;
@@ -139,7 +139,7 @@ User* handleLogin(AuthSystem& authSystem) {
     string username, password;
     
     cout << "\n--- Đăng nhập ---" << endl;
-    cout << "Tên đăng nhập: ";
+    cout << "CCCD: ";
     cin >> username;
     cout << "Mật khẩu: ";
     cin >> password;

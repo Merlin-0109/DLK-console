@@ -176,8 +176,6 @@ bool AuthSystem::saveUserData(User* user) {
             return dataStore->saveDoctorData(id,data);
         case PATIENT:
             return dataStore->savePatientData(id,data);
-        case ADMIN:
-            return dataStore->saveAdminData(id,data);
         default:
             return false;
     }
