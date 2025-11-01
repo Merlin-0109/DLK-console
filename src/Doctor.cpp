@@ -44,7 +44,7 @@ void Doctor::displayInfo() const {
     cout << "THÔNG TIN BÁC SĨ" << endl;
     cout << "==================================" << endl;
     cout << "ID:" << id << endl;
-    cout << "CCCD:" << username << endl;
+    cout << "CCCD:" << identicalCard << endl;
     cout << "Email:" << email << endl;
     cout << "Họ và tên:" << (fullName.empty() ? "[Chưa cập nhật]" :fullName) << endl;
     cout << "Chuyên khoa:" << (specialization.empty() ? "[Chưa cập nhật]" :specialization) << endl;
@@ -54,7 +54,7 @@ void Doctor::displayInfo() const {
 
 bool Doctor::updateProfile(Doctor& doctor){
     User::updateProfile(doctor);
-    
+    cin >> doctor;
     return true;
 }
 
@@ -67,8 +67,8 @@ ostream& operator<<(ostream& o, const Doctor& doctor){
 istream& operator>>(istream& in, Doctor& doctor){
     in >> static_cast<User&>(doctor);
     if (in.peek() == '\n') in.ignore();
-    bool isInteract = (&in == &cin);
-    if (isInteract){
+    // bool isInteract = (&in == &cin);
+    // if (isInteract){
         cout << "Chuyên khoa:";
         string spe;
         getline(in,spe);
@@ -78,7 +78,7 @@ istream& operator>>(istream& in, Doctor& doctor){
         string role;
         getline(in,role);
         doctor.setDoctorRole(role);
-    }
+    // }
     return in;
 }
 
