@@ -19,7 +19,7 @@ public:
     
     // Override methods
     void displayInfo() const override;
-    // bool updateProfile() override;
+    bool isProfileComplete() const override;
 
     // Appointment methods
     bool bookAppointment(const string& doctorId, const string& date, const string& time, const string& reason);

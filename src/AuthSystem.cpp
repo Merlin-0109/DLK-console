@@ -166,7 +166,24 @@ void AuthSystem::logout() {
 bool AuthSystem::updateUserProfile(User* user) {
     if (user == nullptr) return false;
     
-    if (user->updateProfile(*user)) {
+    bool updated = false;
+    
+    // Kiểm tra kiểu người dùng và gọi hàm updateProfile tương ứng
+    if (user->getUserType() == DOCTOR) {
+        Doctor* doctor = dynamic_cast<Doctor*>(user);
+        if (doctor) {
+            updated = doctor->updateProfile(*doctor);
+        }
+    } else if (user->getUserType() == PATIENT) {
+        Patient* patient = dynamic_cast<Patient*>(user);
+        if (patient) {
+            updated = patient->updateProfile(*patient);
+        }
+    } else {
+        updated = user->updateProfile(*user);
+    }
+    
+    if (updated) {
         return saveUserData(user);
     }
     return false;

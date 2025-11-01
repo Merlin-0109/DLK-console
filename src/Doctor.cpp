@@ -55,6 +55,22 @@ void Doctor::displayInfo() const {
 bool Doctor::updateProfile(Doctor& doctor){
     User::updateProfile(doctor);
     
+    // Cập nhật Chuyên khoa
+    cout << "Chuyên khoa:";
+    string newSpec;
+    getline(cin, newSpec);
+    if (!newSpec.empty()) {
+        this->specialization = newSpec;
+    }
+    
+    // Cập nhật Vai trò
+    cout << "Vai trò:";
+    string newRole;
+    getline(cin, newRole);
+    if (!newRole.empty()) {
+        this->doctorRole = newRole;
+    }
+    
     return true;
 }
 
@@ -82,12 +98,128 @@ istream& operator>>(istream& in, Doctor& doctor){
     return in;
 }
 
+// Check if profile is complete (Doctor needs specialization and role)
+bool Doctor::isProfileComplete() const {
+    return !fullName.empty() && 
+           !dateOfBirth.empty() && 
+           !gender.empty() && 
+           !phoneNumber.empty() && 
+           !address.empty() &&
+           !specialization.empty() &&
+           !doctorRole.empty();
+}
+
 // View Appointments
 bool Doctor::viewAppointment(){
+    vector<string> appointments = DataStore::getDoctorAppointments(this->id);
+    
+    if (appointments.empty()) {
+        cout << "\nKhông có lịch hẹn nào." << endl;
+        return false;
+    }
+    
+    cout << "\n========================================" << endl;
+    cout << "   DANH SÁCH LỊCH HẸN CỦA BẠN" << endl;
+    cout << "========================================" << endl;
+    
+    for (const string& appointmentId : appointments) {
+        DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
+        
+        if (!details.appointmentId.empty()) {
+            cout << "\n--- Lịch hẹn " << appointmentId << " ---" << endl;
+            cout << "Bệnh nhân ID: " << details.patientId << endl;
+            cout << "Ngày: " << details.date << endl;
+            cout << "Giờ: " << details.time << endl;
+            cout << "Lý do: " << details.reason << endl;
+            cout << "Trạng thái đặt: " << details.bookStatus << endl;
+            cout << "Trạng thái khám: " << details.visitStatus << endl;
+            cout << "----------------------------------------" << endl;
+        }
+    }
+    
+    cout << "\nTổng số lịch hẹn: " << appointments.size() << endl;
+    cout << "========================================" << endl;
     return true;
 }
 
 // Reject appointments from patients
 bool Doctor::rejectAppointment(){
-    return true;
+    // Hiển thị danh sách lịch hẹn
+    vector<string> appointments = DataStore::getDoctorAppointments(this->id);
+    
+    if (appointments.empty()) {
+        cout << "\nKhông có lịch hẹn nào để từ chối." << endl;
+        return false;
+    }
+    
+    cout << "\n========================================" << endl;
+    cout << "   TỪ CHỐI LỊCH HẸN" << endl;
+    cout << "========================================" << endl;
+    
+    // Hiển thị các lịch hẹn có thể từ chối (Booked, Not Done)
+    int count = 0;
+    for (const string& appointmentId : appointments) {
+        DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
+        
+        if (!details.appointmentId.empty() && 
+            details.bookStatus == "Booked" && 
+            details.visitStatus == "Not Done") {
+            cout << "\nMã lịch hẹn: " << details.appointmentId << endl;
+            cout << "Bệnh nhân: " << details.patientId << endl;
+            cout << "Ngày: " << details.date << " | Giờ: " << details.time << endl;
+            cout << "Lý do: " << details.reason << endl;
+            cout << "----------------------------------------" << endl;
+            count++;
+        }
+    }
+    
+    if (count == 0) {
+        cout << "\nKhông có lịch hẹn nào có thể từ chối." << endl;
+        return false;
+    }
+    
+    // Nhập mã lịch hẹn cần từ chối
+    cout << "\nNhập mã lịch hẹn cần từ chối (hoặc 0 để hủy): ";
+    string appointmentId;
+    cin.ignore();
+    getline(cin, appointmentId);
+    
+    if (appointmentId == "0") {
+        cout << "Đã hủy thao tác." << endl;
+        return false;
+    }
+    
+    // Kiểm tra appointment có tồn tại không
+    if (!DataStore::appointmentExists(appointmentId)) {
+        cout << "Lỗi: Không tìm thấy lịch hẹn!" << endl;
+        return false;
+    }
+    
+    // Đọc thông tin appointment
+    DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
+    
+    // Kiểm tra appointment có phải của bác sĩ này không
+    if (details.doctorId != this->id) {
+        cout << "Lỗi: Lịch hẹn này không thuộc về bạn!" << endl;
+        return false;
+    }
+    
+    // Kiểm tra trạng thái
+    if (details.bookStatus != "Booked") {
+        cout << "Lỗi: Không thể từ chối lịch hẹn này!" << endl;
+        return false;
+    }
+    
+    // Cập nhật trạng thái thành Cancelled
+    if (DataStore::updateBookAppointmentStatus(appointmentId, "Cancelled")) {
+        cout << "\n========================================" << endl;
+        cout << "   ĐÃ TỪ CHỐI LỊCH HẸN THÀNH CÔNG!" << endl;
+        cout << "========================================" << endl;
+        cout << "Mã lịch hẹn: " << appointmentId << endl;
+        cout << "========================================" << endl;
+        return true;
+    }
+    
+    cout << "Lỗi: Không thể từ chối lịch hẹn!" << endl;
+    return false;
 }

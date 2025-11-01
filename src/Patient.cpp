@@ -42,6 +42,15 @@ ostream& operator<<(ostream& o, const Patient& patient){
     o << static_cast<const User&>(patient);
     return o;
 }
+
+// Check if profile is complete (Patient needs more info than base User)
+bool Patient::isProfileComplete() const {
+    return !fullName.empty() && 
+           !dateOfBirth.empty() && 
+           !gender.empty() && 
+           !phoneNumber.empty() && 
+           !address.empty();
+}
 istream& operator>>(istream& in, Patient& patient){
     in >> static_cast<User&>(patient);
     // in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');

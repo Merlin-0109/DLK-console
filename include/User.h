@@ -50,7 +50,7 @@ public:
     string getAddress() const;
 
     UserType getUserType() const;
-    bool isProfileComplete() const;
+    virtual bool isProfileComplete() const;
     
     // Setters
     void setID(string id);
@@ -66,6 +66,7 @@ public:
     void setUserType(UserType type);
     // Update profile
     bool updateProfile(User& user);
+    bool changePassword(const string& oldPassword, const string& newPassword);
     
     // Virtual methods
     virtual void displayInfo() const;
