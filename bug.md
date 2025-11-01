@@ -8,7 +8,6 @@
 ![alt text](image.png) 
     - Không tạo file txt appointment sau khi đặt lịch khám
     - Không hiện mã bác sĩ
-    - Chưa thay đổi username thành CCCD
 
 
 

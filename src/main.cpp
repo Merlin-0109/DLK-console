@@ -16,6 +16,7 @@
 #include "AuthSystem.h"
 #include "Doctor.h"
 #include "Patient.h"
+#include <regex>
 
 using namespace std;
 
@@ -90,7 +91,7 @@ void displayPatientChoice(){
     cout << "7. Cap nhat thong tin ca nhan" << endl;
     cout << "8. Dang xuat" << endl;
     cout << "========================================" << endl;
-    cout << "Nhap lua chon cua ban: ";
+    cout << "Nhap lua chon cua ban:";
 }
 
 // Hàm đăng ký Doctor
@@ -98,8 +99,16 @@ void registerDoctor(AuthSystem& authSystem) {
     string username, password;
     
     cout << "\n--- Đăng ký tài khoản Bác sĩ ---" << endl;
-    cout << "CCCD: ";
-    cin >> username;
+    bool check = false;
+    while (!check){
+        cout << "CCCD:";
+        cin >> username;
+        regex cccd("^0[0-9]{11}$");
+        if (regex_match(username,cccd))
+            check = true;
+        else check = false;
+        if (!check) cout << "Số CCCD không hợp lệ! Vui lòng nhập lại" << endl;
+    }
     cout << "Mật khẩu:";
     cin >> password;
     clearInputBuffer();
@@ -111,8 +120,16 @@ void registerPatient(AuthSystem& authSystem) {
     string username, password;
     
     cout << "\n--- Đăng ký Bệnh nhân ---" << endl;
-    cout << "CCCD: ";
-    cin >> username;
+    bool check = false;
+    while (!check){
+        cout << "CCCD:";
+        cin >> username;
+        regex cccd("^0[0-9]{11}$");
+        if (regex_match(username,cccd))
+            check = true;
+        else check = false;
+        if (!check) cout << "Số CCCD không hợp lệ! Vui lòng nhập lại" << endl;
+    }
     cout << "Mật khẩu:";
     cin >> password;
     clearInputBuffer();
@@ -149,7 +166,7 @@ User* handleLogin(AuthSystem& authSystem) {
     string username, password;
     
     cout << "\n--- Đăng nhập ---" << endl;
-    cout << "CCCD: ";
+    cout << "CCCD:";
     cin >> username;
     cout << "Mật khẩu:";
     cin >> password;
@@ -218,7 +235,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
             cin >> choice;
             
             switch (choice){
-                case 1: { // Đặt lịch khám mới
+                case 1:{ // Đặt lịch khám mới
                     string doctorId, date, time, reason;
                     
                     cout << "\n╔══════════════════════════════════════╗" << endl;
@@ -234,7 +251,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     
                     cout << "\n📋 DANH SÁCH BÁC SĨ:" << endl;
                     cout << "----------------------------------------" << endl;
-                    for (const string& dId : doctorIDs) {
+                    for (const string& dId :doctorIDs) {
                         string data = authSystem.getDataStore()->loadDoctorData(dId);
                         if (!data.empty()) {
                             stringstream ss(data);
@@ -247,9 +264,9 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                             getline(ss, fullName);
                             getline(ss, spec);
                             
-                            cout << "👨‍⚕️ Mã BS: " << id;
-                            cout << " | Tên: " << (fullName.empty() ? username : fullName);
-                            if (!spec.empty()) cout << " | Chuyên khoa: " << spec;
+                            cout << "👨‍⚕️ Mã BS:" << id;
+                            cout << " | Tên:" << (fullName.empty() ? username :fullName);
+                            if (!spec.empty()) cout << " | Chuyên khoa:" << spec;
                             cout << endl;
                         }
                     }
@@ -257,28 +274,28 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     
                     cin.ignore();
                     cout << "\n📝 Nhập thông tin đặt lịch:" << endl;
-                    cout << "Mã bác sĩ: ";
+                    cout << "Mã bác sĩ:";
                     getline(cin, doctorId);
                     
-                    cout << "Ngày khám (DD/MM/YYYY): ";
+                    cout << "Ngày khám (DD/MM/YYYY):";
                     getline(cin, date);
                     
-                    cout << "Giờ khám (HH:MM): ";
+                    cout << "Giờ khám (HH:MM):";
                     getline(cin, time);
                     
-                    cout << "Lý do khám: ";
+                    cout << "Lý do khám:";
                     getline(cin, reason);
                     
                     patient->bookAppointment(doctorId, date, time, reason);
                     break;
                 }
-                case 2: // Xem lịch khám sắp tới
+                case 2:// Xem lịch khám sắp tới
                     patient->viewUpcomingAppointments();
                     break;
-                case 3: // Xem lịch sử khám bệnh
+                case 3:// Xem lịch sử khám bệnh
                     patient->viewAppointmentHistory();
                     break;
-                case 4: { // Đổi lịch khám
+                case 4:{ // Đổi lịch khám
                     string appointmentId, newDate, newTime;
                     cout << "\n╔══════════════════════════════════════╗" << endl;
                     cout << "║       ĐỔI LỊCH KHÁM                  ║" << endl;
@@ -288,19 +305,19 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     patient->viewUpcomingAppointments();
                     
                     cin.ignore();
-                    cout << "\nNhập mã lịch khám cần đổi: ";
+                    cout << "\nNhập mã lịch khám cần đổi:";
                     getline(cin, appointmentId);
                     
-                    cout << "Ngày khám mới (DD/MM/YYYY): ";
+                    cout << "Ngày khám mới (DD/MM/YYYY):";
                     getline(cin, newDate);
                     
-                    cout << "Giờ khám mới (HH:MM): ";
+                    cout << "Giờ khám mới (HH:MM):";
                     getline(cin, newTime);
                     
                     patient->rescheduleAppointment(appointmentId, newDate, newTime);
                     break;
                 }
-                case 5: { // Hủy lịch khám
+                case 5:{ // Hủy lịch khám
                     string appointmentId;
                     cout << "\n╔══════════════════════════════════════╗" << endl;
                     cout << "║       HỦY LỊCH KHÁM                  ║" << endl;
@@ -310,21 +327,21 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     patient->viewUpcomingAppointments();
                     
                     cin.ignore();
-                    cout << "\nNhập mã lịch khám cần hủy: ";
+                    cout << "\nNhập mã lịch khám cần hủy:";
                     getline(cin, appointmentId);
                     patient->cancelAppointment(appointmentId);
                     break;
                 }
-                case 6: // Xem thông tin cá nhân
+                case 6:// Xem thông tin cá nhân
                     patient->displayInfo();
                     break;
-                case 7: // Cập nhật thông tin cá nhân
+                case 7:// Cập nhật thông tin cá nhân
                     if (authSystem.updateUserProfile(patient)) 
                         cout << "✓ Đã lưu thông tin thành công!" << endl;
                     else
                         cout << "✗ Lỗi khi lưu thông tin!" << endl;
                     break;
-                case 8: // Đăng xuất
+                case 8:// Đăng xuất
                     cout << "\n👋 Đăng xuất thành công. Hẹn gặp lại!" << endl;
                     authSystem.logout();
                     logout = true;
