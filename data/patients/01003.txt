@@ -1,9 +1,0 @@
-ID:01003
-CCCD:048000206873
-Mật khẩu:123456
-Họ và tên:
-Ngày sinh:
-Giới tính:
-Email:
-Số điện thoại:
-Địa chỉ:
