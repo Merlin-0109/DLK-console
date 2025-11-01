@@ -103,7 +103,6 @@ string User::getUserTypeString() const {
     switch (userType) {
         case DOCTOR:return "Bác sĩ";
         case PATIENT:return "Bệnh nhân";
-        case ADMIN:return "Quản trị viên";
         default:return "Không xác định";
     }
 }

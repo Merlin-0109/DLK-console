@@ -9,8 +9,7 @@ using namespace std;
 // Enum để định nghĩa loại người dùng
 enum UserType {
     DOCTOR,
-    PATIENT,
-    ADMIN
+    PATIENT
 };
 
 // Lớp cơ sở User

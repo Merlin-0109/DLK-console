@@ -77,7 +77,12 @@ bool AuthSystem::registerDoctor(string identicalCard, string password) {
         cout << "Lỗi: Số căn cước công dân đăng ký đã tồn tại!" << endl;
         return false;
     }
-   
+
+    if (identicalCard.length() != 12){
+        cout << "Lỗi: Số căn cước công dân phải đủ 12 chữ số!" << endl;
+        return false;
+    }
+
     string id = dataStore->generateDoctorID();
     Doctor* doctor = new Doctor(id, identicalCard, password);
     // cin >> *doctor;
@@ -101,6 +106,11 @@ bool AuthSystem::registerPatient(string identicalCard, string password) {
         return false;
     }
     
+    if (identicalCard.length() != 12){
+        cout << "Lỗi: Số căn cước công dân phải đủ 12 chữ số!" << endl;
+        return false;
+    }
+
     string id = dataStore->generatePatientID();
     Patient* patient = new Patient(id, identicalCard, password);
     ostringstream ss;
@@ -136,7 +146,7 @@ User* AuthSystem::login(string identicalCard, string password) {
     cout << "Đăng nhập thành công! Chào mừng, " << name << "!" << endl;
     
     // Chỉ kiểm tra profile cho Doctor và Patient, không kiểm tra Admin
-    if (user->getUserType() != ADMIN && !user->isProfileComplete()) {
+    if (!user->isProfileComplete()) {
         cout << "⚠ Bạn chưa cập nhật đầy đủ thông tin cá nhân. Vui lòng cập nhật!" << endl;
     }
     
