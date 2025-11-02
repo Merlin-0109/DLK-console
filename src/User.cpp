@@ -86,7 +86,7 @@ void User::setUserType(UserType type) {
 }
 // Hiển thị thông tin
 void User::displayInfo() const {
-    cout << "==================================" << endl;
+    // cout << "==================================" << endl;
     cout << "ID:" << id << endl;
     cout << "CCCD:" << identicalCard << endl;
     cout << "Mật khẩu:" << password << endl;
@@ -94,8 +94,8 @@ void User::displayInfo() const {
     cout << "Ngày sinh:" << dateOfBirth << endl;
     cout << "Giới tính:" << gender << endl;
     cout << "Địa chỉ:" << address << endl;
-    cout << "Loại người dùng:" << getUserTypeString() << endl;
-    cout << "==================================" << endl;
+    // cout << "Loại người dùng:" << getUserTypeString() << endl;
+    // cout << "==================================" << endl;
 }
 
 // Lấy chuỗi loại người dùng, chuyển mô tả enum thành string cụ thể khi in ra màn hình
@@ -103,7 +103,6 @@ string User::getUserTypeString() const {
     switch (userType) {
         case DOCTOR:return "Bác sĩ";
         case PATIENT:return "Bệnh nhân";
-        case ADMIN:return "Quản trị viên";
         default:return "Không xác định";
     }
 }

@@ -43,10 +43,11 @@ void Doctor::displayInfo() const {
     cout << "==================================" << endl;
     cout << "THÔNG TIN BÁC SĨ" << endl;
     cout << "==================================" << endl;
-    cout << "ID:" << id << endl;
-    cout << "CCCD:" << identicalCard << endl;
-    cout << "Email:" << email << endl;
-    cout << "Họ và tên:" << (fullName.empty() ? "[Chưa cập nhật]" :fullName) << endl;
+    // cout << "ID:" << id << endl;
+    // cout << "CCCD:" << identicalCard << endl;
+    // cout << "Email:" << email << endl;
+    // cout << "Họ và tên:" << (fullName.empty() ? "[Chưa cập nhật]" :fullName) << endl;
+    User::displayInfo();
     cout << "Chuyên khoa:" << (specialization.empty() ? "[Chưa cập nhật]" :specialization) << endl;
     cout << "Vai trò:" << (doctorRole.empty()?"[Chưa cập nhật]" :doctorRole) << endl;
     cout << "==================================" << endl;
@@ -65,10 +66,10 @@ ostream& operator<<(ostream& o, const Doctor& doctor){
     return o;
 }
 istream& operator>>(istream& in, Doctor& doctor){
-    in >> static_cast<User&>(doctor);
+    // in >> static_cast<User&>(doctor);
     if (in.peek() == '\n') in.ignore();
-    // bool isInteract = (&in == &cin);
-    // if (isInteract){
+    bool isInteract = (&in == &cin);
+    if (isInteract){
         cout << "Chuyên khoa:";
         string spe;
         getline(in,spe);
@@ -78,7 +79,7 @@ istream& operator>>(istream& in, Doctor& doctor){
         string role;
         getline(in,role);
         doctor.setDoctorRole(role);
-    // }
+    }
     return in;
 }
 

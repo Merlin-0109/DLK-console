@@ -9,8 +9,7 @@ using namespace std;
 // Enum để định nghĩa loại người dùng
 enum UserType {
     DOCTOR,
-    PATIENT,
-    ADMIN
+    PATIENT
 };
 
 // Lớp cơ sở User
@@ -66,7 +65,7 @@ public:
 
     void setUserType(UserType type);
     // Update profile
-    bool updateProfile(User& user);
+    vbool updateProfile(User& user);
     
     // Virtual methods
     virtual void displayInfo() const;

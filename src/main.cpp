@@ -59,11 +59,7 @@ void displayUserMenu(User* user) {
     cout << "1. Xem thông tin cá nhân" << endl;
     
     // Chỉ hiển thị tùy chọn cập nhật cho Doctor và Patient
-    if (user->getUserType() != ADMIN) {
-        cout << "2. Cập nhật thông tin cá nhân" << endl;
-    } else {
-        cout << "2. Đăng xuất" << endl;
-    }
+    cout << "2. Cập nhật thông tin cá nhân" << endl;
     cout << "3. Đăng xuất" << endl;
     cout << "========================================" << endl;
     cout << "Nhập lựa chọn của bạn:";
@@ -179,25 +175,8 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
     int choice;
     bool logout = false;
     
-    while (!logout) {
-        if (user->getUserType() == ADMIN) {
-            displayUserMenu(user);
-            cin >> choice;
-            // Menu cho Admin (chỉ có 2 lựa chọn)
-            switch (choice) {
-                case 1:
-                    cout << endl;
-                    user->displayInfo();
-                    break;
-                case 2:
-                    authSystem.logout();
-                    logout = true;
-                    break;
-                default:
-                    cout << "Lựa chọn không hợp lệ! Vui lòng thử lại." << endl;
-            }
-        } 
-        else if (user->getUserType() == DOCTOR){
+    while (!logout) {     
+        if (user->getUserType() == DOCTOR){
             displayDoctorChoice();
             cin >> choice;
             switch (choice){
