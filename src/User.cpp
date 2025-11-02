@@ -84,6 +84,21 @@ void User::setAddress(string address) {
 void User::setUserType(UserType type) {
     this->userType = type;
 }
+
+bool User::changePassword(const string& oldPassword, const string& newPassword) {
+    if (password != oldPassword) {
+        cout << "Mật khẩu cũ không đúng!" << endl;
+        return false;
+    }
+    if (newPassword.empty()) {
+        cout << "Mật khẩu mới không được để trống!" << endl;
+        return false;
+    }
+    password = newPassword;
+    cout << "Đổi mật khẩu thành công!" << endl;
+    return true;
+}
+
 // Hiển thị thông tin
 void User::displayInfo() const {
     // cout << "==================================" << endl;
@@ -96,6 +111,11 @@ void User::displayInfo() const {
     cout << "Địa chỉ:" << address << endl;
     // cout << "Loại người dùng:" << getUserTypeString() << endl;
     // cout << "==================================" << endl;
+}
+
+bool User::updateProfile(User& user){
+    cin >> user;
+    return true;
 }
 
 // Lấy chuỗi loại người dùng, chuyển mô tả enum thành string cụ thể khi in ra màn hình
@@ -143,8 +163,10 @@ istream& operator>>(istream& in, User& user){
     
     string temp_Name;
     cout << "Họ và tên:"; 
-    getline(in,temp_Name); 
-    user.setFullName(temp_Name);
+    getline(in,temp_Name);
+    if (!temp_Name.empty()) {
+        user.setFullName(temp_Name);
+    }
 
     // Đảm bảo sự đúng đắn khi nhập ngày sinh
     if (isInteract){
@@ -154,6 +176,12 @@ istream& operator>>(istream& in, User& user){
         while (!check){
             cout << "Ngày sinh (dd/mm/yyyy):"; 
             getline(in,temp_DOB);
+            
+            // Nếu nhấn Enter, giữ nguyên giá trị cũ
+            if (temp_DOB.empty()) {
+                check = true;
+                break;
+            }
 
             regex dob("^(0[1-9]|1[0-9]|2[0-9]|3[0-1])/(0[1-9]|1[0-2])/(19[0-9]{2}|20(0[0-9]|1[0-9]|2[0-5]))$");
             if (regex_match(temp_DOB,dob)){ // đoạn ni kiểm tra định dạng 
@@ -166,7 +194,9 @@ istream& operator>>(istream& in, User& user){
             else check = false;
             if (!check) cout << "Ngày sinh không hợp lệ! Vui lòng nhập lại" << endl;
         }
-        user.setDateOfBirth(temp_DOB);
+        if (!temp_DOB.empty()) {
+            user.setDateOfBirth(temp_DOB);
+        }
     }
 
     // giới tính
@@ -177,6 +207,12 @@ istream& operator>>(istream& in, User& user){
         while (!check_g){
             cout << "Giới tính (Nam/Nữ):"; 
             getline(in,temp_g);
+            
+            // Nếu nhấn Enter, giữ nguyên giá trị cũ
+            if (temp_g.empty()) {
+                check_g = true;
+                break;
+            }
 
             check_g = true;
             string temp1 = temp_g;
@@ -189,7 +225,9 @@ istream& operator>>(istream& in, User& user){
             else if (temp1 == "nữ") temp_g = "Nữ";
             if (!check_g) cout << "Vui lòng nhập lại theo hướng dẫn" << endl;
         }
-        user.setGender(temp_g);
+        if (!temp_g.empty()) {
+            user.setGender(temp_g);
+        }
     }
     
     // Email
@@ -201,13 +239,21 @@ istream& operator>>(istream& in, User& user){
             cout << "Email(Không cần nhập '@gmail.com'):";
             getline(in,temp_e);
             
+            // Nếu nhấn Enter, giữ nguyên giá trị cũ
+            if (temp_e.empty()) {
+                check_e = true;
+                break;
+            }
+            
             regex local_part_e("^(?!.*\\.\\.)([A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)$");
             if (regex_match(temp_e, local_part_e)) 
                 check_e = true;
             else check_e = false;
             if (!check_e) cout << "Vui lòng nhập lại" << endl;
         }
-        user.setEmail(temp_e + "@gmail.com");
+        if (!temp_e.empty()) {
+            user.setEmail(temp_e + "@gmail.com");
+        }
     }
     
 
@@ -218,6 +264,13 @@ istream& operator>>(istream& in, User& user){
         while (!check_sdt){
             cout << "Số điện thoại:"; 
             getline(in,temp_sdt);
+            
+            // Nếu nhấn Enter, giữ nguyên giá trị cũ
+            if (temp_sdt.empty()) {
+                check_sdt = true;
+                break;
+            }
+            
             regex sdt("^0[0-9]{9}$");
             if (regex_match(temp_sdt,sdt))
                 check_sdt = true;
@@ -225,19 +278,20 @@ istream& operator>>(istream& in, User& user){
             
             if (!check_sdt) cout << "Số điện thoại không hợp lệ! Vui lòng nhập lại số điện thoại" << endl;
         }
-        user.setPhoneNumber(temp_sdt);
+        if (!temp_sdt.empty()) {
+            user.setPhoneNumber(temp_sdt);
+        }
     }
 
     // địa chỉ
     string temp_Address;
     cout << "Địa chỉ:"; 
-    getline(in,temp_Address); 
-    user.setAddress(temp_Address);
+    getline(in,temp_Address);
+    if (!temp_Address.empty()) {
+        user.setAddress(temp_Address);
+    }
 
     return in;
 }
 
-bool User::updateProfile(User& user){
-    cin >> user;
-    return true;
-}
+

@@ -36,7 +36,7 @@ public:
     User(string id,string identicalCard, string password, string fullname, string dateofbirth, string gender, string email, string phoneNumber, string address , UserType type);
     
     // Destructor
-    virtual ~User();
+    virtual ~User() = default;
     
     // Getters
     string getID() const;
@@ -50,7 +50,7 @@ public:
     string getAddress() const;
 
     UserType getUserType() const;
-    bool isProfileComplete() const;
+    virtual bool isProfileComplete() const;
     
     // Setters
     void setID(string id);
@@ -65,7 +65,8 @@ public:
 
     void setUserType(UserType type);
     // Update profile
-    vbool updateProfile(User& user);
+    virtual bool updateProfile(User& user);
+    bool changePassword(const string& oldPassword, const string& newPassword);
     
     // Virtual methods
     virtual void displayInfo() const;

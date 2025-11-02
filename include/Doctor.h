@@ -29,6 +29,7 @@ public:
     
     // Override methods
     void displayInfo() const override;
+    bool isProfileComplete() const override;
 
     bool updateProfile(Doctor& doctor);
     friend ostream& operator<<(ostream&, const Doctor&);

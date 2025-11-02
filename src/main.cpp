@@ -13,6 +13,7 @@
 #undef byte
 #endif
 #include <sstream>
+#include <map>
 #include "AuthSystem.h"
 #include "Doctor.h"
 #include "Patient.h"
@@ -71,7 +72,8 @@ void displayDoctorChoice(){
     cout << "2. Từ chối lịch khám" << endl;
     cout << "3. Xem thông tin cá nhân" << endl;
     cout << "4. Cập nhật thông tin cá nhân" << endl;
-    cout << "5. Đăng xuất" << endl;
+    cout << "5. Đổi mật khẩu" << endl;
+    cout << "6. Đăng xuất" << endl;
     cout << "Nhập lựa chọn của bạn:" ;
 }
 void displayPatientChoice(){
@@ -85,7 +87,8 @@ void displayPatientChoice(){
     cout << "5. Huy lich kham" << endl;
     cout << "6. Xem thong tin ca nhan" << endl;
     cout << "7. Cap nhat thong tin ca nhan" << endl;
-    cout << "8. Dang xuat" << endl;
+    cout << "8. Đổi mật khẩu" << endl;
+    cout << "9. Dang xuat" << endl;
     cout << "========================================" << endl;
     cout << "Nhap lua chon cua ban:";
 }
@@ -193,7 +196,28 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     else
                         cout << "Lỗi khi lưu thông tin!" << endl;
                     break;
-                case 5:
+                case 5:{ // Đổi mật khẩu
+                    string oldPassword, newPassword, confirmPassword;
+                    cout << "\n=== ĐỔI MẬT KHẨU ===" << endl;
+                    cout << "Mật khẩu cũ: ";
+                    cin >> oldPassword;
+                    cout << "Mật khẩu mới: ";
+                    cin >> newPassword;
+                    cout << "Nhập lại mật khẩu mới: ";
+                    cin >> confirmPassword;
+                    
+                    if (newPassword != confirmPassword) {
+                        cout << "Mật khẩu xác nhận không khớp!" << endl;
+                    } else if (user->changePassword(oldPassword, newPassword)) {
+                        if (authSystem.saveUserData(user)) {
+                            cout << "Mật khẩu đã được cập nhật và lưu!" << endl;
+                        } else {
+                            cout << "Lỗi khi lưu mật khẩu mới!" << endl;
+                        }
+                    }
+                    break;
+                }
+                case 6:
                     authSystem.logout();
                     logout = true;
                     break;
@@ -229,12 +253,12 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     }
                     
                     cout << "\n📋 DANH SÁCH BÁC SĨ:" << endl;
-                    cout << "----------------------------------------" << endl;
+                    cout << "========================================" << endl;
                     for (const string& dId :doctorIDs) {
                         string data = authSystem.getDataStore()->loadDoctorData(dId);
                         if (!data.empty()) {
                             stringstream ss(data);
-                            string type, id, username, password, email, fullName, spec;
+                            string type, id, username, password, email, fullName, spec, role;
                             getline(ss, type);
                             getline(ss, id);
                             getline(ss, username);
@@ -242,27 +266,31 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                             getline(ss, email);
                             getline(ss, fullName);
                             getline(ss, spec);
+                            getline(ss, role);
                             
-                            cout << "👨‍⚕️ Mã BS:" << id;
-                            cout << " | Tên:" << (fullName.empty() ? username :fullName);
-                            if (!spec.empty()) cout << " | Chuyên khoa:" << spec;
+                            string displayName = fullName.empty() ? username : fullName;
+                            
+                            cout << "👨‍⚕️ Mã BS: " << id;
+                            cout << " | Tên: " << displayName;
+                            if (!spec.empty()) cout << " | Chuyên khoa: " << spec;
+                            if (!role.empty()) cout << " | Vai trò: " << role;
                             cout << endl;
                         }
                     }
-                    cout << "----------------------------------------" << endl;
+                    cout << "========================================" << endl;
                     
                     cin.ignore();
                     cout << "\n📝 Nhập thông tin đặt lịch:" << endl;
-                    cout << "Mã bác sĩ:";
+                    cout << "Mã bác sĩ: ";
                     getline(cin, doctorId);
                     
-                    cout << "Ngày khám (DD/MM/YYYY):";
+                    cout << "Ngày khám (DD/MM/YYYY): ";
                     getline(cin, date);
                     
-                    cout << "Giờ khám (HH:MM):";
+                    cout << "Giờ khám (HH:MM): ";
                     getline(cin, time);
                     
-                    cout << "Lý do khám:";
+                    cout << "Lý do khám: ";
                     getline(cin, reason);
                     
                     patient->bookAppointment(doctorId, date, time, reason);
@@ -320,13 +348,34 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     else
                         cout << "✗ Lỗi khi lưu thông tin!" << endl;
                     break;
-                case 8:// Đăng xuất
+                case 8:{ // Đổi mật khẩu
+                    string oldPassword, newPassword, confirmPassword;
+                    cout << "\n=== ĐỔI MẬT KHẨU ===" << endl;
+                    cout << "Mật khẩu cũ: ";
+                    cin >> oldPassword;
+                    cout << "Mật khẩu mới: ";
+                    cin >> newPassword;
+                    cout << "Nhập lại mật khẩu mới: ";
+                    cin >> confirmPassword;
+                    
+                    if (newPassword != confirmPassword) {
+                        cout << "Mật khẩu xác nhận không khớp!" << endl;
+                    } else if (patient->changePassword(oldPassword, newPassword)) {
+                        if (authSystem.saveUserData(patient)) {
+                            cout << "Mật khẩu đã được cập nhật và lưu!" << endl;
+                        } else {
+                            cout << "Lỗi khi lưu mật khẩu mới!" << endl;
+                        }
+                    }
+                    break;
+                }
+                case 9:// Đăng xuất
                     cout << "\n👋 Đăng xuất thành công. Hẹn gặp lại!" << endl;
                     authSystem.logout();
                     logout = true;
                     break;
                 default:
-                    cout << "❌ Lựa chọn không hợp lệ! Vui lòng chọn từ 1-8" << endl;
+                    cout << "❌ Lựa chọn không hợp lệ! Vui lòng chọn từ 1-9" << endl;
             }
         }   
     }
