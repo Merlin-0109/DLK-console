@@ -2,6 +2,7 @@
 #include "DataStore.h"
 #include <sstream>
 #include <limits>
+#include <iomanip>
 
 // Constructor mặc định
 Doctor::Doctor() :User(){
@@ -119,18 +120,23 @@ bool Doctor::viewAppointment(){
     cout << "   DANH SÁCH LỊCH HẸN CỦA BẠN" << endl;
     cout << "========================================" << endl;
     
+    // cout << "-------------"
     for (const string& appointmentId : appointments) {
         DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
         
         if (!details.appointmentId.empty()) {
-            cout << "\n--- Lịch hẹn " << appointmentId << " ---" << endl;
+            cout << "┌──────────────────────┬───────────────────────┬──────────────────┬──────────────┐" << endl;
+            cout << "│      Mã cuộc hẹn     │       ID bệnh nhân    │       Ngày       │     Giờ      │" << endl;
+            cout << "└──────────────────────┴───────────────────────┴──────────────────┴──────────────┘" << endl;
+            cout << left << setw(15) << appointmentId << setw(15) << details.patientId << setw(10) << details.date << setw(10) << details.time << endl;
+            cout << appointmentId << " ---" << endl;
             cout << "Bệnh nhân ID: " << details.patientId << endl;
             cout << "Ngày: " << details.date << endl;
             cout << "Giờ: " << details.time << endl;
-            cout << "Lý do: " << details.reason << endl;
+            // cout << "Lý do: " << details.reason << endl;
             cout << "Trạng thái đặt: " << details.bookStatus << endl;
             cout << "Trạng thái khám: " << details.visitStatus << endl;
-            cout << "----------------------------------------" << endl;
+             cout << "------------------------------------------------------------------------------------------------" << endl;
         }
     }
     

@@ -13,6 +13,7 @@
 #undef byte
 #endif
 #include <sstream>
+#include <fstream>
 #include <map>
 #include "AuthSystem.h"
 #include "Doctor.h"
@@ -183,10 +184,16 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
             displayDoctorChoice();
             cin >> choice;
             switch (choice){
-                case 1:// Xem lịch khám
+                case 1:{ // Xem lịch khám
+                    Doctor* doctor = dynamic_cast<Doctor*>(user);
+                    doctor->viewAppointment();
                     break;
-                case 2:// Từ chối lịch khám
+                }
+                case 2:{// Từ chối lịch khám
+                    Doctor* doctor = dynamic_cast<Doctor*>(user);
+                    doctor->rejectAppointment();
                     break;
+                }
                 case 3:// Xem thông tin cá nhân
                     user->displayInfo();
                     break;
@@ -242,7 +249,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     string doctorId, date, time, reason;
                     
                     cout << "\n╔══════════════════════════════════════╗" << endl;
-                    cout << "║       ĐẶT LỊCH KHÁM MỚI              ║" << endl;
+                    cout << "║         ĐẶT LỊCH KHÁM MỚI            ║" << endl;
                     cout << "╚══════════════════════════════════════╝" << endl;
                     
                     // Hiển thị danh sách bác sĩ
@@ -253,7 +260,9 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     }
                     
                     cout << "\n📋 DANH SÁCH BÁC SĨ:" << endl;
-                    cout << "========================================" << endl;
+                    cout << "╔═══════════════╦═══════════════════════════╦══════════════════╦══════════════════════╦═════════════════════╗" << endl;
+                    cout << "║   Mã bác sĩ   ║         Họ và tên         ║    Giới tính     ║     Chuyên khoa      ║      Vai trò        ║" << endl;
+                    cout << "╚═══════════════╩═══════════════════════════╩══════════════════╩══════════════════════╩═════════════════════╝" << endl;
                     for (const string& dId :doctorIDs) {
                         string data = authSystem.getDataStore()->loadDoctorData(dId);
                         if (!data.empty()) {
@@ -270,12 +279,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                                 else if (key == "Vai trò") role = value; 
                             }
                             
-                            cout << "👨‍⚕️ Mã BS: " << id;
-                            cout << " | " << fullName;
-                            cout << " | " << gender;
-                            cout << " | " << spec;
-                            cout << " | " << role;
-                            cout << endl;
+                            cout << id << " ║ " << fullName << " ║ " << gender << " ║ " << spec << " ║ " << role << endl;
                         }
                     }
                     cout << "========================================" << endl;
@@ -387,7 +391,7 @@ int main() {
     // Thiết lập UTF-8 cho console
     SetConsoleOutputCP(65001);
     SetConsoleCP(65001);
-    
+
     AuthSystem authSystem;
     int choice;
     bool exit = false;
