@@ -82,7 +82,7 @@ void displayPatientChoice(){
     cout << "========================================" << endl;
     cout << "1. Đặt lịch khám mới" << endl;
     cout << "2. Xem lịch khám sắp tới" << endl;
-    cout << "3. Xem lịch sử khám bện" << endl;
+    cout << "3. Xem lịch sử khám bệnh" << endl;
     cout << "4. Đổi lịch khám" << endl;
     cout << "5. Hủy lịch khám" << endl;
     cout << "6. Xem thông tin cá nhân" << endl;

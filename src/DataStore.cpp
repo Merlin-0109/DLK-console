@@ -260,7 +260,7 @@ bool  DataStore::writeAppointment(const  string& appointmentId, const Appointmen
         cout << "Khong mo duoc file appointments de ghi lai cuoc hen voi id " + appointmentId << endl;
         return false;
     }
-    file << "appointmentID:" << details.appointmentId << endl;
+    file << "appointmentId:" << details.appointmentId << endl;
     file << "patientId:" << details.patientId << endl;
     file << "doctorId:" << details.doctorId << endl;
     file << "date:" << details.date << endl;
