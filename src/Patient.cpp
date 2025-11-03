@@ -28,13 +28,7 @@ void Patient::displayInfo() const {
     cout << "==================================" << endl;
     cout << "THÔNG TIN BỆNH NHÂN" << endl;
     cout << "==================================" << endl;
-    cout << "ID:" << id << endl;
-    cout << "CCCD:" << username << endl;
-    cout << "Email:" << email << endl;
-    cout << "Họ và tên:" << (fullName.empty() ? "[Chưa cập nhật]" :fullName) << endl;
-    cout << "Ngày sinh:" << (dateOfBirth.empty() ? "[Chưa cập nhật]" :dateOfBirth) << endl;
-    cout << "Số điện thoại:" << (phoneNumber.empty() ? "[Chưa cập nhật]" :phoneNumber) << endl;
-    cout << "Địa chỉ:" << (address.empty() ? "[Chưa cập nhật]" :address) << endl;
+    User::displayInfo();
     cout << "==================================" << endl;
 }
 

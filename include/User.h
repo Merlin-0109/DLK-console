@@ -36,7 +36,7 @@ public:
     User(string id,string identicalCard, string password, string fullname, string dateofbirth, string gender, string email, string phoneNumber, string address , UserType type);
     
     // Destructor
-    virtual ~User() = default;
+    virtual ~User();
     
     // Getters
     string getID() const;

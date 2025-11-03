@@ -80,17 +80,17 @@ void displayPatientChoice(){
     cout << "\n========================================" << endl;
     cout << "           MENU BENH NHAN" << endl;
     cout << "========================================" << endl;
-    cout << "1. Dat lich kham moi" << endl;
-    cout << "2. Xem lich kham sap toi" << endl;
-    cout << "3. Xem lich su kham benh" << endl;
-    cout << "4. Doi lich kham" << endl;
-    cout << "5. Huy lich kham" << endl;
-    cout << "6. Xem thong tin ca nhan" << endl;
-    cout << "7. Cap nhat thong tin ca nhan" << endl;
+    cout << "1. Đặt lịch khám mới" << endl;
+    cout << "2. Xem lịch khám sắp tới" << endl;
+    cout << "3. Xem lịch sử khám bện" << endl;
+    cout << "4. Đổi lịch khám" << endl;
+    cout << "5. Hủy lịch khám" << endl;
+    cout << "6. Xem thông tin cá nhân" << endl;
+    cout << "7. Cập nhật thông tin cá nhân" << endl;
     cout << "8. Đổi mật khẩu" << endl;
-    cout << "9. Dang xuat" << endl;
+    cout << "9. Đăng xuất" << endl;
     cout << "========================================" << endl;
-    cout << "Nhap lua chon cua ban:";
+    cout << "Nhập lựa chọn của bạn:";
 }
 
 // Hàm đăng ký Doctor

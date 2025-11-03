@@ -43,10 +43,6 @@ void Doctor::displayInfo() const {
     cout << "==================================" << endl;
     cout << "THÔNG TIN BÁC SĨ" << endl;
     cout << "==================================" << endl;
-    // cout << "ID:" << id << endl;
-    // cout << "CCCD:" << identicalCard << endl;
-    // cout << "Email:" << email << endl;
-    // cout << "Họ và tên:" << (fullName.empty() ? "[Chưa cập nhật]" :fullName) << endl;
     User::displayInfo();
     cout << "Chuyên khoa:" << (specialization.empty() ? "[Chưa cập nhật]" :specialization) << endl;
     cout << "Vai trò:" << (doctorRole.empty()?"[Chưa cập nhật]" :doctorRole) << endl;

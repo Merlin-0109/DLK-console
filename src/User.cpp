@@ -101,16 +101,14 @@ bool User::changePassword(const string& oldPassword, const string& newPassword) 
 
 // Hiển thị thông tin
 void User::displayInfo() const {
-    // cout << "==================================" << endl;
     cout << "ID:" << id << endl;
     cout << "CCCD:" << identicalCard << endl;
     cout << "Mật khẩu:" << password << endl;
     cout << "Họ và tên:" << (fullName.empty() ? "[Chưa cập nhật]" :fullName) << endl;
-    cout << "Ngày sinh:" << dateOfBirth << endl;
-    cout << "Giới tính:" << gender << endl;
-    cout << "Địa chỉ:" << address << endl;
-    // cout << "Loại người dùng:" << getUserTypeString() << endl;
-    // cout << "==================================" << endl;
+    cout << "Email:" << (email.empty()?"[Chưa cập nhật]" : email) << endl;
+    cout << "Ngày sinh:" << (dateOfBirth.empty() ? "[Chưa cập nhật]" : dateOfBirth) << endl;
+    cout << "Giới tính:" << (gender.empty() ? "[Chưa cập nhật]" : gender) << endl;
+    cout << "Địa chỉ:" << (address.empty() ? "[Chưa cập nhật]" "\nVui lòng cập nhật đầy đủ thông tin": address) << endl;
 }
 
 bool User::updateProfile(User& user){
