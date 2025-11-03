@@ -8,8 +8,7 @@
     - Chức năng từ chối lịch khám của bác sĩ không hoạt động
     - Chức năng xem lịch khám của bác sĩ không hoạt động
     - Nếu chưa có bác sĩ trong hệ thống thì hiển thị hiện chưa có bác sĩ nào thay vì yêu cầu bệnh nhân đặt lịch khám
-    - Phần đặt lịch khám thay vì yêu cầu nhập ID bác sĩ thì nhập tên bác sĩ
-    - Khi hiển thị ra màn hình bác sĩ hiện có thì không hiển thị ID của bác sĩ mà chỉ hiển thị tên, chuyên khoa , thông tin về vai trò
+    - Phần đặt lịch khám thay vì yêu cầu nhập ID bác sĩ thì nhập tên bác sĩ 
 
 
 

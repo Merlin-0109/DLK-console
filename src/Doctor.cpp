@@ -78,7 +78,7 @@ ostream& operator<<(ostream& o, const Doctor& doctor){
     return o;
 }
 istream& operator>>(istream& in, Doctor& doctor){
-    // in >> static_cast<User&>(doctor);
+    in >> static_cast<User&>(doctor);
     if (in.peek() == '\n') in.ignore();
     bool isInteract = (&in == &cin);
     if (isInteract){

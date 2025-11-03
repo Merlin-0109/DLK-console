@@ -258,22 +258,23 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                         string data = authSystem.getDataStore()->loadDoctorData(dId);
                         if (!data.empty()) {
                             stringstream ss(data);
-                            string type, id, username, password, email, fullName, spec, role;
-                            getline(ss, type);
-                            getline(ss, id);
-                            getline(ss, username);
-                            getline(ss, password);
-                            getline(ss, email);
-                            getline(ss, fullName);
-                            getline(ss, spec);
-                            getline(ss, role);
-                            
-                            string displayName = fullName.empty() ? username : fullName;
+                            string line, id, fullName, gender, spec, role;
+                            while(getline(ss,line)){
+                                size_t pos = line.find(":");
+                                string key = line.substr(0,pos);
+                                string value = line.substr(pos+1);
+                                if (key == "ID") id = value;
+                                else if (key == "Họ và tên") fullName = value;
+                                else if (key == "Giới tính") gender = value;
+                                else if (key == "Chuyên khoa") spec = value;
+                                else if (key == "Vai trò") role = value; 
+                            }
                             
                             cout << "👨‍⚕️ Mã BS: " << id;
-                            cout << " | Tên: " << displayName;
-                            if (!spec.empty()) cout << " | Chuyên khoa: " << spec;
-                            if (!role.empty()) cout << " | Vai trò: " << role;
+                            cout << " | " << fullName;
+                            cout << " | " << gender;
+                            cout << " | " << spec;
+                            cout << " | " << role;
                             cout << endl;
                         }
                     }
