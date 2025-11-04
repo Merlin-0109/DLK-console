@@ -291,5 +291,3 @@ istream& operator>>(istream& in, User& user){
 
     return in;
 }
-
-
