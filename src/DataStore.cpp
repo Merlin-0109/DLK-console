@@ -444,7 +444,11 @@ vector<string> DataStore::getDoctorAppointments(const string& doctorId) {
             if (filename.length() > 4) {
                 string appointmentId = filename.substr(0, filename.length() - 4);
                 AppointmentDetails details = readAppointment(appointmentId);
-                
+
+                if (details.bookStatus != "Cancelled"){
+                    cout << details.appointmentId << "|" << details.patientId << "|"
+                    << details.date << "|" << details.time << "|" << details.reason << endl;
+                }
                 if (!details.appointmentId.empty() && details.doctorId == doctorId) {
                     appointments.push_back(details.appointmentId);
                 }
