@@ -180,12 +180,19 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
     
     while (!logout) {     
         if (user->getUserType() == DOCTOR){
+            Doctor* doctor = dynamic_cast<Doctor*>(user);
             displayDoctorChoice();
             cin >> choice;
             switch (choice){
                 case 1:// Xem lịch khám
+                    if (doctor) {
+                        doctor->viewAppointment();
+                    }
                     break;
                 case 2:// Từ chối lịch khám
+                    if (doctor) {
+                        doctor->rejectAppointment();
+                    }
                     break;
                 case 3:// Xem thông tin cá nhân
                     user->displayInfo();
