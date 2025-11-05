@@ -194,16 +194,13 @@ bool AuthSystem::saveUserData(User* user) {
     if (user == nullptr) return false;
     
     ostringstream oss;
-    string id,data;
+    oss << *user;
+    string data = oss.str();
+    string id = user->getID();
     
     switch (user->getUserType()) {
-        case DOCTOR:{
-            Doctor* doctor = dynamic_cast<Doctor*> (user);
-            oss << *doctor;
-            id = user->getID();
-            data = oss.str();
+        case DOCTOR:
             return dataStore->saveDoctorData(id,data);
-        }
         case PATIENT:
             return dataStore->savePatientData(id,data);
         default:

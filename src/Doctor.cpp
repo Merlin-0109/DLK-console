@@ -79,7 +79,22 @@ istream& operator>>(istream& in, Doctor& doctor){
     in >> static_cast<User&>(doctor);
     if (in.peek() == '\n') in.ignore();
     bool isInteract = (&in == &cin);
-    if (isInteract){
+    
+    if (!isInteract) {
+        // Đọc từ file - đọc specialization và doctorRole từ stream
+        string line;
+        while(getline(in, line)) {
+            size_t pos = line.find(":");
+            if (pos != string::npos) {
+                string key = line.substr(0, pos);
+                string val = line.substr(pos + 1);
+                
+                if (key == "Chuyên khoa") doctor.setSpecialization(val);
+                else if (key == "Vai trò") doctor.setDoctorRole(val);
+            }
+        }
+    } else {
+        // Nhập từ bàn phím
         cout << "Chuyên khoa:";
         string spe;
         getline(in,spe);

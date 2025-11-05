@@ -152,6 +152,12 @@ istream& operator>>(istream& in, User& user){
                 if (key == "ID") user.setID(val);
                 else if (key == "CCCD") user.setIdenticalCard(val);
                 else if (key == "Mật khẩu") user.setPassword(val);
+                else if (key == "Họ và tên") user.setFullName(val);
+                else if (key == "Ngày sinh") user.setDateOfBirth(val);
+                else if (key == "Giới tính") user.setGender(val);
+                else if (key == "Email") user.setEmail(val);
+                else if (key == "Số điện thoại") user.setPhoneNumber(val);
+                else if (key == "Địa chỉ") user.setAddress(val);
             }  
         }
         return in;

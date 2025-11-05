@@ -195,7 +195,6 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                         doctor->rejectAppointment();
                     }
                     break;
-                }
                 case 3:// Xem thông tin cá nhân
                     user->displayInfo();
                     break;
