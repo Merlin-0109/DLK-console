@@ -7,6 +7,11 @@
 // Constructor
 AuthSystem::AuthSystem() : currentUser(nullptr) {
     dataStore = new DataStore();
+    
+    // Khởi tạo HashTables với kích thước hợp lý
+    userByIdenticalCard = new HashTable<string, User*>(1009);  // Số nguyên tố cho phân bổ tốt
+    userByID = new HashTable<string, User*>(1009);
+    
     loadUsersFromDataStore();
 }
 
@@ -16,6 +21,10 @@ AuthSystem::~AuthSystem() {
         delete user;
     }
     users.clear();
+    
+    // Giải phóng HashTables
+    delete userByIdenticalCard;
+    delete userByID;
     delete dataStore;
 }
 
@@ -30,6 +39,10 @@ void AuthSystem::loadUsersFromDataStore() {
             Patient* patient = new Patient;
             ss >> *patient;
             users.push_back(patient);
+            
+            // Thêm vào HashTables để tìm kiếm O(1)
+            userByIdenticalCard->insert(patient->getIdenticalCard(), patient);
+            userByID->insert(patient->getID(), patient);
         }
     }
     
@@ -42,26 +55,28 @@ void AuthSystem::loadUsersFromDataStore() {
             Doctor* doctor = new Doctor;
             ss >> *doctor;
             users.push_back(doctor);
+            
+            // Thêm vào HashTables để tìm kiếm O(1)
+            userByIdenticalCard->insert(doctor->getIdenticalCard(), doctor);
+            userByID->insert(doctor->getID(), doctor);
         }
     }
 }
 
-// Tìm user theo username
+// Tìm user theo username - SỬ DỤNG HASHTABLE O(1)
 User* AuthSystem::findUser(string identicalCard) {
-    for (User* user : users) {
-        if (user->getIdenticalCard() == identicalCard) {
-            return user;
-        }
+    User* result = nullptr;
+    if (userByIdenticalCard->find(identicalCard, result)) {
+        return result;
     }
     return nullptr;
 }
 
-// Tìm user theo ID
+// Tìm user theo ID - SỬ DỤNG HASHTABLE O(1)
 User* AuthSystem::findUserByID(string id) {
-    for (User* user : users) {
-        if (user->getID() == id) {
-            return user;
-        }
+    User* result = nullptr;
+    if (userByID->find(id, result)) {
+        return result;
     }
     return nullptr;
 }
@@ -91,6 +106,11 @@ bool AuthSystem::registerDoctor(string identicalCard, string password) {
     // Lưu vào DataStore
     if (dataStore->saveDoctorData(id,oss.str())) {
         users.push_back(doctor);
+        
+        // Thêm vào HashTables
+        userByIdenticalCard->insert(identicalCard, doctor);
+        userByID->insert(id, doctor);
+        
         cout << "Đăng ký thành công! ID của bạn là: " << id << endl;
         cout << "Vui lòng đăng nhập để cập nhật thông tin cá nhân." << endl;
         return true;
@@ -118,6 +138,11 @@ bool AuthSystem::registerPatient(string identicalCard, string password) {
     // Lưu vào DataStore
     if (dataStore->savePatientData(id,ss.str())) {
         users.push_back(patient);
+        
+        // Thêm vào HashTables
+        userByIdenticalCard->insert(identicalCard, patient);
+        userByID->insert(id, patient);
+        
         cout << "Đăng ký thành công! ID của bạn là: " << id << endl;
         cout << "Vui lòng cập nhật thông tin cá nhân sau khi đăng nhập." << endl;
         return true;
