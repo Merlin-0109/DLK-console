@@ -60,8 +60,8 @@ void User::setID(string id) {
 void User::setPassword(string password) {
     this->password = password;
 }
-void User::setIdenticalCard(string cccd){
-    this->identicalCard = cccd;
+void User::setIdenticalCard(string Identitycard){
+    this->identicalCard = Identitycard;
 }
 void User::setFullName(string fullName) {
     this->fullName = fullName;
@@ -87,28 +87,28 @@ void User::setUserType(UserType type) {
 
 bool User::changePassword(const string& oldPassword, const string& newPassword) {
     if (password != oldPassword) {
-        cout << "Mật khẩu cũ không đúng!" << endl;
+        cout << "The old password is incorrect!" << endl;
         return false;
     }
     if (newPassword.empty()) {
-        cout << "Mật khẩu mới không được để trống!" << endl;
+        cout << "The new password cannot be empty!" << endl;
         return false;
     }
     password = newPassword;
-    cout << "Đổi mật khẩu thành công!" << endl;
+    cout << "Change password successfully" << endl;
     return true;
 }
 
 // Hiển thị thông tin
 void User::displayInfo() const {
     cout << "ID:" << id << endl;
-    cout << "CCCD:" << identicalCard << endl;
-    cout << "Mật khẩu:" << password << endl;
-    cout << "Họ và tên:" << (fullName.empty() ? "[Chưa cập nhật]" :fullName) << endl;
-    cout << "Email:" << (email.empty()?"[Chưa cập nhật]" : email) << endl;
-    cout << "Ngày sinh:" << (dateOfBirth.empty() ? "[Chưa cập nhật]" : dateOfBirth) << endl;
-    cout << "Giới tính:" << (gender.empty() ? "[Chưa cập nhật]" : gender) << endl;
-    cout << "Địa chỉ:" << (address.empty() ? "[Chưa cập nhật]" "\nVui lòng cập nhật đầy đủ thông tin": address) << endl;
+    cout << "Identity card:" << identicalCard << endl;
+    cout << "Password:" << password << endl;
+    cout << "Full name:" << (fullName.empty() ? "[Not updated]" :fullName) << endl;
+    cout << "Email:" << (email.empty()?"[Not updated]" : email) << endl;
+    cout << "Date of birth:" << (dateOfBirth.empty() ? "[Not updated]" : dateOfBirth) << endl;
+    cout << "Gender:" << (gender.empty() ? "[Not updated]" : gender) << endl;
+    cout << "Address:" << (address.empty() ? "[Not updated]" "\nPlease update the information completely": address) << endl;
 }
 
 bool User::updateProfile(User& user){
@@ -119,22 +119,22 @@ bool User::updateProfile(User& user){
 // Lấy chuỗi loại người dùng, chuyển mô tả enum thành string cụ thể khi in ra màn hình
 string User::getUserTypeString() const {
     switch (userType) {
-        case DOCTOR:return "Bác sĩ";
-        case PATIENT:return "Bệnh nhân";
-        default:return "Không xác định";
+        case DOCTOR:return "Doctor";
+        case PATIENT:return "Patient";
+        default:return "Undefined";
     }
 }
 
 ostream& operator<<(ostream& out, const User& user){
     out << "ID:" << user.getID()
-        << "\nCCCD:" << user.getIdenticalCard()
-        << "\nMật khẩu:" << user.getPassword()
-        << "\nHọ và tên:" << user.getFullName() 
-        << "\nNgày sinh:" << user.getDateOfBirth()
-        << "\nGiới tính:" << user.getGender()
+        << "\nIdentity card:" << user.getIdenticalCard()
+        << "\nPassword:" << user.getPassword()
+        << "\nFull name:" << user.getFullName() 
+        << "\nDate of birth:" << user.getDateOfBirth()
+        << "\nGender:" << user.getGender()
         << "\nEmail:" << user.getEmail()
-        << "\nSố điện thoại:" << user.getPhoneNumber()
-        << "\nĐịa chỉ:" << user.getAddress() << endl;
+        << "\nPhone number:" << user.getPhoneNumber()
+        << "\nAddress:" << user.getAddress() << endl;
 
         return out;
 }
@@ -150,14 +150,14 @@ istream& operator>>(istream& in, User& user){
                 string val = line.substr(pos+1);
 
                 if (key == "ID") user.setID(val);
-                else if (key == "CCCD") user.setIdenticalCard(val);
-                else if (key == "Mật khẩu") user.setPassword(val);
-                else if (key == "Họ và tên") user.setFullName(val);
-                else if (key == "Ngày sinh") user.setDateOfBirth(val);
-                else if (key == "Giới tính") user.setGender(val);
+                else if (key == "Identity card") user.setIdenticalCard(val);
+                else if (key == "Password") user.setPassword(val);
+                else if (key == "Full name") user.setFullName(val);
+                else if (key == "Date of birth") user.setDateOfBirth(val);
+                else if (key == "Gender") user.setGender(val);
                 else if (key == "Email") user.setEmail(val);
-                else if (key == "Số điện thoại") user.setPhoneNumber(val);
-                else if (key == "Địa chỉ") user.setAddress(val);
+                else if (key == "Phone number") user.setPhoneNumber(val);
+                else if (key == "Address") user.setAddress(val);
             }  
         }
         return in;
@@ -166,19 +166,19 @@ istream& operator>>(istream& in, User& user){
     if (in.peek() == '\n') in.ignore();
     
     string temp_Name;
-    cout << "Họ và tên:"; 
+    cout << "Full name:"; 
     getline(in,temp_Name);
     if (!temp_Name.empty()) {
         user.setFullName(temp_Name);
     }
 
-    // Đảm bảo sự đúng đắn khi nhập ngày sinh
+    // Đảm bảo sự đúng đắn khi nhập Date of birth
     if (isInteract){
         string temp_DOB;
         bool check = false;
    
         while (!check){
-            cout << "Ngày sinh (dd/mm/yyyy):"; 
+            cout << "Date of birth (dd/mm/yyyy):"; 
             getline(in,temp_DOB);
             
             // Nếu nhấn Enter, giữ nguyên giá trị cũ
@@ -196,20 +196,20 @@ istream& operator>>(istream& in, User& user){
                 else check = true;
             }
             else check = false;
-            if (!check) cout << "Ngày sinh không hợp lệ! Vui lòng nhập lại" << endl;
+            if (!check) cout << "Date of birth is invalid! Please re-enter" << endl;
         }
         if (!temp_DOB.empty()) {
             user.setDateOfBirth(temp_DOB);
         }
     }
 
-    // giới tính
+    // Gender
     if (isInteract){
         string temp_g;
         bool check_g = false;
    
         while (!check_g){
-            cout << "Giới tính (Nam/Nữ):"; 
+            cout << "Gender (Male/Female):"; 
             getline(in,temp_g);
             
             // Nếu nhấn Enter, giữ nguyên giá trị cũ
@@ -223,11 +223,11 @@ istream& operator>>(istream& in, User& user){
             for (char &c :temp1){
                 c = tolower(c);
             }
-            if (temp1 != "nam" && temp1 != "nữ")
+            if (temp1 != "male" && temp1 != "female")
                 check_g = false;
-            if (temp1 == "nam") temp_g = "Nam";
-            else if (temp1 == "nữ") temp_g = "Nữ";
-            if (!check_g) cout << "Vui lòng nhập lại theo hướng dẫn" << endl;
+            if (temp1 == "male") temp_g = "Male";
+            else if (temp1 == "female") temp_g = "Female";
+            if (!check_g) cout << "Please re-enter according to the instructions" << endl;
         }
         if (!temp_g.empty()) {
             user.setGender(temp_g);
@@ -240,7 +240,7 @@ istream& operator>>(istream& in, User& user){
         bool check_e = false;
     
         while(!check_e){
-            cout << "Email(Không cần nhập '@gmail.com'):";
+            cout << "Email(No need to enter '@gmail.com'):";
             getline(in,temp_e);
             
             // Nếu nhấn Enter, giữ nguyên giá trị cũ
@@ -253,7 +253,7 @@ istream& operator>>(istream& in, User& user){
             if (regex_match(temp_e, local_part_e)) 
                 check_e = true;
             else check_e = false;
-            if (!check_e) cout << "Vui lòng nhập lại" << endl;
+            if (!check_e) cout << "Please re-enter" << endl;
         }
         if (!temp_e.empty()) {
             user.setEmail(temp_e + "@gmail.com");
@@ -266,7 +266,7 @@ istream& operator>>(istream& in, User& user){
         string temp_sdt;
         bool check_sdt = false;
         while (!check_sdt){
-            cout << "Số điện thoại:"; 
+            cout << "Phone number:"; 
             getline(in,temp_sdt);
             
             // Nếu nhấn Enter, giữ nguyên giá trị cũ
@@ -280,16 +280,16 @@ istream& operator>>(istream& in, User& user){
                 check_sdt = true;
             else check_sdt = false;
             
-            if (!check_sdt) cout << "Số điện thoại không hợp lệ! Vui lòng nhập lại số điện thoại" << endl;
+            if (!check_sdt) cout << "Phone number is invalid! Please re-enter the phone number" << endl;
         }
         if (!temp_sdt.empty()) {
             user.setPhoneNumber(temp_sdt);
         }
     }
 
-    // địa chỉ
+    // Address
     string temp_Address;
-    cout << "Địa chỉ:"; 
+    cout << "Address:"; 
     getline(in,temp_Address);
     if (!temp_Address.empty()) {
         user.setAddress(temp_Address);

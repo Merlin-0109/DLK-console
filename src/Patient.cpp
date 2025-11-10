@@ -1,5 +1,6 @@
 #include "Patient.h"
 #include "DataStore.h"
+#include "UI.h"
 #include <sstream>
 #include <fstream>
 #include <iomanip>
@@ -26,7 +27,7 @@ Patient::~Patient() {}
 // Hiển thị thông tin
 void Patient::displayInfo() const {
     cout << "==================================" << endl;
-    cout << "THÔNG TIN BỆNH NHÂN" << endl;
+    cout << "PERSONAL INFORMATION" << endl;
     cout << "==================================" << endl;
     User::displayInfo();
     cout << "==================================" << endl;
@@ -56,36 +57,36 @@ istream& operator>>(istream& in, Patient& patient){
 bool Patient::bookAppointment(const string& doctorId, const string& date, const string& time, const string& reason) {
     // Kiểm tra thông tin cá nhân đã đầy đủ chưa
     if (!isProfileComplete()) {
-        cout << "\n⚠ Vui lòng cập nhật đầy đủ thông tin cá nhân trước khi đặt lịch khám!" << endl;
+        cout << "\n⚠ Please complete your personal information before scheduling an appointment!" << endl;
         return false;
     }
     
     // Validate input
     if (doctorId.empty()) {
-        cout << "Lỗi: Mã bác sĩ không được để trống!" << endl;
+        cout << "Error: Doctor code cannot be empty!" << endl;
         return false;
     }
     
     if (reason.empty()) {
-        cout << "Lỗi: Vui lòng nhập lý do khám!" << endl;
+        cout << "Error: Please enter the reason for the consultation!" << endl;
         return false;
     }
     
     // Validate date format
     if (!validateDate(date)) {
-        cout << "Lỗi: Định dạng ngày không hợp lệ! Vui lòng nhập theo định dạng DD/MM/YYYY" << endl;
+        cout << "Error: Invalid date format! Please enter in the format DD/MM/YYYY" << endl;
         return false;
     }
     
     // Validate time format
     if (!validateTime(time)) {
-        cout << "Lỗi: Định dạng giờ không hợp lệ! Vui lòng nhập theo định dạng HH:MM" << endl;
+        cout << "Error: Invalid time format! Please enter in HH:MM format" << endl;
         return false;
     }
     
     // Check if date/time is in the future
     if (!isDateInFuture(date, time)) {
-        cout << "Lỗi: Không thể đặt lịch cho thời gian trong quá khứ!" << endl;
+        cout << "Error: Cannot schedule for a time in the past!" << endl;
         return false;
     }
     
@@ -108,19 +109,19 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         cout << "\n========================================" << endl;
         cout << "   ✓ ĐẶT LỊCH KHÁM THÀNH CÔNG!" << endl;
         cout << "========================================" << endl;
-        cout << "Mã lịch khám: " << appointmentId << endl;
-        cout << "Bệnh nhân: " << fullName << " (" << id << ")" << endl;
-        cout << "Bác sĩ: " << getDoctorInfo(doctorId) << endl;
-        cout << "Ngày: " << date << endl;
-        cout << "Giờ: " << time << endl;
-        cout << "Lý do: " << reason << endl;
+        cout << "Appointment ID: " << appointmentId << endl;
+        cout << "Patient: " << fullName << " (" << id << ")" << endl;
+        cout << "Doctor: " << getDoctorInfo(doctorId) << endl;
+        cout << "Date: " << date << endl;
+        cout << "Time: " << time << endl;
+        cout << "Reason: " << reason << endl;
         cout << "========================================" << endl;
-        cout << "⚠ Vui lòng đến đúng giờ và mang theo CCCD/CMND!" << endl;
+        cout << "⚠ Please arrive on time and bring your Identity Card.!" << endl;
         cout << "========================================" << endl;
         return true;
     }
     
-    cout << "Lỗi: Không thể đặt lịch khám!" << endl;
+    cout << "Error: Unable to schedule an appointment!" << endl;
     return false;
 }
 
@@ -129,31 +130,21 @@ bool Patient::viewMyAppointments() const {
     vector<string> appointments = DataStore::getPatientAppointments(this->id);
     
     if (appointments.empty()) {
-        cout << "\nBạn chưa có lịch khám nào." << endl;
+        cout << "\nYou don't have any appointments yet" << endl;
         return false;
     }
     
-    cout << "\n========================================" << endl;
-    cout << "   DANH SÁCH LỊCH KHÁM CỦA BẠN" << endl;
-    cout << "========================================" << endl;
+    vector<int> widths = {22,23,18,14,21};
+    vector<vector<string>> rows;
+
+    rows.push_back({"Appointment ID", "Doctor", "Date", "Time", "Reason"});
     
     for (const string& appointmentId : appointments) {
         DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
-        
-        if (!details.appointmentId.empty()) {
-            cout << "\nMã lịch khám: " << details.appointmentId << endl;
-            cout << "Bác sĩ: " << getDoctorInfo(details.doctorId) << endl;
-            cout << "Ngày: " << details.date << endl;
-            cout << "Giờ: " << details.time << endl;
-            cout << "Lý do: " << details.reason << endl;
-            cout << "Trạng thái đặt lịch: " << details.bookStatus << endl;
-            cout << "Trạng thái khám: " << details.visitStatus << endl;
-            cout << "----------------------------------------" << endl;
-        }
+        rows.push_back({details.appointmentId, getDoctorInfo(details.doctorId),details.date, details.time});
     }
-    
-    cout << "\nTổng số lịch khám: " << appointments.size() << endl;
-    cout << "========================================" << endl;
+    drawTable(5,8,widths, rows);
+    cout << "\nTotal appointments: " << appointments.size() << endl;
     return true;
 }
 
@@ -161,27 +152,27 @@ bool Patient::viewMyAppointments() const {
 bool Patient::cancelAppointment(const string& appointmentId) {
     // Kiểm tra appointment có tồn tại không
     if (!DataStore::appointmentExists(appointmentId)) {
-        cout << "Lỗi: Không tìm thấy lịch khám với mã " << appointmentId << endl;
+        cout << "Error: Not found appointment " << appointmentId << endl;
         return false;
     }
     
     // Đọc thông tin appointment
     DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
     
-    // Kiểm tra appointment có phải của bệnh nhân này không
+    // Kiểm tra appointment có phải của Patient này không
     if (details.patientId != this->id) {
-        cout << "Lỗi: Lịch khám này không thuộc về bạn!" << endl;
+        cout << "Error: This appointment does not belong to you!" << endl;
         return false;
     }
     
     // Kiểm tra trạng thái hiện tại
     if (details.bookStatus == "Cancelled") {
-        cout << "Lịch khám này đã được hủy trước đó." << endl;
+        cout << "This appointment has been canceled previously." << endl;
         return false;
     }
     
     if (details.visitStatus == "Done") {
-        cout << "Không thể hủy lịch khám đã hoàn thành!" << endl;
+        cout << "Cannot cancel an appointment that has been completed!" << endl;
         return false;
     }
     
@@ -190,12 +181,12 @@ bool Patient::cancelAppointment(const string& appointmentId) {
         cout << "\n========================================" << endl;
         cout << "   HỦY LỊCH KHÁM THÀNH CÔNG!" << endl;
         cout << "========================================" << endl;
-        cout << "Mã lịch khám: " << appointmentId << endl;
+        cout << "Appointment ID: " << appointmentId << endl;
         cout << "========================================" << endl;
         return true;
     }
     
-    cout << "Lỗi: Không thể hủy lịch khám!" << endl;
+    cout << "Error: Cannot cancel the appointment!" << endl;
     return false;
 }
 
@@ -203,43 +194,43 @@ bool Patient::cancelAppointment(const string& appointmentId) {
 bool Patient::rescheduleAppointment(const string& appointmentId, const string& newDate, const string& newTime) {
     // Kiểm tra appointment có tồn tại không
     if (!DataStore::appointmentExists(appointmentId)) {
-        cout << "Lỗi: Không tìm thấy lịch khám với mã " << appointmentId << endl;
+        cout << "Error: Not found appointment " << appointmentId << endl;
         return false;
     }
     
     // Đọc thông tin appointment
     DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
     
-    // Kiểm tra appointment có phải của bệnh nhân này không
+    // Kiểm tra appointment có phải của Patient này không
     if (details.patientId != this->id) {
-        cout << "Lỗi: Lịch khám này không thuộc về bạn!" << endl;
+        cout << "Error: This appointment does not belong to you!" << endl;
         return false;
     }
     
     // Kiểm tra trạng thái
     if (details.bookStatus == "Cancelled") {
-        cout << "Không thể đổi lịch cho cuộc hẹn đã bị hủy!" << endl;
+        cout << "Cannot reschedule an appointment that has been canceled!" << endl;
         return false;
     }
     
     if (details.visitStatus == "Done") {
-        cout << "Không thể đổi lịch cho cuộc hẹn đã hoàn thành!" << endl;
+        cout << "Cannot reschedule an appointment that has been completed!" << endl;
         return false;
     }
     
     // Validate ngày giờ mới
     if (!validateDate(newDate)) {
-        cout << "Lỗi: Định dạng ngày không hợp lệ! Vui lòng nhập theo định dạng DD/MM/YYYY" << endl;
+        cout << "Error: Invalid date format! Please enter in the format DD/MM/YYYY" << endl;
         return false;
     }
     
     if (!validateTime(newTime)) {
-        cout << "Lỗi: Định dạng giờ không hợp lệ! Vui lòng nhập theo định dạng HH:MM" << endl;
+        cout << "Error: Invalid time format! Please enter in HH:MM format" << endl;
         return false;
     }
     
     if (!isDateInFuture(newDate, newTime)) {
-        cout << "Lỗi: Không thể đặt lịch cho thời gian trong quá khứ!" << endl;
+        cout << "Error: Cannot schedule for a time in the past!" << endl;
         return false;
     }
     
@@ -252,14 +243,14 @@ bool Patient::rescheduleAppointment(const string& appointmentId, const string& n
         cout << "\n========================================" << endl;
         cout << "   ĐỔI LỊCH KHÁM THÀNH CÔNG!" << endl;
         cout << "========================================" << endl;
-        cout << "Mã lịch khám: " << appointmentId << endl;
-        cout << "Ngày mới: " << newDate << endl;
-        cout << "Giờ mới: " << newTime << endl;
+        cout << "Appointment ID: " << appointmentId << endl;
+        cout << "Date: " << newDate << endl;
+        cout << "Time: " << newTime << endl;
         cout << "========================================" << endl;
         return true;
     }
     
-    cout << "Lỗi: Không thể đổi lịch khám!" << endl;
+    cout << "Error: Unable to reschedule the appointment!" << endl;
     return false;
 }
 
@@ -268,7 +259,7 @@ bool Patient::viewAppointmentHistory() const {
     vector<string> appointments = DataStore::getPatientAppointments(this->id);
     
     if (appointments.empty()) {
-        cout << "\nBạn chưa có lịch khám nào." << endl;
+        cout << "\nYou do not have any medical appointments" << endl;
         return false;
     }
     
@@ -297,11 +288,11 @@ bool Patient::viewAppointmentHistory() const {
     }
     
     cout << "\n========================================" << endl;
-    cout << "THỐNG KÊ:" << endl;
-    cout << "- Tổng số lịch khám: " << appointments.size() << endl;
-    cout << "- Đang chờ khám: " << activeCount << endl;
-    cout << "- Đã khám xong: " << completedCount << endl;
-    cout << "- Đã hủy: " << cancelledCount << endl;
+    cout << "Statistics:" << endl;
+    cout << "- Total appointments: " << appointments.size() << endl;
+    cout << "- Waiting for examination: " << activeCount << endl;
+    cout << "- Examination completed: " << completedCount << endl;
+    cout << "- Cancelled: " << cancelledCount << endl;
     cout << "========================================" << endl;
     return true;
 }
@@ -311,7 +302,7 @@ bool Patient::viewUpcomingAppointments() const {
     vector<string> appointments = DataStore::getPatientAppointments(this->id);
     
     if (appointments.empty()) {
-        cout << "\nBạn chưa có lịch khám nào." << endl;
+        cout << "\nYou do not have any medical appointments." << endl;
         return false;
     }
     
@@ -334,12 +325,12 @@ bool Patient::viewUpcomingAppointments() const {
     }
     
     if (upcomingCount == 0) {
-        cout << "\nBạn không có lịch khám nào sắp tới." << endl;
+        cout << "\nYou don't have any upcoming appointments" << endl;
         cout << "========================================" << endl;
         return false;
     }
     
-    cout << "\nTổng số lịch khám sắp tới: " << upcomingCount << endl;
+    cout << "\nTotal number of upcoming appointments: " << upcomingCount << endl;
     cout << "========================================" << endl;
     return true;
 }
@@ -438,26 +429,26 @@ bool Patient::isDateInFuture(const string& date, const string& time) const {
 // Display appointment details (helper function)
 void Patient::displayAppointmentDetails(const DataStore::AppointmentDetails& details) const {
     cout << "\n----------------------------------------" << endl;
-    cout << "Mã lịch khám: " << details.appointmentId << endl;
-    cout << "Bác sĩ: " << getDoctorInfo(details.doctorId) << endl;
-    cout << "Ngày: " << details.date << endl;
-    cout << "Giờ: " << details.time << endl;
-    cout << "Lý do: " << details.reason << endl;
-    cout << "Trạng thái đặt lịch: ";
+    cout << "Appointment ID: " << details.appointmentId << endl;
+    cout << "Doctor: " << getDoctorInfo(details.doctorId) << endl;
+    cout << "Date: " << details.date << endl;
+    cout << "Time: " << details.time << endl;
+    cout << "Reason: " << details.reason << endl;
+    cout << "Book status: ";
     
     if (details.bookStatus == "Booked") {
-        cout << "✓ Đã đặt" << endl;
+        cout << "✓ Booked" << endl;
     } else if (details.bookStatus == "Cancelled") {
-        cout << "✗ Đã hủy" << endl;
+        cout << "✗ Cancelled" << endl;
     } else {
         cout << details.bookStatus << endl;
     }
     
-    cout << "Trạng thái khám: ";
+    cout << "Visit status: ";
     if (details.visitStatus == "Done") {
-        cout << "✓ Đã khám xong" << endl;
+        cout << "✓ Done" << endl;
     } else if (details.visitStatus == "Not Done") {
-        cout << "⧗ Chưa khám" << endl;
+        cout << "⧗ Not done" << endl;
     } else {
         cout << details.visitStatus << endl;
     }
@@ -488,7 +479,7 @@ string Patient::getDoctorInfo(const string& doctorId) const {
     ifstream file(filepath);
     
     if (!file.is_open()) {
-        return doctorId + " [Không tìm thấy thông tin]";
+        return doctorId + " [Not found information]";
     }
     
     // Parse doctor data to get name and specialization
@@ -502,9 +493,9 @@ string Patient::getDoctorInfo(const string& doctorId) const {
             string key = line.substr(0, pos);
             string value = line.substr(pos + 1);
             
-            if (key == "Họ và tên") {
+            if (key == "Full name") {
                 name = value;
-            } else if (key == "Chuyên khoa") {
+            } else if (key == "Specialization") {
                 specialization = value;
             }
         }

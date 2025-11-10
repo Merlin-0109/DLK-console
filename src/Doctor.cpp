@@ -3,6 +3,7 @@
 #include <sstream>
 #include <limits>
 #include <iomanip>
+#include "UI.h"
 
 // Constructor mặc định
 Doctor::Doctor() :User(){
@@ -41,26 +42,26 @@ void Doctor::setDoctorRole(string doctorRole){
 // Hiển thị thông tin
 void Doctor::displayInfo() const {
     cout << "==================================" << endl;
-    cout << "THÔNG TIN BÁC SĨ" << endl;
+    cout << "PERSONAL INFORMATION" << endl;
     cout << "==================================" << endl;
     User::displayInfo();
-    cout << "Chuyên khoa:" << (specialization.empty() ? "[Chưa cập nhật]" :specialization) << endl;
-    cout << "Vai trò:" << (doctorRole.empty()?"[Chưa cập nhật]" :doctorRole) << endl;
+    cout << "Specialization:" << (specialization.empty() ? "[Not updated]" :specialization) << endl;
+    cout << "Role:" << (doctorRole.empty()?"[Not updated]" :doctorRole) << endl;
     cout << "==================================" << endl;
 }
 
 bool Doctor::updateProfile(Doctor& doctor){
     User::updateProfile(doctor);
     
-    cout << "Chuyên khoa:";
+    cout << "Specialization:";
     string newSpec;
     getline(cin, newSpec);
     if (!newSpec.empty()) {
         this->specialization = newSpec;
     }
     
-    // Cập nhật Vai trò
-    cout << "Vai trò:";
+    // Cập nhật Role
+    cout << "Role:";
     string newRole;
     getline(cin, newRole);
     if (!newRole.empty()) {
@@ -71,11 +72,26 @@ bool Doctor::updateProfile(Doctor& doctor){
 
 ostream& operator<<(ostream& o, const Doctor& doctor){
     o << static_cast<const User&>(doctor);
-    o << "Chuyên khoa:" << doctor.getSpecialization() 
-        << "\nVai trò:" << doctor.getDoctorRole() << endl;
+    o << "Specialization:" << doctor.getSpecialization() 
+        << "\nRole:" << doctor.getDoctorRole() << endl;
     return o;
 }
 istream& operator>>(istream& in, Doctor& doctor){
+    // in >> static_cast<User&>(doctor);
+    // if (in.peek() == '\n') in.ignore();
+    // bool isInteract = (&in == &cin);
+    // if (isInteract){
+    //     cout << "Specialization:";
+    //     string spe;
+    //     getline(in,spe);
+    //     doctor.setSpecialization(spe);
+
+    //     cout << "Role:";
+    //     string role;
+    //     getline(in,role);
+    //     doctor.setDoctorRole(role);
+    // }
+    // return in;
     in >> static_cast<User&>(doctor);
     if (in.peek() == '\n') in.ignore();
     bool isInteract = (&in == &cin);
@@ -121,67 +137,48 @@ bool Doctor::isProfileComplete() const {
 
 // View Appointments
 bool Doctor::viewAppointment(){
-
-    cout << "┌──────────────────────┬───────────────────────┬──────────────────┬──────────────┬─────────────────────┐" << endl;
-    cout << "│      Mã cuộc hẹn     │       ID bệnh nhân    │       Ngày       │     Giờ      │        Lý do        │" << endl;
-    cout << "└──────────────────────┴───────────────────────┴──────────────────┴──────────────┴─────────────────────┘" << endl;
     vector<string> appointments = DataStore::getDoctorAppointments(this->id);
     
     if (appointments.empty()) {
-        cout << "\nKhông có lịch hẹn nào." << endl;
+        cout << "\nYou don't have any appointments yet" << endl;
         return false;
     }
-    
-    cout << "\nTổng số lịch hẹn: " << appointments.size() << endl;
+    vector<int> widths = {22,23,18,14,21};
+    vector<vector<string>> rows;
+
+    rows.push_back({"Appointment ID", "Patient ID", "Date", "Time", "Reason"});
+    for (string listID : appointments){
+        DataStore::AppointmentDetails d = DataStore::readAppointment(listID);
+        rows.push_back({d.appointmentId, d.patientId, d.date, d.time, d.reason});
+    }
+    drawTable(5,8,widths,rows);
+    cout << "\nTotal appointments: " << appointments.size() << endl;
     return true;
 }
 
-// Reject appointments from patients
-bool Doctor::rejectAppointment(){
+// decline appointments from patients
+bool Doctor::declineAppointment(){
     // Hiển thị danh sách lịch hẹn
     vector<string> appointments = DataStore::getDoctorAppointments(this->id);
     Doctor::viewAppointment();
-    // if (appointments.empty()) {
-    //     cout << "\nKhông có lịch hẹn nào để từ chối." << endl;
-    //     return false;
-    // }
-
-    // // Hiển thị các lịch hẹn có thể từ chối (Booked, Not Done)
-    // int count = 0;
-    // for (const string& appointmentId : appointments) {
-    //     DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
-        
-    //     if (!details.appointmentId.empty() && 
-    //         details.bookStatus == "Booked" && 
-    //         details.visitStatus == "Not Done") {
-    //         cout << "\nMã lịch hẹn: " << details.appointmentId << endl;
-    //         cout << "Bệnh nhân: " << details.patientId << endl;
-    //         cout << "Ngày: " << details.date << " | Giờ: " << details.time << endl;
-    //         cout << "Lý do: " << details.reason << endl;
-    //         cout << "----------------------------------------" << endl;
-    //         count++;
-    //     }
-    // }
-    
-    // if (count == 0) {
-    //     cout << "\nKhông có lịch hẹn nào có thể từ chối." << endl;
-    //     return false;
-    // }
-    
+    if (appointments.empty()) {
+        cout << "\nYou have no appointment to decline" << endl;
+        return false;
+    }
     // Nhập mã lịch hẹn cần từ chối
-    cout << "\nNhập mã lịch hẹn cần từ chối (hoặc 0 để hủy): ";
+    cout << "\nEnter the appointment code to decline (or 0 to cancel) ";
     string appointmentId;
-    cin.ignore();
+
     getline(cin, appointmentId);
     
     if (appointmentId == "0") {
-        cout << "Đã hủy thao tác." << endl;
+        cout << "Operation has been canceled" << endl;
         return false;
     }
     
     // Kiểm tra appointment có tồn tại không
     if (!DataStore::appointmentExists(appointmentId)) {
-        cout << "Lỗi: Không tìm thấy lịch hẹn!" << endl;
+        cout << "Not found appointment!" << endl;
         return false;
     }
     
@@ -190,13 +187,13 @@ bool Doctor::rejectAppointment(){
     
     // Kiểm tra appointment có phải của bác sĩ này không
     if (details.doctorId != this->id) {
-        cout << "Lỗi: Lịch hẹn này không thuộc về bạn!" << endl;
+        cout << "Error: This appointment does not belong to you!" << endl;
         return false;
     }
     
     // Kiểm tra trạng thái
     if (details.bookStatus != "Booked") {
-        cout << "Lỗi: Không thể từ chối lịch hẹn này!" << endl;
+        cout << "Error: Cannot decline this appointment!" << endl;
         return false;
     }
     
@@ -205,11 +202,11 @@ bool Doctor::rejectAppointment(){
         cout << "\n========================================" << endl;
         cout << "   ĐÃ TỪ CHỐI LỊCH HẸN THÀNH CÔNG!" << endl;
         cout << "========================================" << endl;
-        cout << "Mã lịch hẹn: " << appointmentId << endl;
+        cout << "Appointment ID: " << appointmentId << endl;
         cout << "========================================" << endl;
         return true;
     }
     
-    cout << "Lỗi: Không thể từ chối lịch hẹn!" << endl;
+    cout << "Error: Cannot decline this appointment!" << endl;
     return false;
 }

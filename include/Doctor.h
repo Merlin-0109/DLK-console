@@ -36,7 +36,7 @@ public:
     friend istream& operator>>(istream&, Doctor&);
     
     bool viewAppointment();
-    bool rejectAppointment(); 
+    bool declineAppointment(); 
 
     // Doctor service
     vector<string> getDoctorIDs();

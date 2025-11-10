@@ -280,7 +280,7 @@ DataStore::AppointmentDetails DataStore::readAppointment(const  string& appointm
     ifstream file(filepath);
 
     if (!file.is_open()){
-        cout << "Khong the mo file cuoc hen voi id " + appointmentId << endl;
+        cout << "Can not open file " + appointmentId << endl;
         return details;
     }
 
@@ -311,7 +311,7 @@ bool DataStore::updateBookAppointmentStatus(const  string& appointmentId, const 
     fstream file(filepath);
 
     if (!file.is_open()){
-        cout << "Khong the mo file cuoc hen voi id " + appointmentId + " de cap nhat trang thai";
+        cout << "Can not open file " + appointmentId + " to update the bookstatus";
         return false;
     }
 
@@ -330,7 +330,7 @@ bool DataStore::updateBookAppointmentStatus(const  string& appointmentId, const 
     file.close();
      ofstream fileWrite(filepath);
     if (!fileWrite.is_open()){
-        cout << "Khong the mo file de cap nhat trang thai tham dat lich" << endl;
+        cout << "Can not open file to update the book status" << endl;
         return false;
     }
 
@@ -348,7 +348,7 @@ bool DataStore::updateVisitAppointmentStatus(const  string& appointmentId,const 
     ifstream file(filepath);
 
     if (!file.is_open()){
-        cout << "Khong the mo file cuoc hen voi id " + appointmentId;
+        cout << "Can not open file " + appointmentId;
         return false;
     }
 
@@ -368,7 +368,7 @@ bool DataStore::updateVisitAppointmentStatus(const  string& appointmentId,const 
 
     ofstream fileWrite(filepath);
     if (!fileWrite.is_open()){
-        cout << "Khong the mo file de cap nhat trang thai tham kham" << endl;
+        cout << "Can not open file to update the visit status" << endl;
         return false;
     }
 
@@ -445,11 +445,7 @@ vector<string> DataStore::getDoctorAppointments(const string& doctorId) {
                 string appointmentId = filename.substr(0, filename.length() - 4);
                 AppointmentDetails details = readAppointment(appointmentId);
 
-                if (details.bookStatus != "Cancelled"){
-                    cout << details.appointmentId << "|" << details.patientId << "|"
-                    << details.date << "|" << details.time << "|" << details.reason << endl;
-                }
-                if (!details.appointmentId.empty() && details.doctorId == doctorId) {
+                if (!details.appointmentId.empty() && details.doctorId == doctorId && details.bookStatus != "Cancelled") {
                     appointments.push_back(details.appointmentId);
                 }
             }
