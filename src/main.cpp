@@ -91,21 +91,6 @@ int displayRegisterMenu() {
     return runMenu(menuLogIn_Out,3);
 }
 
-
-// Hàm hiển thị menu sau khi đăng nhập - ko can thiet 
-// void displayUserMenu(User* user) {
-//     cout << "\n========================================" << endl;
-//     cout << "   MENU NGƯỜI DÙNG - " << user->getUserTypeString() << endl;
-//     cout << "========================================" << endl;
-//     cout << "1. Xem thông tin cá nhân" << endl;
-    
-//     // Chỉ hiển thị tùy chọn cập nhật cho Doctor và Patient
-//     cout << "2. Cập nhật thông tin cá nhân" << endl;
-//     cout << "3. Đăng xuất" << endl;
-//     cout << "========================================" << endl;
-//     cout << "Nhập lựa chọn của bạn:";
-// }
-
 int displayDoctorChoice(){
     return runMenu(menuDoctor,6);
 }
