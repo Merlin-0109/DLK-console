@@ -149,6 +149,7 @@ istream& operator>>(istream& in, User& user){
                 string key = line.substr(0,pos);
                 string val = line.substr(pos+1);
 
+                // Chỉ đọc các field của User, dừng lại nếu gặp field không phải của User
                 if (key == "ID") user.setID(val);
                 else if (key == "CCCD") user.setIdenticalCard(val);
                 else if (key == "Mật khẩu") user.setPassword(val);
@@ -158,6 +159,13 @@ istream& operator>>(istream& in, User& user){
                 else if (key == "Email") user.setEmail(val);
                 else if (key == "Số điện thoại") user.setPhoneNumber(val);
                 else if (key == "Địa chỉ") user.setAddress(val);
+                else {
+                    // Gặp field không phải của User (ví dụ: "Chuyên khoa", "Vai trò")
+                    // Đẩy lại dòng này vào stream để class con đọc tiếp
+                    // Vì C++ không hỗ trợ pushback line, ta cần cách khác
+                    // Ta sẽ để Doctor tự đọc toàn bộ file thay vì dựa vào User
+                    break;  // Dừng đọc ở đây
+                }
             }  
         }
         return in;

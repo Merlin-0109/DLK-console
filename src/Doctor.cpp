@@ -76,12 +76,10 @@ ostream& operator<<(ostream& o, const Doctor& doctor){
     return o;
 }
 istream& operator>>(istream& in, Doctor& doctor){
-    in >> static_cast<User&>(doctor);
-    if (in.peek() == '\n') in.ignore();
     bool isInteract = (&in == &cin);
     
     if (!isInteract) {
-        // Đọc từ file - đọc specialization và doctorRole từ stream
+        // Đọc từ file - đọc toàn bộ và parse
         string line;
         while(getline(in, line)) {
             size_t pos = line.find(":");
@@ -89,12 +87,27 @@ istream& operator>>(istream& in, Doctor& doctor){
                 string key = line.substr(0, pos);
                 string val = line.substr(pos + 1);
                 
-                if (key == "Chuyên khoa") doctor.setSpecialization(val);
+                // Parse User fields
+                if (key == "ID") doctor.setID(val);
+                else if (key == "CCCD") doctor.setIdenticalCard(val);
+                else if (key == "Mật khẩu") doctor.setPassword(val);
+                else if (key == "Họ và tên") doctor.setFullName(val);
+                else if (key == "Ngày sinh") doctor.setDateOfBirth(val);
+                else if (key == "Giới tính") doctor.setGender(val);
+                else if (key == "Email") doctor.setEmail(val);
+                else if (key == "Số điện thoại") doctor.setPhoneNumber(val);
+                else if (key == "Địa chỉ") doctor.setAddress(val);
+                // Parse Doctor fields
+                else if (key == "Chuyên khoa") doctor.setSpecialization(val);
                 else if (key == "Vai trò") doctor.setDoctorRole(val);
             }
         }
     } else {
-        // Nhập từ bàn phím
+        // Nhập từ bàn phím - gọi User operator>> trước
+        in >> static_cast<User&>(doctor);
+        if (in.peek() == '\n') in.ignore();
+        
+        // Nhập thông tin Doctor
         cout << "Chuyên khoa:";
         string spe;
         getline(in,spe);
