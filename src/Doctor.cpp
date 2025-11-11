@@ -79,7 +79,7 @@ istream& operator>>(istream& in, Doctor& doctor){
     bool isInteract = (&in == &cin);
     
     if (!isInteract) {
-        // Đọc từ file - đọc specialization và doctorRole từ stream
+        // Đọc từ file - đọc toàn bộ và parse
         string line;
         while(getline(in, line)) {
             size_t pos = line.find(":");

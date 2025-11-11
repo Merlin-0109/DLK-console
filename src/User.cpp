@@ -149,6 +149,7 @@ istream& operator>>(istream& in, User& user){
                 string key = line.substr(0,pos);
                 string val = line.substr(pos+1);
 
+                // Chỉ đọc các field của User, dừng lại nếu gặp field không phải của User
                 if (key == "ID") user.setID(val);
                 else if (key == "Identity card") user.setIdenticalCard(val);
                 else if (key == "Password") user.setPassword(val);
