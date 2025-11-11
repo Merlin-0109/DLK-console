@@ -62,12 +62,16 @@ string menuPatient[] = {
 };
 
 void showTitle(string fileName){
-    SetColor(14);
+    ostringstream oss;
     ifstream file(fileName);
     string line;
     while(getline(file,line)){
-        cout << line << endl;
+        oss << line << endl;
     }
+    file.close();
+    
+    SetColor(14);
+    cout << oss.str() << flush;
     SetColor(7);
 }
 
@@ -126,14 +130,16 @@ void registerUser(AuthSystem& authSystem, UserType type) {
     string username = "", password1 = "", password2 = "";
     int position = 0; // 0 = CCCD, 1 = pass1, 2 = pass2
 
-    while (true) {
-        system("cls");
-        showTitle("title.txt");
-        SetColor(14);
-        cout << "\n\n\n\n\t\t\t\t\t\t\t===== REGISTER " + temp + " ACCOUNT =====\n\n";
-        SetColor(7);
+    // VẼ PHẦN TĨNH 1 LẦN DUY NHẤT
+    system("cls");
+    showTitle("title.txt");
+    SetColor(14);
+    cout << "\n\n\n\n\t\t\t\t\t\t\t===== REGISTER " + temp + " ACCOUNT =====\n\n";
+    SetColor(7);
+    drawBox(boxX, boxY, boxW, boxH);
 
-        drawBox(boxX, boxY, boxW, boxH);
+    while (true) {
+        // CHỈ XÓA VÀ CẬP NHẬT PHẦN ĐỘNG
         // XÓA DÒNG CŨ
         for (int i = 0; i < 3; ++i) {
             gotoXY(boxX + 2, boxY + 1 + i * 2);
@@ -175,6 +181,9 @@ void registerUser(AuthSystem& authSystem, UserType type) {
                         cout << "Invalid identity card! Must be 12 digits, start with 0.";
                         SetColor(7);
                         _getch();
+                        // XÓA THÔNG BÁO LỖI
+                        gotoXY(boxX + 2, boxY + 8);
+                        cout << string(boxW - 4, ' ');
                         username = "";
                         position = 0;
                     }
@@ -184,6 +193,9 @@ void registerUser(AuthSystem& authSystem, UserType type) {
                     cout << "Passwords do not match! Please try again.";
                     SetColor(7);
                     _getch();
+                    // XÓA THÔNG BÁO LỖI
+                    gotoXY(boxX + 2, boxY + 8);
+                    cout << string(boxW - 4, ' ');
                     password1 = password2 = "";
                     position = 1;
                 }
@@ -243,10 +255,13 @@ User* handleLogin(AuthSystem& authSystem) {
     string username = "", password = "";
     int position = 0; // 0 = CCCD, 1 = password
 
+    // VẼ PHẦN TĨNH 1 LẦN DUY NHẤT
+    system("cls");
+    showTitle("title.txt");
+    drawBox(boxX, boxY, boxW, boxH);
+
     while (true) {
-        system("cls");
-        showTitle("title.txt");
-        drawBox(boxX, boxY, boxW, boxH);
+        // CHỈ CẬP NHẬT PHẦN ĐỘNG
         gotoXY(boxX + 2, boxY + 1);
         cout << string(boxW - 4, ' ');  // xóa dòng Identity card
         gotoXY(boxX + 2, boxY + 3);

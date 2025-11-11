@@ -104,19 +104,25 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     
     // Lưu appointment
     if (DataStore::writeAppointment(appointmentId, details)) {
-        cout << "\n\t\t\t\t\t========================================" << endl;
+        ostringstream oss;
+        oss << "\n\t\t\t\t\t========================================" << endl;
         SetColor(14);
-        cout << "   ✓ BOOKED APPOINTMENT SUCCESSFULL!" << endl;
+        oss << "   ✓ BOOKED APPOINTMENT SUCCESSFULL!" << endl;
+        cout << oss.str() << flush;
         SetColor(7);
-        cout << "\t\t\t\t\t========================================" << endl;
-        cout << "\t\t\t\t\tAppointment ID: " << appointmentId << endl;
-        cout << "\t\t\t\t\tPatient: " << fullName << " (" << id << ")" << endl;
-        cout << "\t\t\t\t\tDoctor: " << getDoctorInfo(doctorId) << endl;
-        cout << "\t\t\t\t\tDate: " << date << endl;
-        cout << "\t\t\t\t\tTime: " << time << endl;
-        cout << "\t\t\t\t\tReason: " << reason << endl;
-        cout << "\t\t\t\t\t========================================" << endl;
-        cout << "\t\t\t\t\t⚠ Please arrive on time and bring your Identity Card!" << endl;
+        oss.str("");
+        oss.clear();
+        
+        oss << "\t\t\t\t\t========================================" << endl;
+        oss << "\t\t\t\t\tAppointment ID: " << appointmentId << endl;
+        oss << "\t\t\t\t\tPatient: " << fullName << " (" << id << ")" << endl;
+        oss << "\t\t\t\t\tDoctor: " << getDoctorInfo(doctorId) << endl;
+        oss << "\t\t\t\t\tDate: " << date << endl;
+        oss << "\t\t\t\t\tTime: " << time << endl;
+        oss << "\t\t\t\t\tReason: " << reason << endl;
+        oss << "\t\t\t\t\t========================================" << endl;
+        oss << "\t\t\t\t\t⚠ Please arrive on time and bring your Identity Card!" << endl;
+        cout << oss.str() << flush;
         return true;
     }
     
@@ -177,11 +183,13 @@ bool Patient::cancelAppointment(const string& appointmentId) {
     
     // Cập nhật trạng thái
     if (DataStore::updateBookAppointmentStatus(appointmentId, "Cancelled")) {
-        cout << "\n========================================" << endl;
-        cout << "   CANCELLED APPOINTMENT SUCCESSFULLY!" << endl;
-        cout << "========================================" << endl;
-        cout << "Appointment ID: " << appointmentId << endl;
-        cout << "========================================" << endl;
+        ostringstream oss;
+        oss << "\n========================================" << endl;
+        oss << "   CANCELLED APPOINTMENT SUCCESSFULLY!" << endl;
+        oss << "========================================" << endl;
+        oss << "Appointment ID: " << appointmentId << endl;
+        oss << "========================================" << endl;
+        cout << oss.str() << flush;
         return true;
     }
     
@@ -239,13 +247,15 @@ bool Patient::rescheduleAppointment(const string& appointmentId, const string& n
     
     // Lưu lại appointment
     if (DataStore::writeAppointment(appointmentId, details)) {
-        cout << "\n========================================" << endl;
-        cout << "   RESCHEDULED APPOINTMENT SUCCESSFULLY!" << endl;
-        cout << "========================================" << endl;
-        cout << "Appointment ID: " << appointmentId << endl;
-        cout << "Date: " << newDate << endl;
-        cout << "Time: " << newTime << endl;
-        cout << "========================================" << endl;
+        ostringstream oss;
+        oss << "\n========================================" << endl;
+        oss << "   RESCHEDULED APPOINTMENT SUCCESSFULLY!" << endl;
+        oss << "========================================" << endl;
+        oss << "Appointment ID: " << appointmentId << endl;
+        oss << "Date: " << newDate << endl;
+        oss << "Time: " << newTime << endl;
+        oss << "========================================" << endl;
+        cout << oss.str() << flush;
         return true;
     }
     
@@ -262,9 +272,11 @@ bool Patient::viewAppointmentHistory() const {
         return false;
     }
     
-    cout << "\n========================================" << endl;
-    cout << "   MEDICAL EXAMINATION HISTORY" << endl;
-    cout << "========================================" << endl;
+    ostringstream oss;
+    oss << "\n========================================" << endl;
+    oss << "   MEDICAL EXAMINATION HISTORY" << endl;
+    oss << "========================================" << endl;
+    cout << oss.str() << flush;
     
     int completedCount = 0;
     int cancelledCount = 0;
@@ -286,13 +298,15 @@ bool Patient::viewAppointmentHistory() const {
         }
     }
     
-    cout << "\n========================================" << endl;
-    cout << "Statistics:" << endl;
-    cout << "- Total appointments: " << appointments.size() << endl;
-    cout << "- Waiting for examination: " << activeCount << endl;
-    cout << "- Examination completed: " << completedCount << endl;
-    cout << "- Cancelled: " << cancelledCount << endl;
-    cout << "========================================" << endl;
+    ostringstream os;
+    os << "\n========================================" << endl;
+    os << "Statistics:" << endl;
+    os << "- Total appointments: " << appointments.size() << endl;
+    os << "- Waiting for examination: " << activeCount << endl;
+    os << "- Examination completed: " << completedCount << endl;
+    os << "- Cancelled: " << cancelledCount << endl;
+    os << "========================================" << endl;
+    cout << os.str() << flush;
     return true;
 }
 

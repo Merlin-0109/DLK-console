@@ -1,6 +1,7 @@
 #include "UI.h"
 #include <iostream>
 #include <vector>
+#include <sstream>
 
 using namespace std;
 
@@ -11,6 +12,11 @@ void gotoXY(int x, int y) {
 
 void SetColor(int color) {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+}
+
+void clearScreen() {
+    // ANSI escape code để xóa màn hình và đưa con trỏ về (0,0)
+    cout << "\033[2J\033[H" << flush;
 }
 
 void drawBox(int x, int y, int w, int h) {
@@ -102,11 +108,8 @@ int runMenu(string items[], int count) {
     }
     
     // 2. TÍNH TOÁN KÍCH THƯỚC KHUNG
-    // Chiều rộng cho nội dung (cộng thêm 2 khoảng trắng lề)
     const int contentWidth = maxLen + 4; 
-    // Chiều rộng tổng = nội dung + 2 viền dọc (cột)
     const int menuWidth = contentWidth + 2; 
-    // Chiều cao = Số hàng * 2 + 1 (mỗi hàng 1 dòng data + 1 dòng chia, + 1 dòng cuối)
     const int menuHeight = count * 2; 
     
     // Ẩn con trỏ
@@ -115,76 +118,83 @@ int runMenu(string items[], int count) {
     cursorInfo.bVisible = false;
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
 
-    while (true) {
-        // Lấy kích thước console và tính startX, startY
-        CONSOLE_SCREEN_BUFFER_INFO csbi;
-        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-        int consoleWidth  = csbi.srWindow.Right  - csbi.srWindow.Left + 1;
-        int consoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top  + 1;
-        int startX = (consoleWidth - menuWidth) / 2;
-        int startY = (consoleHeight - menuHeight) / 2;
+    // Lấy kích thước console và tính startX, startY
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    int consoleWidth  = csbi.srWindow.Right  - csbi.srWindow.Left + 1;
+    int consoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top  + 1;
+    int startX = (consoleWidth - menuWidth) / 2;
+    int startY = (consoleHeight - menuHeight) / 2;
+    
+    // VẼ KHUNG NGOÀI 1 LẦN DUY NHẤT
+    SetColor(11);
+    drawBox(startX, startY, menuWidth, menuHeight);
+    
+    // VẼ CÁC ĐƯỜNG PHÂN CÁCH 1 LẦN
+    for (int i = 0; i < count - 1; i++) {
+        SetColor(11);
+        int sepY = startY + 2 + i * 2;
+        gotoXY(startX, sepY);
+        cout << "├";
+        for (int j = 0; j < menuWidth - 1; ++j) {
+            cout << "─";
+        }
+        cout << "┤";
+    }
+    
+    // VẼ TẤT CẢ CÁC ITEMS LẦN ĐẦU TIÊN
+    for (int i = 0; i < count; i++) {
+        int itemY = startY + 1 + i * 2; 
+        int itemX = startX + 1;
         
-        // VẼ KHUNG NGOÀI (Sử dụng drawBox)
-        SetColor(11); // Xanh ngọc
-        drawBox(startX, startY, menuWidth, menuHeight);
-        
-        // Vòng lặp vẽ nội dung và đường chia
-        for (int i = 0; i < count; i++) {
-            
-            // Vị trí y của dòng dữ liệu (data row)
-            int itemY = startY + 1 + i * 2; 
-
-            // SET MÀU CHO HÀNG DỮ LIỆU VÀ IN CHỮ
-            if (i + 1 == choice) {
-                // Highlight: Nền Đỏ (4) + Chữ Trắng Sáng (15)
-                SetColor(4 * 16 + 15); 
-            } else {
-                // Mặc định: Nền Đen (0) + Chữ Trắng (7)
-                SetColor(0 * 16 + 7);
-            }
-            
-            // Vị trí x của text (cách viền 1 đơn vị)
-            int itemX = startX + 1;
-            gotoXY(itemX, itemY);
-            
-            // In nội dung (chiếm toàn bộ chiều rộng nội dung)
-            // Lấy độ dài để căn giữa text trong vùng (menuWidth - 2)
-            // cout << centerText(items[i], menuWidth - 2); 
-
-            int textLength = items[i].length();
-            int requiredPadding = (menuWidth - 4) - textLength; // Chiều rộng nội dung - độ dài chuỗi
-            
-            // Tạo chuỗi căn lề trái: items[i] + khoảng trắng đệm
-            string leftAlignedText = "   " + items[i] + string(requiredPadding, ' ');
-            
-            // In chuỗi đã căn lề trái (để tô đầy đủ màu nền)
-            cout << leftAlignedText;
-            
-            // VẼ ĐƯỜNG PHÂN CÁCH (trừ hàng cuối)
-            if (i < count - 1) {
-                SetColor(11); // Viền xanh ngọc
-                int sepY = startY + 2 + i * 2;
-                gotoXY(startX, sepY);
-                
-                // VẼ ĐƯỜNG NGANG CHIA DÒNG:
-                // Bắt đầu bằng '├' (góc trái dưới của ô trên)
-                cout << "├";
-                // Vẽ đường ngang '─'
-                for (int j = 0; j < menuWidth - 1; ++j) {
-                    cout << "─";
-                }
-                // Kết thúc bằng '┤' (góc phải dưới của ô trên)
-                cout << "┤";
-            }
+        if (i + 1 == choice) {
+            SetColor(4 * 16 + 15); // Highlight item đầu tiên
+        } else {
+            SetColor(0 * 16 + 7); // Mặc định
         }
         
-        // Đặt lại màu chữ mặc định sau khi vẽ xong
-        SetColor(7);
+        gotoXY(itemX, itemY);
+        int textLength = items[i].length();
+        int requiredPadding = (menuWidth - 4) - textLength;
+        string leftAlignedText = "   " + items[i] + string(requiredPadding, ' ');
+        cout << leftAlignedText;
+    }
+    SetColor(7);
+    
+    int oldChoice = choice; // Để track item cũ cần unhighlight
 
+    while (true) {
         key = _getch();
+        
+        // Xử lý phím
         if (key == 72 && choice > 1) choice--;          // UP
         else if (key == 80 && choice < count) choice++; // DOWN
         else if (key == 13) break;                      // ENTER
+        
+        // CHỈ VẼ LẠI 2 ITEMS BỊ THAY ĐỔI (nếu có thay đổi)
+        if (oldChoice != choice) {
+            for (int i = 0; i < count; i++) {
+                // Chỉ vẽ lại nếu là item mới được chọn HOẶC item cũ bị bỏ chọn
+                if (i + 1 == choice || i + 1 == oldChoice) {
+                    int itemY = startY + 1 + i * 2; 
+                    int itemX = startX + 1;
+                    
+                    if (i + 1 == choice) {
+                        SetColor(4 * 16 + 15); // Highlight
+                    } else {
+                        SetColor(0 * 16 + 7); // Mặc định
+                    }
+                    
+                    gotoXY(itemX, itemY);
+                    int textLength = items[i].length();
+                    int requiredPadding = (menuWidth - 4) - textLength;
+                    string leftAlignedText = "   " + items[i] + string(requiredPadding, ' ');
+                    cout << leftAlignedText;
+                }
+            }
+            SetColor(7);
+            oldChoice = choice;
+        }
     }
 
     // Hiển thị lại con trỏ
