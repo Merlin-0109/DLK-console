@@ -159,7 +159,7 @@ istream& operator>>(istream& in, User& user){
                 else if (key == "Email") user.setEmail(val);
                 else if (key == "Phone number") user.setPhoneNumber(val);
                 else if (key == "Address") user.setAddress(val);
-                else break;
+                else return in;
             }  
         }
         return in;

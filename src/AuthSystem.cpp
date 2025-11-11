@@ -229,7 +229,10 @@ void AuthSystem::displayAllUsers() const {
         return;
     }
     
-    cout << "\n========== ALL USER ==========" << endl;
+    ostringstream oss;
+    oss << "\n========== ALL USER ==========" << endl;
+    cout << oss.str() << flush;
+    
     for (const User* user : users) {
         user->displayInfo();
         cout << endl;
