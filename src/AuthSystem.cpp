@@ -1,5 +1,7 @@
 #include "AuthSystem.h"
 #include "UI.h"
+#include "Doctor.h"
+#include "Patient.h"
 #include <sstream>
 #include <algorithm> 
 #include <iostream>
@@ -193,15 +195,27 @@ bool AuthSystem::saveUserData(User* user) {
     if (user == nullptr) return false;
     
     ostringstream oss;
-    oss << *user;
-    string data = oss.str();
     string id = user->getID();
     
     switch (user->getUserType()) {
-        case DOCTOR:
-            return dataStore->saveDoctorData(id,data);
-        case PATIENT:
-            return dataStore->savePatientData(id,data);
+        case DOCTOR: {
+            Doctor* doctor = dynamic_cast<Doctor*>(user);
+            if (doctor) {
+                oss << *doctor;
+                string data = oss.str();
+                return dataStore->saveDoctorData(id, data);
+            }
+            return false;
+        }
+        case PATIENT: {
+            Patient* patient = dynamic_cast<Patient*>(user);
+            if (patient) {
+                oss << *patient;
+                string data = oss.str();
+                return dataStore->savePatientData(id, data);
+            }
+            return false;
+        }
         default:
             return false;
     }
