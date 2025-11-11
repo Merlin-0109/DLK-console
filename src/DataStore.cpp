@@ -257,7 +257,7 @@ bool  DataStore::writeAppointment(const  string& appointmentId, const Appointmen
     ofstream file(filepath);
 
     if (!file.is_open()){
-        cout << "Khong mo duoc file appointments de ghi lai cuoc hen voi id " + appointmentId << endl;
+        cout << "Can not open the file " + appointmentId << endl;
         return false;
     }
     file << "appointmentId:" << details.appointmentId << endl;
@@ -270,8 +270,6 @@ bool  DataStore::writeAppointment(const  string& appointmentId, const Appointmen
     file << "visitStatus:" << details.visitStatus << endl; // done/not done
 
     file.close();
-
-    // string patientListFile = "data/Patient/" + details.patientId + "_appointments.txt";
     return true;
 }
 DataStore::AppointmentDetails DataStore::readAppointment(const  string& appointmentId){

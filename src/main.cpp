@@ -118,79 +118,124 @@ void wayBackMenu(){
     _getch();
 }
 
-// Hàm đăng ký Doctor
-void registerDoctor(AuthSystem& authSystem) {
-    string username, password;
-    
-    cout << "\n--- Đăng ký tài khoản Bác sĩ ---" << endl;
-    bool check = false;
-    while (!check){
-        cout << "Identity card:";
-        cin >> username;
-        regex cccd("^0[0-9]{11}$");
-        if (regex_match(username,cccd))
-            check = true;
-        else check = false;
-        if (!check) cout << "The identity card number is invalid! Please re-enter" << endl;
-    }
-    cout << "Password:";
-    cin >> password;
-    clearInputBuffer();
-    authSystem.registerDoctor(username, password);
-}
+void registerUser(AuthSystem& authSystem, UserType type) {
+    const string temp = (type == DOCTOR) ? "DOCTOR" : "PATIENT";
+    const int boxX = 55, boxY = 15;
+    const int boxW = 40, boxH = 6;
 
-// Hàm đăng ký Patient
-void registerPatient(AuthSystem& authSystem) {
-    string username, password;
-    
-    cout << "\n--- Đăng ký Bệnh nhân ---" << endl;
-    bool check = false;
-    while (!check){
-        cout << "Identity card:";
-        cin >> username;
-        regex cccd("^0[0-9]{11}$");
-        if (regex_match(username,cccd))
-            check = true;
-        else check = false;
-        if (!check) cout << "The identity card number is invalid! Please re-enter" << endl;
+    string username = "", password1 = "", password2 = "";
+    int position = 0; // 0 = CCCD, 1 = pass1, 2 = pass2
+
+    while (true) {
+        system("cls");
+        showTitle("title.txt");
+        SetColor(14);
+        cout << "\n\n\n\n\t\t\t\t\t\t\t===== REGISTER " + temp + " ACCOUNT =====\n\n";
+        SetColor(7);
+
+        drawBox(boxX, boxY, boxW, boxH);
+        // XÓA DÒNG CŨ
+        for (int i = 0; i < 3; ++i) {
+            gotoXY(boxX + 2, boxY + 1 + i * 2);
+            cout << string(boxW - 4, ' ');
+        }
+
+        // Viết lại nhãn + dữ liệu
+        gotoXY(boxX + 2, boxY + 1);
+        cout << "Identity card: " << username;
+        gotoXY(boxX + 2, boxY + 3);
+        cout << "Password: " << string(password1.length(), '*');
+        gotoXY(boxX + 2, boxY + 5);
+        cout << "Confirm password: " << string(password2.length(), '*');
+
+        // Đặt con trỏ đúng vị trí
+        if (position == 0)
+            gotoXY(boxX + 17 + username.length(), boxY + 1); 
+        else if (position == 1)
+            gotoXY(boxX + 12 + password1.length(), boxY + 3);
+        else gotoXY(boxX + 20 + password2.length(), boxY + 5);
+
+        char key = _getch();
+
+        // DI CHUYỂN
+        if (key == 72 && position > 0) position--;        // Lên
+        else if (key == 80 && position < 2) position++;   // Xuống
+
+        // ENTER
+        else if (key == 13) {
+            if (position == 2 && !username.empty() && !password1.empty() && !password2.empty()) {
+                if (password1 == password2) {
+                    // KIỂM TRA CCCD
+                    regex cccd("^0[0-9]{11}$");
+                    if (regex_match(username, cccd)) {
+                        break; // THÀNH CÔNG
+                    } else {
+                        gotoXY(boxX + 2, boxY + 8);
+                        SetColor(12);
+                        cout << "Invalid identity card! Must be 12 digits, start with 0.";
+                        SetColor(7);
+                        _getch();
+                        username = "";
+                        position = 0;
+                    }
+                } else {
+                    gotoXY(boxX + 2, boxY + 8);
+                    SetColor(12);
+                    cout << "Passwords do not match! Please try again.";
+                    SetColor(7);
+                    _getch();
+                    password1 = password2 = "";
+                    position = 1;
+                }
+            }
+        }
+
+        // BACKSPACE
+        else if (key == 8) {
+            if (position == 0 && !username.empty()) username.pop_back();
+            else if (position == 1 && !password1.empty()) password1.pop_back();
+            else if (position == 2 && !password2.empty()) password2.pop_back();
+        }
+
+        // NHẬP KÝ TỰ
+        else if (isprint(key)) {
+            if (position == 0 && username.length() < 12) username += key;
+            else if (position == 1) password1 += key;
+            else if (position == 2) password2 += key;
+        }
     }
-    cout << "Password:";
-    cin >> password;
-    clearInputBuffer();
-    authSystem.registerPatient(username, password);
+    (type == DOCTOR) ? authSystem.registerDoctor(username, password1): authSystem.registerPatient(username,password1);
 }
 
 // Hàm xử lý đăng ký
 void handleRegistration(AuthSystem& authSystem) {
     int choice;
-        choice = displayRegisterMenu();
-
         SetColor(2);
-        cout << "\t\t\t\t\tWHICH ROLE ARE YOU REGISTERING FOR?" << endl;
+        cout << "\n\n\n\n\n\t\t\t\t\t\t\t\t\t\t\tWHICH ROLE ARE YOU REGISTERING FOR?" << endl;
         SetColor(7);
+
+        choice = displayRegisterMenu();
         
         switch (choice) {
-            case 1:
-                registerDoctor(authSystem);
+            case 1:{
+                system("cls");
+                SetColor(14);
+                showTitle("title.txt");
+                SetColor(7);
+                registerUser(authSystem,DOCTOR);
                 break;
-            case 2:
-                registerPatient(authSystem);
+            }
+            case 2:{
+                system("cls");
+                SetColor(14);
+                showTitle("title.txt");
+                SetColor(7);
+                registerUser(authSystem,PATIENT);
                 break;
+            }
         }
 }
 
-// Hàm xử lý đăng nhập
-// User* handleLogin(AuthSystem& authSystem) {
-//     string username, password;
-    
-//     cout << "\n--- Đăng nhập ---" << endl;
-//     cout << "CCCD:";
-//     cin >> username;
-//     cout << "Password:";
-//     cin >> password;
-    
-//     return authSystem.login(username, password);
-// }
 User* handleLogin(AuthSystem& authSystem) {
     const int boxX = 70, boxY = 15;
     const int boxW = 40, boxH = 4;
@@ -263,41 +308,40 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
             Doctor* doctor = dynamic_cast<Doctor*>(user);
             choice = displayDoctorChoice();
             switch (choice){
-                case 1:// Xem lịch khám
-                    if (doctor) {
+                case 1:{ // Xem lịch khám
                         system("cls");
                         showTitle("titleDoctor.txt");
 
                         SetColor(2);
-                        cout << "\t\t\t\t\tLIST OF APPOINTMENT" << endl;
+                        cout << "\n\n\n\t\t\t\t\tLIST OF APPOINTMENT" << endl;
                         SetColor(7);
 
                         doctor->viewAppointment();
+
+                        wayBackMenu();
+                        break;
                     }
-                    wayBackMenu();
-                    break;
-                case 2:// Từ chối lịch khám
+                case 2: {// Từ chối lịch khám
                     system("cls");
                     showTitle("titleDoctor.txt");
 
                     SetColor(2);
-                    cout << "\t\t\t\t\tDECLINE APPOINTMENT" << endl;
+                    cout << "\n\n\n\t\t\t\t\tDECLINE APPOINTMENT" << endl;
                     SetColor(7);
-
-                    if (doctor) {
-                        doctor->declineAppointment();
-                    }
+                    
+                    doctor->declineAppointment();
                     wayBackMenu();
                     break;
+                }
                 case 3:{ // Xem thông tin cá nhân
                     system("cls");
                     showTitle("titleDoctor.txt");
 
                     SetColor(2);
-                    cout << "\t\t\t\t\tPERSONAL INFORMATION" << endl;
+                    cout << "\n\n\n\t\t\t\t\tPERSONAL INFORMATION" << endl;
                     SetColor(7);
 
-                    user->displayInfo();
+                    doctor->displayInfo();
                     wayBackMenu();
                     break;
                 }
@@ -306,10 +350,10 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     showTitle("titleDoctor.txt");
 
                     SetColor(2);
-                    cout << "\t\t\t\t\tUPDATE PERSONAL INFORMATION" << endl;
+                    cout << "\n\n\n\t\t\t\t\tUPDATE PERSONAL INFORMATION" << endl;
                     SetColor(7);
 
-                    if (authSystem.updateUserProfile(user)) 
+                    if (authSystem.updateUserProfile(doctor)) 
                             cout << "Information saved successfully!" << endl;
                     else
                         cout << "Error saving information!" << endl;
@@ -322,7 +366,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     string oldPassword, newPassword, confirmPassword;
                     
                     SetColor(2);
-                    cout << "\t\t\t\t\tCHANGE PASSWORD" << endl;
+                    cout << "\n\n\n\t\t\t\t\tCHANGE PASSWORD" << endl;
                     SetColor(7);
 
                     cout << "Old password:";
@@ -353,13 +397,16 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
         }
         else if (user->getUserType() == PATIENT){
             Patient* patient = dynamic_cast<Patient*>(user);
+            system("cls");
             showTitle("titlePatient.txt");
             cout << "\nWelcome, " << user->getFullName() << endl;
             
             // Hiển thị số lịch khám đang chờ
             int activeCount = patient->countActiveAppointments();
             if (activeCount > 0) {
-                cout << "\n📋 You're having " << activeCount << " appointments" << endl;
+                SetColor(4*16+15);
+                cout << "\nNotification: You're having " << activeCount << " appointments" << endl;
+                SetColor(7);
             }
             
             choice = displayPatientChoice();
@@ -407,17 +454,17 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     drawTable(15,10,widths,rows);
                     
                     // cin.ignore();
-                    cout << "\n📝 Enter booking information:" << endl;
-                    cout << "Doctor ID:";
+                    cout << "\n\n\n\t\t\t\t\t📝 ENTER BOOKING INFORMATION" << endl;
+                    cout << "\t\t\t\t\tDoctor ID:";
                     getline(cin, doctorId);
                     
-                    cout << "Date (DD/MM/YYYY):";
+                    cout << "\t\t\t\t\tDate (DD/MM/YYYY):";
                     getline(cin, date);
                     
-                    cout << "Time (HH:MM):";
+                    cout << "\t\t\t\t\tTime (HH:MM):";
                     getline(cin, time);
                     
-                    cout << "Reason:";
+                    cout << "\t\t\t\t\tReason:";
                     getline(cin, reason);
                     
                     patient->bookAppointment(doctorId, date, time, reason);
@@ -428,7 +475,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     showTitle("titlePatient.txt");
 
                     SetColor(2);
-                    cout << "\t\t\t\t\tVIEW UPCOMMING APPOINTMENT" << endl;
+                    cout << "\n\n\n\t\t\t\t\tUPCOMMING APPOINTMENT" << endl;
                     SetColor(7);
 
                     patient->viewUpcomingAppointments();
@@ -439,7 +486,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     showTitle("titlePatient.txt");
 
                     SetColor(2);
-                    cout << "\t\t\t\t\tMEDICAL EXAMINATION HISTORY" << endl;
+                    cout << "\n\n\n\t\t\t\t\tMEDICAL EXAMINATION HISTORY" << endl;
                     SetColor(7);
 
                     patient->viewAppointmentHistory();
@@ -451,7 +498,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     string appointmentId, newDate, newTime;
                     
                     SetColor(2);
-                    cout << "\t\t\t\t\tRESCHEDULE THE APPOINTMENT" << endl;
+                    cout << "\n\n\n\t\t\t\t\tRESCHEDULE THE APPOINTMENT" << endl;
                     SetColor(7);
                     // Hiển thị lịch khám hiện tại
                     patient->viewUpcomingAppointments();
@@ -475,7 +522,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     string appointmentId;
 
                     SetColor(2);
-                    cout << "\t\t\t\t\tCANCEL THE APPOINTMENT" << endl;
+                    cout << "\n\n\n\t\t\t\t\tCANCEL THE APPOINTMENT" << endl;
                     SetColor(7);
                     
                     // Hiển thị lịch khám hiện tại
@@ -492,7 +539,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     showTitle("titlePatient.txt");
 
                     SetColor(2);
-                    cout << "\t\t\t\t\tPERSONAL INFORMATION" << endl;
+                    cout << "\n\n\n\t\t\t\t\tPERSONAL INFORMATION" << endl;
                     SetColor(7);
 
                     patient->displayInfo();
@@ -503,7 +550,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     showTitle("titlePatient.txt");
 
                     SetColor(2);
-                    cout << "\t\t\t\t\tUPDATE PERSONAL INFORMATION" << endl;
+                    cout << "\n\n\n\t\t\t\t\tUPDATE PERSONAL INFORMATION" << endl;
                     SetColor(7);
 
                     if (authSystem.updateUserProfile(patient)) 
@@ -518,7 +565,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     string oldPassword, newPassword, confirmPassword;
                     
                     SetColor(2);
-                    cout << "\t\t\t\t\tCHANGE PASSWORD" << endl;
+                    cout << "\n\n\n\t\t\t\t\tCHANGE PASSWORD" << endl;
                     SetColor(7);
 
                     cout << "Old password:";

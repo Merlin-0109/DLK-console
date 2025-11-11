@@ -1,4 +1,5 @@
 #include "AuthSystem.h"
+#include "UI.h"
 #include <sstream>
 #include <algorithm> 
 #include <iostream>
@@ -7,6 +8,11 @@
 // Constructor
 AuthSystem::AuthSystem() : currentUser(nullptr) {
     dataStore = new DataStore();
+    
+    // Khởi tạo HashTables với kích thước hợp lý
+    userByIdenticalCard = new HashTable<string, User*>(1009);  // Số nguyên tố cho phân bổ tốt
+    userByID = new HashTable<string, User*>(1009);
+    
     loadUsersFromDataStore();
 }
 
@@ -16,6 +22,10 @@ AuthSystem::~AuthSystem() {
         delete user;
     }
     users.clear();
+    
+    // Giải phóng HashTables
+    delete userByIdenticalCard;
+    delete userByID;
     delete dataStore;
 }
 
@@ -30,6 +40,10 @@ void AuthSystem::loadUsersFromDataStore() {
             Patient* patient = new Patient;
             ss >> *patient;
             users.push_back(patient);
+            
+            // Thêm vào HashTables để tìm kiếm O(1)
+            userByIdenticalCard->insert(patient->getIdenticalCard(), patient);
+            userByID->insert(patient->getID(), patient);
         }
     }
     
@@ -42,26 +56,28 @@ void AuthSystem::loadUsersFromDataStore() {
             Doctor* doctor = new Doctor;
             ss >> *doctor;
             users.push_back(doctor);
+            
+            // Thêm vào HashTables để tìm kiếm O(1)
+            userByIdenticalCard->insert(doctor->getIdenticalCard(), doctor);
+            userByID->insert(doctor->getID(), doctor);
         }
     }
 }
 
-// Tìm user theo username
+// Tìm user theo username - SỬ DỤNG HASHTABLE O(1)
 User* AuthSystem::findUser(string identicalCard) {
-    for (User* user : users) {
-        if (user->getIdenticalCard() == identicalCard) {
-            return user;
-        }
+    User* result = nullptr;
+    if (userByIdenticalCard->find(identicalCard, result)) {
+        return result;
     }
     return nullptr;
 }
 
-// Tìm user theo ID
+// Tìm user theo ID - SỬ DỤNG HASHTABLE O(1)
 User* AuthSystem::findUserByID(string id) {
-    for (User* user : users) {
-        if (user->getID() == id) {
-            return user;
-        }
+    User* result = nullptr;
+    if (userByID->find(id, result)) {
+        return result;
     }
     return nullptr;
 }
@@ -85,14 +101,16 @@ bool AuthSystem::registerDoctor(string identicalCard, string password) {
 
     string id = dataStore->generateDoctorID();
     Doctor* doctor = new Doctor(id, identicalCard, password);
-    // cin >> *doctor;
     ostringstream oss;
     oss << *doctor;
     // Lưu vào DataStore
     if (dataStore->saveDoctorData(id,oss.str())) {
         users.push_back(doctor);
-        cout << "Registration successful! Your ID is:" << id << endl;
+        SetColor(2);
+        cout << "\n\nRegistration successful! Your ID is:" << id << endl;
         cout << "Please log in to update your personal information" << endl;
+        SetColor(7);
+        system("pause");
         return true;
     }
     delete doctor;
@@ -118,8 +136,11 @@ bool AuthSystem::registerPatient(string identicalCard, string password) {
     // Lưu vào DataStore
     if (dataStore->savePatientData(id,ss.str())) {
         users.push_back(patient);
-        cout << "Registration successful! Your ID is " << id << endl;
+        SetColor(2);
+        cout << "\n\nRegistration successful! Your ID is " << id << endl;
         cout << "Please log in to update your personal information" << endl;
+        SetColor(7);
+        system("pause");
         return true;
     }
     
@@ -130,22 +151,6 @@ bool AuthSystem::registerPatient(string identicalCard, string password) {
 // Đăng nhập
 User* AuthSystem::login(string identicalCard, string password) {
     User* user = findUser(identicalCard);
-    
-    // if (user == nullptr) {
-    //     cout << "Lỗi: Người dùng không tồn tại!" << endl;
-    //     return nullptr;
-    // }
-    
-    // if (user->getPassword() != password) {
-    //     cout << "Lỗi: Mật khẩu không chính xác!" << endl;
-    //     return nullptr;
-    // }
-    
-    // currentUser = user;
-    // string name = user->getFullName().empty() ? user->getIdenticalCard() : user->getFullName();
-    // cout << "Đăng nhập thành công!" << endl;
-    
-    // Chỉ kiểm tra profile cho Doctor và Patient, không kiểm tra Admin
     if (!user->isProfileComplete()) {
         cout << "⚠ You have not fully updated your personal information. Please update it!" << endl;
     }
@@ -175,8 +180,6 @@ bool AuthSystem::updateUserProfile(User* user) {
     } else if (user->getUserType() == PATIENT) {
         Patient* patient = dynamic_cast<Patient*>(user);
         updated = patient->updateProfile(*patient);
-    } else {
-        updated = user->updateProfile(*user);
     }
     
     if (updated) {
@@ -222,11 +225,11 @@ DataStore* AuthSystem::getDataStore() const {
 // Hiển thị tất cả users
 void AuthSystem::displayAllUsers() const {
     if (users.empty()) {
-        cout << "Không có người dùng nào trong hệ thống." << endl;
+        cout << "There is no user in the system" << endl;
         return;
     }
     
-    cout << "\n========== TẤT CẢ NGƯỜI DÙNG ==========" << endl;
+    cout << "\n========== ALL USER ==========" << endl;
     for (const User* user : users) {
         user->displayInfo();
         cout << endl;

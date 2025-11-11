@@ -101,14 +101,14 @@ bool User::changePassword(const string& oldPassword, const string& newPassword) 
 
 // Hiển thị thông tin
 void User::displayInfo() const {
-    cout << "ID:" << id << endl;
-    cout << "Identity card:" << identicalCard << endl;
-    cout << "Password:" << password << endl;
-    cout << "Full name:" << (fullName.empty() ? "[Not updated]" :fullName) << endl;
-    cout << "Email:" << (email.empty()?"[Not updated]" : email) << endl;
-    cout << "Date of birth:" << (dateOfBirth.empty() ? "[Not updated]" : dateOfBirth) << endl;
-    cout << "Gender:" << (gender.empty() ? "[Not updated]" : gender) << endl;
-    cout << "Address:" << (address.empty() ? "[Not updated]" "\nPlease update the information completely": address) << endl;
+    cout << "\t\t\t\t\tID:" << id << endl;
+    cout << "\t\t\t\t\tIdentity card:" << identicalCard << endl;
+    cout << "\t\t\t\t\tPassword:" << password << endl;
+    cout << "\t\t\t\t\tFull name:" << (fullName.empty() ? "[Not updated]" :fullName) << endl;
+    cout << "\t\t\t\t\tEmail:" << (email.empty()?"[Not updated]" : email) << endl;
+    cout << "\t\t\t\t\tDate of birth:" << (dateOfBirth.empty() ? "[Not updated]" : dateOfBirth) << endl;
+    cout << "\t\t\t\t\tGender:" << (gender.empty() ? "[Not updated]" : gender) << endl;
+    cout << "\t\t\t\t\tAddress:" << (address.empty() ? "[Not updated]" : address) << endl;
 }
 
 bool User::updateProfile(User& user){
@@ -158,6 +158,7 @@ istream& operator>>(istream& in, User& user){
                 else if (key == "Email") user.setEmail(val);
                 else if (key == "Phone number") user.setPhoneNumber(val);
                 else if (key == "Address") user.setAddress(val);
+                else break;
             }  
         }
         return in;

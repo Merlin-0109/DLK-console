@@ -26,11 +26,9 @@ Patient::~Patient() {}
 
 // Hiển thị thông tin
 void Patient::displayInfo() const {
-    cout << "==================================" << endl;
-    cout << "PERSONAL INFORMATION" << endl;
-    cout << "==================================" << endl;
+    cout << "\t\t\t\t\t==================================" << endl;
     User::displayInfo();
-    cout << "==================================" << endl;
+    cout << "\t\t\t\t\t==================================" << endl;
 }
 
 ostream& operator<<(ostream& o, const Patient& patient){
@@ -106,18 +104,19 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     
     // Lưu appointment
     if (DataStore::writeAppointment(appointmentId, details)) {
-        cout << "\n========================================" << endl;
-        cout << "   ✓ ĐẶT LỊCH KHÁM THÀNH CÔNG!" << endl;
-        cout << "========================================" << endl;
-        cout << "Appointment ID: " << appointmentId << endl;
-        cout << "Patient: " << fullName << " (" << id << ")" << endl;
-        cout << "Doctor: " << getDoctorInfo(doctorId) << endl;
-        cout << "Date: " << date << endl;
-        cout << "Time: " << time << endl;
-        cout << "Reason: " << reason << endl;
-        cout << "========================================" << endl;
-        cout << "⚠ Please arrive on time and bring your Identity Card.!" << endl;
-        cout << "========================================" << endl;
+        cout << "\n\t\t\t\t\t========================================" << endl;
+        SetColor(14);
+        cout << "   ✓ BOOKED APPOINTMENT SUCCESSFULL!" << endl;
+        SetColor(7);
+        cout << "\t\t\t\t\t========================================" << endl;
+        cout << "\t\t\t\t\tAppointment ID: " << appointmentId << endl;
+        cout << "\t\t\t\t\tPatient: " << fullName << " (" << id << ")" << endl;
+        cout << "\t\t\t\t\tDoctor: " << getDoctorInfo(doctorId) << endl;
+        cout << "\t\t\t\t\tDate: " << date << endl;
+        cout << "\t\t\t\t\tTime: " << time << endl;
+        cout << "\t\t\t\t\tReason: " << reason << endl;
+        cout << "\t\t\t\t\t========================================" << endl;
+        cout << "\t\t\t\t\t⚠ Please arrive on time and bring your Identity Card!" << endl;
         return true;
     }
     
@@ -179,7 +178,7 @@ bool Patient::cancelAppointment(const string& appointmentId) {
     // Cập nhật trạng thái
     if (DataStore::updateBookAppointmentStatus(appointmentId, "Cancelled")) {
         cout << "\n========================================" << endl;
-        cout << "   HỦY LỊCH KHÁM THÀNH CÔNG!" << endl;
+        cout << "   CANCELLED APPOINTMENT SUCCESSFULLY!" << endl;
         cout << "========================================" << endl;
         cout << "Appointment ID: " << appointmentId << endl;
         cout << "========================================" << endl;
@@ -241,7 +240,7 @@ bool Patient::rescheduleAppointment(const string& appointmentId, const string& n
     // Lưu lại appointment
     if (DataStore::writeAppointment(appointmentId, details)) {
         cout << "\n========================================" << endl;
-        cout << "   ĐỔI LỊCH KHÁM THÀNH CÔNG!" << endl;
+        cout << "   RESCHEDULED APPOINTMENT SUCCESSFULLY!" << endl;
         cout << "========================================" << endl;
         cout << "Appointment ID: " << appointmentId << endl;
         cout << "Date: " << newDate << endl;
@@ -264,7 +263,7 @@ bool Patient::viewAppointmentHistory() const {
     }
     
     cout << "\n========================================" << endl;
-    cout << "   LỊCH SỬ KHÁM BỆNH" << endl;
+    cout << "   MEDICAL EXAMINATION HISTORY" << endl;
     cout << "========================================" << endl;
     
     int completedCount = 0;
@@ -302,16 +301,15 @@ bool Patient::viewUpcomingAppointments() const {
     vector<string> appointments = DataStore::getPatientAppointments(this->id);
     
     if (appointments.empty()) {
-        cout << "\nYou do not have any medical appointments." << endl;
+        cout << "\n\t\t\t\t\tYou do not have any medical appointments." << endl;
         return false;
     }
     
-    cout << "\n========================================" << endl;
-    cout << "   LỊCH KHÁM SẮP TỚI" << endl;
-    cout << "========================================" << endl;
-    
     int upcomingCount = 0;
     
+    vector<int> widths = {30,20,20,20,15,20,20,20};
+    vector<vector<string>> rows;
+    rows.push_back({"Appointment ID","Doctor ID","Doctor's full name","Date","Time","Reason","Book status","Visit status"});
     for (const string& appointmentId : appointments) {
         DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
         
@@ -319,19 +317,21 @@ bool Patient::viewUpcomingAppointments() const {
             details.bookStatus == "Booked" && 
             details.visitStatus == "Not Done") {
             
-            displayAppointmentDetails(details);
+            // displayAppointmentDetails(details);
+            rows.push_back({details.appointmentId,details.doctorId, getDoctorInfo(details.doctorId), details.date,details.time,details.reason,details.bookStatus,details.visitStatus});
+
             upcomingCount++;
         }
     }
-    
+    drawTable(15,10,widths,rows);
     if (upcomingCount == 0) {
-        cout << "\nYou don't have any upcoming appointments" << endl;
-        cout << "========================================" << endl;
+        cout << "\n\t\t\t\t\tYou don't have any upcoming appointments" << endl;
+        cout << "\t\t\t\t\t========================================" << endl;
         return false;
     }
     
-    cout << "\nTotal number of upcoming appointments: " << upcomingCount << endl;
-    cout << "========================================" << endl;
+    cout << "\n\t\t\t\t\tTotal number of upcoming appointments: " << upcomingCount << endl;
+    cout << "\t\t\t\t\t========================================" << endl;
     return true;
 }
 

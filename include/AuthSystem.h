@@ -5,6 +5,7 @@
 #include "Doctor.h"
 #include "Patient.h"
 #include "DataStore.h"
+#include "HashTable.h"
 #include <vector>
 #include <fstream>
 
@@ -13,6 +14,10 @@ private:
     vector<User*> users;
     DataStore* dataStore;
     User* currentUser;
+    
+    // HashTables for O(1) lookup
+    HashTable<string, User*>* userByIdenticalCard;  // Tìm theo CCCD - O(1)
+    HashTable<string, User*>* userByID;             // Tìm theo ID - O(1)
 
     // Private helper methods
     void loadUsersFromDataStore();

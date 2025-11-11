@@ -41,13 +41,11 @@ void Doctor::setDoctorRole(string doctorRole){
 }
 // Hiển thị thông tin
 void Doctor::displayInfo() const {
-    cout << "==================================" << endl;
-    cout << "PERSONAL INFORMATION" << endl;
-    cout << "==================================" << endl;
+    cout << "\t\t\t\t\t==================================" << endl;
     User::displayInfo();
-    cout << "Specialization:" << (specialization.empty() ? "[Not updated]" :specialization) << endl;
-    cout << "Role:" << (doctorRole.empty()?"[Not updated]" :doctorRole) << endl;
-    cout << "==================================" << endl;
+    cout << "\t\t\t\t\tSpecialization:" << (specialization.empty() ? "[Not updated]" :specialization) << endl;
+    cout << "\t\t\t\t\tRole:" << (doctorRole.empty()?"[Not updated]" :doctorRole) << endl;
+    cout << "\t\t\t\t\t==================================" << endl;
 }
 
 bool Doctor::updateProfile(Doctor& doctor){
@@ -72,28 +70,12 @@ bool Doctor::updateProfile(Doctor& doctor){
 
 ostream& operator<<(ostream& o, const Doctor& doctor){
     o << static_cast<const User&>(doctor);
-    o << "Specialization:" << doctor.getSpecialization() 
+    o << "Specialization:" << doctor.getSpecialization()
         << "\nRole:" << doctor.getDoctorRole() << endl;
     return o;
 }
-istream& operator>>(istream& in, Doctor& doctor){
-    // in >> static_cast<User&>(doctor);
-    // if (in.peek() == '\n') in.ignore();
-    // bool isInteract = (&in == &cin);
-    // if (isInteract){
-    //     cout << "Specialization:";
-    //     string spe;
-    //     getline(in,spe);
-    //     doctor.setSpecialization(spe);
 
-    //     cout << "Role:";
-    //     string role;
-    //     getline(in,role);
-    //     doctor.setDoctorRole(role);
-    // }
-    // return in;
-    in >> static_cast<User&>(doctor);
-    if (in.peek() == '\n') in.ignore();
+istream& operator>>(istream& in, Doctor& doctor){
     bool isInteract = (&in == &cin);
     
     if (!isInteract) {
@@ -105,24 +87,36 @@ istream& operator>>(istream& in, Doctor& doctor){
                 string key = line.substr(0, pos);
                 string val = line.substr(pos + 1);
                 
-                if (key == "Chuyên khoa") doctor.setSpecialization(val);
-                else if (key == "Vai trò") doctor.setDoctorRole(val);
+                if (key == "ID") doctor.setID(val);
+                else if (key == "Identity card") doctor.setIdenticalCard(val);
+                else if (key == "Password") doctor.setPassword(val);
+                else if (key == "Full name") doctor.setFullName(val);
+                else if (key == "Date of birth") doctor.setDateOfBirth(val);
+                else if (key == "Gender") doctor.setGender(val);
+                else if (key == "Email") doctor.setEmail(val);
+                else if (key == "Phone number") doctor.setPhoneNumber(val);
+                else if (key == "Address") doctor.setAddress(val);
+                else if (key == "Specialization") doctor.setSpecialization(val);
+                else if (key == "Role") doctor.setDoctorRole(val);
             }
         }
     } else {
+        in >> static_cast<User&>(doctor);
+        if (in.peek() == '\n') in.ignore();
         // Nhập từ bàn phím
-        cout << "Chuyên khoa:";
+        cout << "Specialization:";
         string spe;
         getline(in,spe);
         doctor.setSpecialization(spe);
 
-        cout << "Vai trò:";
+        cout << "Role:";
         string role;
         getline(in,role);
         doctor.setDoctorRole(role);
     }
     return in;
 }
+
 
 // Check if profile is complete (Doctor needs specialization and role)
 bool Doctor::isProfileComplete() const {
@@ -200,7 +194,7 @@ bool Doctor::declineAppointment(){
     // Cập nhật trạng thái thành Cancelled
     if (DataStore::updateBookAppointmentStatus(appointmentId, "Cancelled")) {
         cout << "\n========================================" << endl;
-        cout << "   ĐÃ TỪ CHỐI LỊCH HẸN THÀNH CÔNG!" << endl;
+        cout << "   DECLINED APPOINTMENT SUCCESSFULLY!" << endl;
         cout << "========================================" << endl;
         cout << "Appointment ID: " << appointmentId << endl;
         cout << "========================================" << endl;
