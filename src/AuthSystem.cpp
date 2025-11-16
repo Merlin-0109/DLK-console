@@ -160,22 +160,22 @@ bool AuthSystem::registerPatient(string identicalCard, string password) {
 User* AuthSystem::login(string identicalCard, string password) {
     User* user = findUser(identicalCard);
     if (user == nullptr) {
-        cout << "Login failed: account not found." << endl;
+        cout << "\t\t\t\t\t\t\n\nLogin failed: account not found." << endl;
         return nullptr;
     }
 
     // Verify password
     if (user->getPassword() != password) {
-        cout << "Login failed: incorrect password." << endl;
+        cout << "\t\t\t\t\tLogin failed: incorrect password." << endl;
         return nullptr;
     }
 
+    currentUser = user;
+    cout << "\n\nLogin successful. Welcome " << (user->getFullName().empty() ? user->getIdenticalCard() : user->getFullName()) << "!" << endl;
     // Successful login: check profile completeness and set current user
     if (!user->isProfileComplete()) {
         cout << "⚠ You have not fully updated your personal information. Please update it!" << endl;
     }
-    currentUser = user;
-    cout << "Login successful. Welcome " << (user->getFullName().empty() ? user->getIdenticalCard() : user->getFullName()) << "!" << endl;
     return user;
 }
 

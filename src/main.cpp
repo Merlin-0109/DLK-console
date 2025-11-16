@@ -95,21 +95,6 @@ int displayRegisterMenu() {
     return runMenu(menuLogIn_Out,3);
 }
 
-
-// Hàm hiển thị menu sau khi đăng nhập - ko can thiet 
-// void displayUserMenu(User* user) {
-//     cout << "\n========================================" << endl;
-//     cout << "   MENU NGƯỜI DÙNG - " << user->getUserTypeString() << endl;
-//     cout << "========================================" << endl;
-//     cout << "1. Xem thông tin cá nhân" << endl;
-    
-//     // Chỉ hiển thị tùy chọn cập nhật cho Doctor và Patient
-//     cout << "2. Cập nhật thông tin cá nhân" << endl;
-//     cout << "3. Đăng xuất" << endl;
-//     cout << "========================================" << endl;
-//     cout << "Nhập lựa chọn của bạn:";
-// }
-
 int displayDoctorChoice(){
     return runMenu(menuDoctor,6);
 }
@@ -223,7 +208,7 @@ void registerUser(AuthSystem& authSystem, UserType type) {
 void handleRegistration(AuthSystem& authSystem) {
     int choice;
         SetColor(2);
-        cout << "\n\n\n\n\n\t\t\t\t\t\t\t\t\t\t\tWHICH ROLE ARE YOU REGISTERING FOR?" << endl;
+        cout << "\n\n\n\n\n\n\n\t\t\t\t\t\t\t\t\t\tWHICH ROLE ARE YOU REGISTERING FOR?" << endl;
         SetColor(7);
 
         choice = displayRegisterMenu();
@@ -273,7 +258,7 @@ User* handleLogin(AuthSystem& authSystem) {
 
         gotoXY(boxX + 2, boxY + 3);
         cout << "Password: " << string(password.length(), '*');
-
+        
         // Đặt con trỏ đúng vị trí
         if (position == 0)
             gotoXY(boxX + 17 + username.length(), boxY + 1); 
@@ -283,9 +268,6 @@ User* handleLogin(AuthSystem& authSystem) {
         char key = _getch();
         if (key == 72) position = 0; // mũi tên lên
         else if (key == 80) position = 1; // mũi tên xuống
-        else if (key == 13) {
-            if (!username.empty() && !password.empty()) break; // enter khi đầy đủ
-        }
         else if (key == 8) { // backspace
             if (position == 0 && !username.empty()) username.pop_back();
             if (position == 1 && !password.empty()) password.pop_back();
@@ -293,21 +275,23 @@ User* handleLogin(AuthSystem& authSystem) {
         else if (isprint(key)) { // chỉ thêm ký tự in được
             if (position == 0) username += key;
             else password += key;
+        } 
+        else if (key == 13) {
+            if (!username.empty() && !password.empty()){
+                // enter khi đầy đủ
+                User* user = authSystem.login(username,password);
+                if (user){
+                    system("pause");
+                    return user;
+                }
+                else{
+                    gotoXY(boxX + 2, boxY + boxH + 1);
+                    cout << "Log in failed" << endl;
+                    _getch();
+                }
+            }
         }
     }
-
-    User* user = authSystem.login(username, password);
-    if (user){
-        system("cls");
-        string name = user->getFullName().empty() ? user->getIdenticalCard() : user->getFullName();
-        return user;
-    }
-    else{
-        gotoXY(boxX + 2, boxY + boxH + 1);
-        cout << "Login failed. Please try again!" << endl;
-        _getch();
-    }
-    return nullptr;
 }
 
 // Hàm xử lý menu sau khi đăng nhập
@@ -596,6 +580,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                 }
                 case 9:// Đăng xuất
                     cout << "\n👋 Log out successfully! See you later" << endl;
+                    system("cls");
                     authSystem.logout();
                     logout = true;
                     break;

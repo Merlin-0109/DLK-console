@@ -193,13 +193,10 @@ bool Doctor::declineAppointment(){
     
     // Cập nhật trạng thái thành Cancelled
     if (DataStore::updateBookAppointmentStatus(appointmentId, "Cancelled")) {
-        ostringstream oss;
-        oss << "\n========================================" << endl;
-        oss << "   DECLINED APPOINTMENT SUCCESSFULLY!" << endl;
-        oss << "========================================" << endl;
-        oss << "Appointment ID: " << appointmentId << endl;
-        oss << "========================================" << endl;
-        cout << oss.str() << flush;
+        SetColor(2);
+        cout << "DECLINED APPOINTMENT SUCCESSFULLY!" << endl;
+        SetColor(7);
+        cout << "Declined appointment ID: " << appointmentId << endl;
         return true;
     }
     

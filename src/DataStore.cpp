@@ -17,7 +17,6 @@ DataStore::DataStore() :dataFolderPath("data") {
     doctorIDsFile = dataFolderPath + "/doctor_ids.txt";
     
     initializeDirectories();
-    // initializeDefaultAdmins();
 }
 
 DataStore::DataStore(const string& basePath) :dataFolderPath(basePath) {
@@ -28,7 +27,6 @@ DataStore::DataStore(const string& basePath) :dataFolderPath(basePath) {
     doctorIDsFile = dataFolderPath + "/doctor_ids.txt";
     
     initializeDirectories();
-    // initializeDefaultAdmins();
 }
 
 // Create directory if it doesn't exist
@@ -103,8 +101,7 @@ vector<string> DataStore::loadIDsFromFile(const string& filename) {
             }
         }
         file.close();
-    }
-    
+    } 
     return ids;
 }
 
@@ -139,7 +136,6 @@ bool DataStore::savePatientData(const string& id, const string& data) {
         file.close();
         return true;
     }
-    
     return false;
 }
 
@@ -153,7 +149,6 @@ bool DataStore::saveDoctorData(const string& id, const string& data) {
         file.close();
         return true;
     }
-    
     return false;
 }
 
@@ -257,7 +252,7 @@ bool  DataStore::writeAppointment(const  string& appointmentId, const Appointmen
     ofstream file(filepath);
 
     if (!file.is_open()){
-        cout << "Can not open the file " + appointmentId << endl;
+        cout << "Can not open file " + appointmentId << endl;
         return false;
     }
     file << "appointmentId:" << details.appointmentId << endl;
@@ -318,15 +313,23 @@ bool DataStore::updateBookAppointmentStatus(const  string& appointmentId, const 
     while(getline(file,line)){
         size_t pos = line.find(":");
         string key = line.substr(0,pos);
+        string value = line.substr(pos + 1);
         if (pos != string::npos){
-            if (key == "bookStatus"){
+            if (key == "appointmentId") lines.push_back(line);
+            else if (key == "patientId") lines.push_back(line);
+            else if (key == "doctorId") lines.push_back(line);
+            else if (key == "date") lines.push_back(line);
+            else if (key == "time") lines.push_back(line);
+            else if (key == "reason") lines.push_back(line);
+            else if (key == "bookStatus"){
                 line = "bookStatus:" + newStatus;
                 lines.push_back(line);
             }
+            else if (key == "visitStatus") lines.push_back(line);
         }
     }
     file.close();
-     ofstream fileWrite(filepath);
+    ofstream fileWrite(filepath);
     if (!fileWrite.is_open()){
         cout << "Can not open file to update the book status" << endl;
         return false;
@@ -357,7 +360,7 @@ bool DataStore::updateVisitAppointmentStatus(const  string& appointmentId,const 
         string key = line.substr(0,pos);
         if (pos != string::npos){
             if (key == "visitStatus"){
-                line = "visitStatus:" + newvisitStatus;
+                line = "visitStatus" + newvisitStatus;
                 lines.push_back(line);
             } 
         }
