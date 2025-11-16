@@ -108,6 +108,9 @@ bool AuthSystem::registerDoctor(string identicalCard, string password) {
     // Lưu vào DataStore
     if (dataStore->saveDoctorData(id,oss.str())) {
         users.push_back(doctor);
+        // Insert into hash tables for O(1) lookup
+        userByIdenticalCard->insert(identicalCard, doctor);
+        userByID->insert(id, doctor);
         SetColor(2);
         cout << "\n\nRegistration successful! Your ID is:" << id << endl;
         cout << "Please log in to update your personal information" << endl;
@@ -138,6 +141,9 @@ bool AuthSystem::registerPatient(string identicalCard, string password) {
     // Lưu vào DataStore
     if (dataStore->savePatientData(id,ss.str())) {
         users.push_back(patient);
+        // Insert into hash tables for O(1) lookup
+        userByIdenticalCard->insert(identicalCard, patient);
+        userByID->insert(id, patient);
         SetColor(2);
         cout << "\n\nRegistration successful! Your ID is " << id << endl;
         cout << "Please log in to update your personal information" << endl;

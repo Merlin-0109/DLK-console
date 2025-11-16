@@ -618,10 +618,12 @@ int main() {
         int choice = displayMainMenu();
 
         switch (choice) {
-            case 1:{ // đăng ký
+                case 1:{ // đăng ký
                 system("cls");
                 showTitle("title.txt");
                 handleRegistration(authSystem);
+                // Clear any leftover input before prompting login
+                clearInputBuffer();
                 User* user = handleLogin(authSystem);
                 if (user != nullptr) {
                     handleUserSession(authSystem, user);

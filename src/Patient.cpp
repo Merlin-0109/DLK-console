@@ -160,6 +160,46 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         return false;
     }
 
+    // Hiển thị hàng chờ cho khung giờ này (ai khám trước ai khám sau)
+    vector<string> queue = DataStore::getDoctorAppointmentsForDateSlot(doctorId, chosenDate, chosenTime);
+    cout << "\nCurrent queue for " << chosenDate << " " << chosenTime << ":" << endl;
+    if (queue.empty()) {
+        cout << "- (no appointments yet)" << endl;
+    } else {
+        for (size_t i = 0; i < queue.size(); ++i) {
+            // load patient name
+            DataStore::AppointmentDetails d = DataStore::readAppointment(queue[i]);
+            string patientInfo = d.patientId;
+            string pdata;
+            // read patient file directly
+            ifstream pf("data/patients/" + d.patientId + ".txt");
+            if (pf.is_open()) {
+                stringstream ssbuf;
+                ssbuf << pf.rdbuf();
+                pdata = ssbuf.str();
+                pf.close();
+            }
+            if (!pdata.empty()) {
+                stringstream ss(pdata);
+                string line;
+                while (getline(ss, line)) {
+                    size_t pos = line.find(":");
+                    if (pos != string::npos) {
+                        string key = line.substr(0, pos);
+                        string val = line.substr(pos+1);
+                        if (key == "Full name") {
+                            patientInfo = val + " (" + d.patientId + ")";
+                            break;
+                        }
+                    }
+                }
+            }
+            cout << i+1 << ". " << patientInfo << endl;
+        }
+    }
+
+    cout << "\nYour position will be: " << (queue.size() + 1) << "\n";
+
     // Tạo appointment ID
     string appointmentId = DataStore::generateAppointmentID();
 
