@@ -186,10 +186,11 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         oss.str("");
         oss.clear();
 
+        vector<string>infor = getDoctorInfo(doctorId);
         oss << "\t\t\t\t\t========================================" << endl;
         oss << "\t\t\t\t\tAppointment ID: " << appointmentId << endl;
         oss << "\t\t\t\t\tPatient: " << fullName << " (" << id << ")" << endl;
-        oss << "\t\t\t\t\tDoctor: " << getDoctorInfo(doctorId) << endl;
+        oss << "\t\t\t\t\tDoctor: " << infor[0] << endl;
         oss << "\t\t\t\t\tDate: " << chosenDate << endl;
         oss << "\t\t\t\t\tTime: " << chosenTime << endl;
         oss << "\t\t\t\t\tReason: " << reasonInput << endl;
@@ -219,7 +220,8 @@ bool Patient::viewMyAppointments() const {
     
     for (const string& appointmentId : appointments) {
         DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
-        rows.push_back({details.appointmentId, getDoctorInfo(details.doctorId),details.date, details.time});
+        vector<string> infor = getDoctorInfo(details.doctorId);
+        rows.push_back({details.appointmentId, infor[0],details.date, details.time});
     }
     drawTable(5,8,widths, rows);
     cout << "\nTotal appointments: " << appointments.size() << endl;
@@ -395,18 +397,19 @@ bool Patient::viewUpcomingAppointments() const {
     
     int upcomingCount = 0;
     
-    vector<int> widths = {30,20,30,20,15,20,20,20};
+    vector<int> widths = {30,15,30,30,20,15,20};
     vector<vector<string>> rows;
-    rows.push_back({"Appointment ID","Doctor ID","Doctor's full name","Date","Time","Reason","Book status","Visit status"});
+    rows.push_back({"Appointment ID","Doctor ID","Doctor's full name","Specialization","Date","Time","Reason"});
+
     for (const string& appointmentId : appointments) {
         DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
         
         if (!details.appointmentId.empty() && 
             details.bookStatus == "Booked" && 
             details.visitStatus == "Not Done") {
-            
+            vector<string> infor = getDoctorInfo(details.doctorId);
             // displayAppointmentDetails(details);
-            rows.push_back({details.appointmentId,details.doctorId, getDoctorInfo(details.doctorId), details.date,details.time,details.reason,details.bookStatus,details.visitStatus});
+            rows.push_back({details.appointmentId,details.doctorId, infor[0],infor[1], details.date,details.time,details.reason});
 
             upcomingCount++;
         }
@@ -520,7 +523,7 @@ bool Patient::isDateInFuture(const string& date, const string& time) const {
 void Patient::displayAppointmentDetails(const DataStore::AppointmentDetails& details) const {
     cout << "\n----------------------------------------" << endl;
     cout << "Appointment ID: " << details.appointmentId << endl;
-    cout << "Doctor: " << getDoctorInfo(details.doctorId) << endl;
+    cout << "Doctor: " << getDoctorInfo(details.doctorId)[0] << endl;
     cout << "Date: " << details.date << endl;
     cout << "Time: " << details.time << endl;
     cout << "Reason: " << details.reason << endl;
@@ -563,20 +566,20 @@ int Patient::countActiveAppointments() const {
 }
 
 // Get doctor information for display
-string Patient::getDoctorInfo(const string& doctorId) const {
+vector<string> Patient::getDoctorInfo(const string& doctorId) const {
     // Read doctor data from file directly
     string filepath = "data/doctors/" + doctorId + ".txt";
     ifstream file(filepath);
     
     if (!file.is_open()) {
-        return doctorId + " [Not found information]";
+        return { doctorId + " [Not found information]"};
     }
     
     // Parse doctor data to get name and specialization
     string line;
     string name = "";
     string specialization = "";
-    
+    vector<string> infor;
     while (getline(file, line)) {
         size_t pos = line.find(":");
         if (pos != string::npos) {
@@ -592,16 +595,12 @@ string Patient::getDoctorInfo(const string& doctorId) const {
     }
     
     file.close();
-    
-    // Build display string
-    stringstream result;
-    result << doctorId;
     if (!name.empty()) {
-        result << " - " << name;
+        infor.push_back(name);
     }
     if (!specialization.empty()) {
-        result << " (" << specialization << ")";
+        infor.push_back(specialization);
     }
     
-    return result.str();
+    return infor;
 }

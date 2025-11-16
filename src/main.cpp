@@ -208,7 +208,7 @@ void registerUser(AuthSystem& authSystem, UserType type) {
 void handleRegistration(AuthSystem& authSystem) {
     int choice;
         SetColor(2);
-        cout << "\n\n\n\n\n\t\t\t\t\t\t\t\t\t\t\tWHICH ROLE ARE YOU REGISTERING FOR?" << endl;
+        cout << "\n\n\n\n\n\n\n\t\t\t\t\t\t\t\t\t\tWHICH ROLE ARE YOU REGISTERING FOR?" << endl;
         SetColor(7);
 
         choice = displayRegisterMenu();
@@ -281,7 +281,6 @@ User* handleLogin(AuthSystem& authSystem) {
                 // enter khi đầy đủ
                 User* user = authSystem.login(username,password);
                 if (user){
-                    cout << "Log in successfull" << endl;
                     system("pause");
                     return user;
                 }
@@ -581,6 +580,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                 }
                 case 9:// Đăng xuất
                     cout << "\n👋 Log out successfully! See you later" << endl;
+                    system("cls");
                     authSystem.logout();
                     logout = true;
                     break;

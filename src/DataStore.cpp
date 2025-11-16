@@ -17,7 +17,6 @@ DataStore::DataStore() :dataFolderPath("data") {
     doctorIDsFile = dataFolderPath + "/doctor_ids.txt";
     
     initializeDirectories();
-    // initializeDefaultAdmins();
 }
 
 DataStore::DataStore(const string& basePath) :dataFolderPath(basePath) {
@@ -28,7 +27,6 @@ DataStore::DataStore(const string& basePath) :dataFolderPath(basePath) {
     doctorIDsFile = dataFolderPath + "/doctor_ids.txt";
     
     initializeDirectories();
-    // initializeDefaultAdmins();
 }
 
 // Create directory if it doesn't exist
@@ -103,8 +101,7 @@ vector<string> DataStore::loadIDsFromFile(const string& filename) {
             }
         }
         file.close();
-    }
-    
+    } 
     return ids;
 }
 
@@ -139,7 +136,6 @@ bool DataStore::savePatientData(const string& id, const string& data) {
         file.close();
         return true;
     }
-    
     return false;
 }
 
@@ -153,7 +149,6 @@ bool DataStore::saveDoctorData(const string& id, const string& data) {
         file.close();
         return true;
     }
-    
     return false;
 }
 
