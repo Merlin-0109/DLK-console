@@ -59,50 +59,121 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         cout << "\n⚠ Please complete your personal information before scheduling an appointment!" << endl;
         return false;
     }
-    
-    // Validate input
+    // Nếu date rỗng -> gọi tương tác để chọn ngày và khung giờ trong 1 tuần
+    string chosenDate = date;
+    string chosenTime = time;
+    string reasonInput = reason;
+
     if (doctorId.empty()) {
         cout << "Error: Doctor code cannot be empty!" << endl;
         return false;
     }
-    
-    if (reason.empty()) {
-        cout << "Error: Please enter the reason for the consultation!" << endl;
+
+    if (chosenDate.empty()) {
+        // Hiển thị 7 ngày gần nhất (từ hôm nay)
+        vector<string> dates;
+        time_t now = std::time(nullptr);
+        for (int i = 0; i < 7; ++i) {
+            time_t t = now + i * 24 * 60 * 60;
+            tm* tm_ptr = localtime(&t);
+            char buf[16];
+            strftime(buf, sizeof(buf), "%d/%m/%Y", tm_ptr);
+            dates.push_back(string(buf));
+        }
+
+        cout << "\nSelect a date within next 7 days:\n";
+        for (size_t i = 0; i < dates.size(); ++i) {
+            cout << i+1 << ". " << dates[i] << endl;
+        }
+        cout << "Enter choice (1-7): ";
+        int di = 0;
+        string line;
+        getline(cin, line);
+        if (line.empty()) getline(cin, line);
+        try { di = stoi(line); } catch(...) { di = 0; }
+        if (di < 1 || di > 7) {
+            cout << "Invalid date selection." << endl;
+            return false;
+        }
+        chosenDate = dates[di-1];
+    }
+
+    // Các khung giờ mặc định
+    vector<string> slots = {"07:00","08:00","09:00","10:00","11:00","13:30","14:30","15:30"};
+
+    // Đếm số appointment hiện có cho từng slot của bác sĩ vào ngày đó
+    vector<int> counts(slots.size(), 0);
+    vector<string> doctorApps = DataStore::getDoctorAppointments(doctorId);
+    for (const string& appId : doctorApps) {
+        DataStore::AppointmentDetails d = DataStore::readAppointment(appId);
+        if (d.date == chosenDate) {
+            for (size_t s = 0; s < slots.size(); ++s) {
+                if (d.time == slots[s]) counts[s]++;
+            }
+        }
+    }
+
+    // Hiển thị khung giờ và số slot còn lại
+    cout << "\nAvailable time slots for " << chosenDate << ":\n";
+    for (size_t s = 0; s < slots.size(); ++s) {
+        int remaining = 5 - counts[s];
+        if (remaining <= 0) {
+            SetColor(12); // đỏ
+            cout << s+1 << ". " << slots[s] << " - FULL\n";
+            SetColor(7);
+        } else {
+            cout << s+1 << ". " << slots[s] << " - " << remaining << " slots remaining\n";
+        }
+    }
+
+    cout << "\nSelect slot number: ";
+    string slotLine;
+    getline(cin, slotLine);
+    if (slotLine.empty()) getline(cin, slotLine);
+    int slotChoice = 0;
+    try { slotChoice = stoi(slotLine); } catch(...) { slotChoice = 0; }
+    if (slotChoice < 1 || slotChoice > (int)slots.size()) {
+        cout << "Invalid slot selection." << endl;
         return false;
     }
-    
-    // Validate date format
-    if (!validateDate(date)) {
-        cout << "Error: Invalid date format! Please enter in the format DD/MM/YYYY" << endl;
+    if (counts[slotChoice-1] >= 5) {
+        cout << "Selected slot is full. Please choose another slot." << endl;
         return false;
     }
-    
-    // Validate time format
-    if (!validateTime(time)) {
-        cout << "Error: Invalid time format! Please enter in HH:MM format" << endl;
+    chosenTime = slots[slotChoice-1];
+
+    // Nhập lý do nếu chưa có
+    if (reasonInput.empty()) {
+        cout << "Reason: ";
+        string r;
+        getline(cin, r);
+        if (r.empty()) {
+            cout << "Error: Please enter the reason for the consultation!" << endl;
+            return false;
+        }
+        reasonInput = r;
+    }
+
+    // Kiểm tra rằng ngày/giờ đã ở tương lai
+    if (!validateDate(chosenDate) || !validateTime(chosenTime) || !isDateInFuture(chosenDate, chosenTime)) {
+        cout << "Error: Cannot schedule for this date/time (must be in the future and valid)." << endl;
         return false;
     }
-    
-    // Check if date/time is in the future
-    if (!isDateInFuture(date, time)) {
-        cout << "Error: Cannot schedule for a time in the past!" << endl;
-        return false;
-    }
-    
+
     // Tạo appointment ID
     string appointmentId = DataStore::generateAppointmentID();
-    
+
     // Tạo appointment details
     DataStore::AppointmentDetails details;
     details.appointmentId = appointmentId;
     details.patientId = this->id;
     details.doctorId = doctorId;
-    details.date = date;
-    details.time = time;
-    details.reason = reason;
+    details.date = chosenDate;
+    details.time = chosenTime;
+    details.reason = reasonInput;
     details.bookStatus = "Booked";
     details.visitStatus = "Not Done";
-    
+
     // Lưu appointment
     if (DataStore::writeAppointment(appointmentId, details)) {
         ostringstream oss;
@@ -113,20 +184,20 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         SetColor(7);
         oss.str("");
         oss.clear();
-        
+
         oss << "\t\t\t\t\t========================================" << endl;
         oss << "\t\t\t\t\tAppointment ID: " << appointmentId << endl;
         oss << "\t\t\t\t\tPatient: " << fullName << " (" << id << ")" << endl;
         oss << "\t\t\t\t\tDoctor: " << getDoctorInfo(doctorId) << endl;
-        oss << "\t\t\t\t\tDate: " << date << endl;
-        oss << "\t\t\t\t\tTime: " << time << endl;
-        oss << "\t\t\t\t\tReason: " << reason << endl;
+        oss << "\t\t\t\t\tDate: " << chosenDate << endl;
+        oss << "\t\t\t\t\tTime: " << chosenTime << endl;
+        oss << "\t\t\t\t\tReason: " << reasonInput << endl;
         oss << "\t\t\t\t\t========================================" << endl;
         oss << "\t\t\t\t\t⚠ Please arrive on time and bring your Identity Card!" << endl;
         cout << oss.str() << flush;
         return true;
     }
-    
+
     cout << "Error: Unable to schedule an appointment!" << endl;
     return false;
 }

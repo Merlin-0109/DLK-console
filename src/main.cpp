@@ -472,17 +472,9 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     cout << "\n\n\n\t\t\t\t\t📝 ENTER BOOKING INFORMATION" << endl;
                     cout << "\t\t\t\t\tDoctor ID:";
                     getline(cin, doctorId);
-                    
-                    cout << "\t\t\t\t\tDate (DD/MM/YYYY):";
-                    getline(cin, date);
-                    
-                    cout << "\t\t\t\t\tTime (HH:MM):";
-                    getline(cin, time);
-                    
-                    cout << "\t\t\t\t\tReason:";
-                    getline(cin, reason);
-                    
-                    patient->bookAppointment(doctorId, date, time, reason);
+
+                    // Let Patient::bookAppointment handle date/slot/reason selection interactively
+                    patient->bookAppointment(doctorId, "", "", "");
                     break;
                 }
                 case 2: {// Xem lịch khám sắp tới
