@@ -558,6 +558,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     SetColor(7);
 
                     patient->displayInfo();
+                    wayBackMenu();
                     break;
                 }
                 case 7:{ // Cập nhật thông tin cá nhân

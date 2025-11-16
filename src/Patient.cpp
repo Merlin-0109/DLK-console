@@ -1,6 +1,7 @@
 #include "Patient.h"
 #include "DataStore.h"
 #include "UI.h"
+#include <cstdlib>
 #include <sstream>
 #include <fstream>
 #include <iomanip>
@@ -316,6 +317,7 @@ bool Patient::viewUpcomingAppointments() const {
     
     if (appointments.empty()) {
         cout << "\n\t\t\t\t\tYou do not have any medical appointments." << endl;
+        system("pause");
         return false;
     }
     
@@ -341,11 +343,13 @@ bool Patient::viewUpcomingAppointments() const {
     if (upcomingCount == 0) {
         cout << "\n\t\t\t\t\tYou don't have any upcoming appointments" << endl;
         cout << "\t\t\t\t\t========================================" << endl;
+        system("pause");
         return false;
     }
     
     cout << "\n\t\t\t\t\tTotal number of upcoming appointments: " << upcomingCount << endl;
     cout << "\t\t\t\t\t========================================" << endl;
+    system("pause");
     return true;
 }
 
