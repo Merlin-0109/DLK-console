@@ -1,5 +1,6 @@
 #include "Patient.h"
 #include "DataStore.h"
+#include "AuthSystem.h"
 #include "UI.h"
 #include <sstream>
 #include <fstream>
@@ -321,7 +322,7 @@ bool Patient::viewUpcomingAppointments() const {
     
     int upcomingCount = 0;
     
-    vector<int> widths = {30,20,20,20,15,20,20,20};
+    vector<int> widths = {30,20,30,20,15,20,20,20};
     vector<vector<string>> rows;
     rows.push_back({"Appointment ID","Doctor ID","Doctor's full name","Date","Time","Reason","Book status","Visit status"});
     for (const string& appointmentId : appointments) {

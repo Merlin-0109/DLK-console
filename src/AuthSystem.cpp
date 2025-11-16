@@ -153,10 +153,9 @@ bool AuthSystem::registerPatient(string identicalCard, string password) {
 // Đăng nhập
 User* AuthSystem::login(string identicalCard, string password) {
     User* user = findUser(identicalCard);
-    if (!user->isProfileComplete()) {
-        cout << "⚠ You have not fully updated your personal information. Please update it!" << endl;
-    }
-    
+    if (user->getPassword() != password)
+        return nullptr; 
+    if (!user) return nullptr;
     return user;
 }
 
