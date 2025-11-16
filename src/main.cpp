@@ -452,7 +452,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     }
                     drawTable(15,10,widths,rows);
                     
-                    // cin.ignore();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     cout << "\n\n\n\t\t\t\t\t📝 ENTER BOOKING INFORMATION" << endl;
                     cout << "\t\t\t\t\tDoctor ID:";
                     getline(cin, doctorId);

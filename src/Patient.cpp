@@ -90,7 +90,6 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         int di = 0;
         string line;
         getline(cin, line);
-        if (line.empty()) getline(cin, line);
         try { di = stoi(line); } catch(...) { di = 0; }
         if (di < 1 || di > 7) {
             cout << "Invalid date selection." << endl;
@@ -130,7 +129,6 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     cout << "\nSelect slot number: ";
     string slotLine;
     getline(cin, slotLine);
-    if (slotLine.empty()) getline(cin, slotLine);
     int slotChoice = 0;
     try { slotChoice = stoi(slotLine); } catch(...) { slotChoice = 0; }
     if (slotChoice < 1 || slotChoice > (int)slots.size()) {
