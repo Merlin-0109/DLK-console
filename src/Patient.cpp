@@ -103,7 +103,6 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         int di = 0;
         string line;
         getline(cin, line);
-        if (line.empty()) getline(cin, line);
         try { di = stoi(line); } catch(...) { di = 0; }
         if (di < 1 || di > 7) {
             cout << "Invalid date selection." << endl;
@@ -143,7 +142,6 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     cout << "\nSelect slot number: ";
     string slotLine;
     getline(cin, slotLine);
-    if (slotLine.empty()) getline(cin, slotLine);
     int slotChoice = 0;
     try { slotChoice = stoi(slotLine); } catch(...) { slotChoice = 0; }
     if (slotChoice < 1 || slotChoice > (int)slots.size()) {
@@ -173,6 +171,46 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         cout << "Error: Cannot schedule for this date/time (must be in the future and valid)." << endl;
         return false;
     }
+
+    // Hiển thị hàng chờ cho khung giờ này (ai khám trước ai khám sau)
+    vector<string> queue = DataStore::getDoctorAppointmentsForDateSlot(doctorId, chosenDate, chosenTime);
+    cout << "\nCurrent queue for " << chosenDate << " " << chosenTime << ":" << endl;
+    if (queue.empty()) {
+        cout << "- (no appointments yet)" << endl;
+    } else {
+        for (size_t i = 0; i < queue.size(); ++i) {
+            // load patient name
+            DataStore::AppointmentDetails d = DataStore::readAppointment(queue[i]);
+            string patientInfo = d.patientId;
+            string pdata;
+            // read patient file directly
+            ifstream pf("data/patients/" + d.patientId + ".txt");
+            if (pf.is_open()) {
+                stringstream ssbuf;
+                ssbuf << pf.rdbuf();
+                pdata = ssbuf.str();
+                pf.close();
+            }
+            if (!pdata.empty()) {
+                stringstream ss(pdata);
+                string line;
+                while (getline(ss, line)) {
+                    size_t pos = line.find(":");
+                    if (pos != string::npos) {
+                        string key = line.substr(0, pos);
+                        string val = line.substr(pos+1);
+                        if (key == "Full name") {
+                            patientInfo = val + " (" + d.patientId + ")";
+                            break;
+                        }
+                    }
+                }
+            }
+            cout << i+1 << ". " << patientInfo << endl;
+        }
+    }
+
+    cout << "\nYour position will be: " << (queue.size() + 1) << "\n";
 
     // Tạo appointment ID
     string appointmentId = DataStore::generateAppointmentID();

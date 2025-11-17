@@ -465,3 +465,29 @@ bool DataStore::appointmentExists(const string& appointmentId) {
     file.close();
     return exists;
 }
+
+// Get appointments for a specific doctor on a specific date and time slot (ordered by appointmentId)
+vector<string> DataStore::getDoctorAppointmentsForDateSlot(const string& doctorId, const string& date, const string& timeSlot) {
+    vector<string> appointments;
+    string appointmentsFolder = "data/appointments";
+    WIN32_FIND_DATAA findData;
+    HANDLE hFind = FindFirstFileA((appointmentsFolder + "\\*.txt").c_str(), &findData);
+
+    if (hFind != INVALID_HANDLE_VALUE) {
+        do {
+            string filename = findData.cFileName;
+            if (filename.length() > 4) {
+                string appointmentId = filename.substr(0, filename.length() - 4);
+                AppointmentDetails details = readAppointment(appointmentId);
+                if (!details.appointmentId.empty() && details.doctorId == doctorId && details.date == date && details.time == timeSlot && details.bookStatus != "Cancelled") {
+                    appointments.push_back(details.appointmentId);
+                }
+            }
+        } while (FindNextFileA(hFind, &findData) != 0);
+        FindClose(hFind);
+    }
+
+    // appointmentId encodes timestamp so lexical order approximates creation order
+    sort(appointments.begin(), appointments.end());
+    return appointments;
+}

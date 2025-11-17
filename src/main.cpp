@@ -452,7 +452,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     }
                     drawTable(15,10,widths,rows);
                     
-                    // cin.ignore();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     cout << "\n\n\n\t\t\t\t\t📝 ENTER BOOKING INFORMATION" << endl;
                     cout << "\t\t\t\t\tDoctor ID:";
                     getline(cin, doctorId);
@@ -603,10 +603,12 @@ int main() {
         int choice = displayMainMenu();
 
         switch (choice) {
-            case 1:{ // đăng ký
+                case 1:{ // đăng ký
                 system("cls");
                 showTitle("title.txt");
                 handleRegistration(authSystem);
+                // Clear any leftover input before prompting login
+                clearInputBuffer();
                 User* user = handleLogin(authSystem);
                 if (user != nullptr) {
                     handleUserSession(authSystem, user);

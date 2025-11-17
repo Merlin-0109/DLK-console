@@ -94,6 +94,7 @@ class DataStore {
         static string generateAppointmentID(); // Tao ID cho appointment
         static vector<string> getPatientAppointments(const string& patientId); // Lay danh sach appointments cua benh nhan
         static vector<string> getDoctorAppointments(const string& doctorId); // Lay danh sach appointments cua bac si
+        static vector<string> getDoctorAppointmentsForDateSlot(const string& doctorId, const string& date, const string& timeSlot); // Lay appointments theo bac si, ngay, khung gio
         static bool appointmentExists(const string& appointmentId); // Kiem tra appointment co ton tai
 };
 
