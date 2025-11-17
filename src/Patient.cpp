@@ -69,18 +69,31 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         cout << "Error: Doctor code cannot be empty!" << endl;
         return false;
     }
-
+    string dayWeek[] = {"Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"};
     if (chosenDate.empty()) {
         // Hiển thị 7 ngày gần nhất (từ hôm nay)
         vector<string> dates;
+        vector<string> dayOfWeek;
         time_t now = std::time(nullptr);
         for (int i = 0; i < 7; ++i) {
             time_t t = now + i * 24 * 60 * 60;
             tm* tm_ptr = localtime(&t);
+            if (tm_ptr->tm_wday == 0) dayOfWeek.push_back(dayWeek[0]);
+            else if (tm_ptr->tm_wday == 1) dayOfWeek.push_back(dayWeek[1]);
+            else if (tm_ptr->tm_wday == 2) dayOfWeek.push_back(dayWeek[2]);
+            else if (tm_ptr->tm_wday == 3) dayOfWeek.push_back(dayWeek[3]);
+            else if (tm_ptr->tm_wday == 4) dayOfWeek.push_back(dayWeek[4]);
+            else if (tm_ptr->tm_wday == 5) dayOfWeek.push_back(dayWeek[5]);
+            else dayOfWeek.push_back(dayWeek[6]); 
             char buf[16];
             strftime(buf, sizeof(buf), "%d/%m/%Y", tm_ptr);
             dates.push_back(string(buf));
         }
+
+        vector<int> widths = {15,15,15,15,15,15,15,15};
+        vector<vector<string>> rows;
+
+        drawTable(10,10,widths,rows);
 
         cout << "\nSelect a date within next 7 days:\n";
         for (size_t i = 0; i < dates.size(); ++i) {
@@ -100,7 +113,7 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     }
 
     // Các khung giờ mặc định
-    vector<string> slots = {"07:00","08:00","09:00","10:00","11:00","13:30","14:30","15:30"};
+    vector<string> slots = {"07:00","08:00","09:00","10:00","13:30","14:30","15:30"};
 
     // Đếm số appointment hiện có cho từng slot của bác sĩ vào ngày đó
     vector<int> counts(slots.size(), 0);
@@ -134,11 +147,11 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     int slotChoice = 0;
     try { slotChoice = stoi(slotLine); } catch(...) { slotChoice = 0; }
     if (slotChoice < 1 || slotChoice > (int)slots.size()) {
-        cout << "Invalid slot selection." << endl;
+        cout << "Invalid slot selection" << endl;
         return false;
     }
     if (counts[slotChoice-1] >= 5) {
-        cout << "Selected slot is full. Please choose another slot." << endl;
+        cout << "Selected slot is full. Please choose another slot" << endl;
         return false;
     }
     chosenTime = slots[slotChoice-1];
