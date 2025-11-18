@@ -143,10 +143,11 @@ bool Doctor::viewAppointment(){
     rows.push_back({"Appointment ID", "Patient ID", "Date", "Time", "Reason"});
     for (string listID : appointments){
         DataStore::AppointmentDetails d = DataStore::readAppointment(listID);
-        rows.push_back({d.appointmentId, d.patientId, d.date, d.time, d.reason});
+        if (d.bookStatus == "Booked" && d.visitStatus != "Done")
+            rows.push_back({d.appointmentId, d.patientId, d.date, d.time, d.reason});
     }
     drawTable(5,8,widths,rows);
-    cout << "\nTotal appointments: " << appointments.size() << endl;
+    cout << "\nTotal appointments: " << rows.size() - 1 << endl;
     return true;
 }
 
@@ -236,7 +237,5 @@ bool Doctor::updateAppointmentStatus(){
         return false;
     }
     else DataStore::updateVisitAppointmentStatus(appointmentId,"Done");
-
-    cout << "Error: Update failed!" << endl;
     return false;
 }

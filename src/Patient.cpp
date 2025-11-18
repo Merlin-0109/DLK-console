@@ -86,7 +86,7 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         }
 
         cout << "\n\n\t\t\t\t\t==========BOOKING CALENDAR==========" << endl;
-        cout << setw(15) << " ";
+        cout << setw(16) << " ";
         for (int i = 0; i < 7; i++){
             tm d = dates[i];
             if (d.tm_wday == 0) SetColor(12);
@@ -95,7 +95,7 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
             char buf[6];
             strftime(buf,sizeof(buf),"%d/%m",&dates[i]);
 
-            cout << setw(15) << dayWeek[d.tm_wday] + "(" + buf +")";
+            cout << setw(14) << dayWeek[d.tm_wday] + "(" + buf +")";
             dayWeek_runMenu[i] = dayWeek[d.tm_wday];
         }
         dayWeek_runMenu[7] = dayWeek[dates[6].tm_wday];
@@ -126,9 +126,16 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
                 cout << setw(15) << "[OFF]";
                 SetColor(7);
             }
-            else if(booked[row][col] != "null")
+            else if(booked[row][col] != "null"){
+                SetColor(10);
                 cout << setw(15) << "[✓]";
-            else cout << setw(15) << "[ ]";
+                SetColor(7);
+            }
+            else {
+                SetColor(15);
+                cout << setw(15) << "[ ]";
+                SetColor(7);
+            }
         }
         cout << endl;
     }

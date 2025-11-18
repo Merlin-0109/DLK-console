@@ -313,7 +313,7 @@ bool DataStore::updateBookAppointmentStatus(const  string& appointmentId, const 
     while(getline(file,line)){
         size_t pos = line.find(":");
         string key = line.substr(0,pos);
-        string value = line.substr(pos + 1);
+        // string value = line.substr(pos + 1);
         if (pos != string::npos){
             if (key == "appointmentId") lines.push_back(line);
             else if (key == "patientId") lines.push_back(line);
