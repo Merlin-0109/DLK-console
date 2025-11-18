@@ -261,6 +261,7 @@ bool  DataStore::writeAppointment(const  string& appointmentId, const Appointmen
     file << "date:" << details.date << endl;
     file << "time:" << details.time << endl;
     file << "reason:" << details.reason << endl;
+    file << "clinic:" << details.clinic << endl;
     file << "bookStatus:" << details.bookStatus << endl; // booked/cancelled
     file << "visitStatus:" << details.visitStatus << endl; // done/not done
 
@@ -290,6 +291,7 @@ DataStore::AppointmentDetails DataStore::readAppointment(const  string& appointm
             else if (key == "date") details.date = value;
             else if (key == "time") details.time = value;
             else if (key == "reason") details.reason = value;
+            else if (key == "clinic") details.clinic = value;
             else if (key == "bookStatus") details.bookStatus = value;
             else if (key == "visitStatus") details.visitStatus = value;
         }

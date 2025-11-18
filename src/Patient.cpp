@@ -263,6 +263,10 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     // Tạo appointment ID
     string appointmentId = DataStore::generateAppointmentID();
 
+    // Lấy thông tin bác sĩ bao gồm clinic
+    vector<string> doctorInfo = getDoctorInfo(doctorId);
+    string clinicName = (doctorInfo.size() >= 3) ? doctorInfo[2] : "Not updated";
+
     // Tạo appointment details
     DataStore::AppointmentDetails details;
     details.appointmentId = appointmentId;
@@ -271,6 +275,7 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     details.date = chosenDate;
     details.time = chosenTime;
     details.reason = reasonInput;
+    details.clinic = clinicName;
     details.bookStatus = "Booked";
     details.visitStatus = "Not Done";
 
@@ -285,11 +290,11 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         oss.str("");
         oss.clear();
 
-        vector<string>infor = getDoctorInfo(doctorId);
         oss << "\t\t\t\t\t========================================" << endl;
         oss << "\t\t\t\t\tAppointment ID: " << appointmentId << endl;
         oss << "\t\t\t\t\tPatient: " << fullName << " (" << id << ")" << endl;
-        oss << "\t\t\t\t\tDoctor: " << infor[0] << endl;
+        oss << "\t\t\t\t\tDoctor: " << doctorInfo[0] << endl;
+        oss << "\t\t\t\t\tClinic: " << clinicName << endl;
         oss << "\t\t\t\t\tDate: " << chosenDate << endl;
         oss << "\t\t\t\t\tTime: " << chosenTime << endl;
         oss << "\t\t\t\t\tReason: " << reasonInput << endl;
@@ -481,6 +486,7 @@ bool Patient::viewAppointmentHistory() const {
     os << "- Cancelled: " << cancelledCount << endl;
     os << "========================================" << endl;
     cout << os.str() << flush;
+    system("pause");
     return true;
 }
 
@@ -496,9 +502,9 @@ bool Patient::viewUpcomingAppointments() const {
     
     int upcomingCount = 0;
     
-    vector<int> widths = {30,15,30,30,20,15,20};
+    vector<int> widths = {30,15,30,30,20,20,15,20};
     vector<vector<string>> rows;
-    rows.push_back({"Appointment ID","Doctor ID","Doctor's full name","Specialization","Date","Time","Reason"});
+    rows.push_back({"Appointment ID","Doctor ID","Doctor's full name","Specialization","Clinic","Date","Time","Reason"});
 
     for (const string& appointmentId : appointments) {
         DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
@@ -507,8 +513,9 @@ bool Patient::viewUpcomingAppointments() const {
             details.bookStatus == "Booked" && 
             details.visitStatus == "Not Done") {
             vector<string> infor = getDoctorInfo(details.doctorId);
+            string clinicName = details.clinic.empty() ? "Not updated" : details.clinic;
             // displayAppointmentDetails(details);
-            rows.push_back({details.appointmentId,details.doctorId, infor[0],infor[1], details.date,details.time,details.reason});
+            rows.push_back({details.appointmentId,details.doctorId, infor[0],infor[1], clinicName, details.date,details.time,details.reason});
 
             upcomingCount++;
         }
@@ -517,11 +524,13 @@ bool Patient::viewUpcomingAppointments() const {
     if (upcomingCount == 0) {
         cout << "\n\t\t\t\t\tYou don't have any upcoming appointments" << endl;
         cout << "\t\t\t\t\t========================================" << endl;
+        system("pause");
         return false;
     }
     
     cout << "\n\t\t\t\t\tTotal number of upcoming appointments: " << upcomingCount << endl;
     cout << "\t\t\t\t\t========================================" << endl;
+    system("pause");
     return true;
 }
 
@@ -621,6 +630,7 @@ void Patient::displayAppointmentDetails(const DataStore::AppointmentDetails& det
     cout << "\n----------------------------------------" << endl;
     cout << "Appointment ID: " << details.appointmentId << endl;
     cout << "Doctor: " << getDoctorInfo(details.doctorId)[0] << endl;
+    cout << "Clinic: " << (details.clinic.empty() ? "Not updated" : details.clinic) << endl;
     cout << "Date: " << details.date << endl;
     cout << "Time: " << details.time << endl;
     cout << "Reason: " << details.reason << endl;
@@ -676,6 +686,7 @@ vector<string> Patient::getDoctorInfo(const string& doctorId) const {
     string line;
     string name = "";
     string specialization = "";
+    string clinic = "";
     vector<string> infor;
     while (getline(file, line)) {
         size_t pos = line.find(":");
@@ -687,6 +698,8 @@ vector<string> Patient::getDoctorInfo(const string& doctorId) const {
                 name = value;
             } else if (key == "Specialization") {
                 specialization = value;
+            } else if (key == "Clinic") {
+                clinic = value;
             }
         }
     }
@@ -697,6 +710,9 @@ vector<string> Patient::getDoctorInfo(const string& doctorId) const {
     }
     if (!specialization.empty()) {
         infor.push_back(specialization);
+    }
+    if (!clinic.empty()) {
+        infor.push_back(clinic);
     }
     
     return infor;

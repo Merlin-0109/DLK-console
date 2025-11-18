@@ -8,13 +8,14 @@ class Doctor :public User {
 private:
     string specialization;
     string doctorRole;
+    string clinic;
 
 public:
     // Constructor
     Doctor();
     Doctor(string id, string identicalCard, string password);
     Doctor(string id, string identicalCard, string password,string fullName,string dateofbirth, string gender, string email, string phoneNumber, string address,
-           string specialization, string doctorRole);
+           string specialization, string doctorRole, string clinic = "");
     
     // Destructor
     ~Doctor();
@@ -22,10 +23,12 @@ public:
     // Getters
     string getSpecialization() const;
     string getDoctorRole() const;
+    string getClinic() const;
     
     // Setters
     void setSpecialization(string specialization);
     void setDoctorRole(string doctorRole);
+    void setClinic(string clinic);
     
     // Override methods
     void displayInfo() const override;

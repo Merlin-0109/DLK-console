@@ -30,6 +30,7 @@ class DataStore {
             string date;
             string time;
             string reason;
+            string clinic; // phong kham
             string bookStatus; // booked/cancelled
             string visitStatus; // done; not_done
         };

@@ -9,17 +9,18 @@
 Doctor::Doctor() :User(){
     specialization = "";
     doctorRole = "";
+    clinic = "";
     userType = DOCTOR;
 }
 
 // Constructor đơn giản cho đăng ký
 Doctor::Doctor(string id, string identicalCard, string password)
-    :User(id,identicalCard , password, DOCTOR), specialization(""), doctorRole(""){}
+    :User(id,identicalCard , password, DOCTOR), specialization(""), doctorRole(""), clinic(""){}
 
 // Constructor đầy đủ
-Doctor::Doctor(string id, string identicalCard, string password,string fullName,string dateofbirth, string gender, string email, string phoneNumber, string address ,string specialization, string doctorRole)
+Doctor::Doctor(string id, string identicalCard, string password,string fullName,string dateofbirth, string gender, string email, string phoneNumber, string address ,string specialization, string doctorRole, string clinic)
     :User(id,identicalCard,password,fullName,dateofbirth,gender,email,phoneNumber,address, DOCTOR),
-    specialization(specialization), doctorRole(doctorRole) {}
+    specialization(specialization), doctorRole(doctorRole), clinic(clinic) {}
 
 // Destructor
 Doctor::~Doctor() {}
@@ -31,6 +32,9 @@ string Doctor::getSpecialization() const {
 string Doctor::getDoctorRole() const{
     return doctorRole;
 }
+string Doctor::getClinic() const{
+    return clinic;
+}
 
 // Setters
 void Doctor::setSpecialization(string specialization) {
@@ -39,12 +43,16 @@ void Doctor::setSpecialization(string specialization) {
 void Doctor::setDoctorRole(string doctorRole){
     this->doctorRole = doctorRole;
 }
+void Doctor::setClinic(string clinic){
+    this->clinic = clinic;
+}
 // Hiển thị thông tin
 void Doctor::displayInfo() const {
     cout << "\t\t\t\t\t==================================" << endl;
     User::displayInfo();
     cout << "\t\t\t\t\tSpecialization:" << (specialization.empty() ? "[Not updated]" :specialization) << endl;
     cout << "\t\t\t\t\tRole:" << (doctorRole.empty()?"[Not updated]" :doctorRole) << endl;
+    cout << "\t\t\t\t\tClinic:" << (clinic.empty()?"[Not updated]" :clinic) << endl;
     cout << "\t\t\t\t\t==================================" << endl;
 }
 
@@ -65,13 +73,22 @@ bool Doctor::updateProfile(Doctor& doctor){
     if (!newRole.empty()) {
         this->doctorRole = newRole;
     }
+    
+    // Cập nhật Clinic
+    cout << "Clinic:";
+    string newClinic;
+    getline(cin, newClinic);
+    if (!newClinic.empty()) {
+        this->clinic = newClinic;
+    }
     return true;
 }
 
 ostream& operator<<(ostream& o, const Doctor& doctor){
     o << static_cast<const User&>(doctor);
     o << "Specialization:" << doctor.getSpecialization()
-        << "\nRole:" << doctor.getDoctorRole() << endl;
+        << "\nRole:" << doctor.getDoctorRole()
+        << "\nClinic:" << doctor.getClinic() << endl;
     return o;
 }
 
@@ -98,6 +115,7 @@ istream& operator>>(istream& in, Doctor& doctor){
                 else if (key == "Address") doctor.setAddress(val);
                 else if (key == "Specialization") doctor.setSpecialization(val);
                 else if (key == "Role") doctor.setDoctorRole(val);
+                else if (key == "Clinic") doctor.setClinic(val);
             }
         }
     } else {
@@ -113,6 +131,11 @@ istream& operator>>(istream& in, Doctor& doctor){
         string role;
         getline(in,role);
         doctor.setDoctorRole(role);
+        
+        cout << "Clinic:";
+        string clinic;
+        getline(in,clinic);
+        doctor.setClinic(clinic);
     }
     return in;
 }
