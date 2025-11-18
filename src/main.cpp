@@ -42,6 +42,7 @@ string menuLogIn_Out[] = {
 string menuDoctor[] = {
     "View appointment",
     "Decline appointment",
+    "Update visit status of appointment",
     "View personal information",
     "Update personal information",
     "Change password",
@@ -75,10 +76,6 @@ void showTitle(string fileName){
     SetColor(7);
 }
 
-void showTitlePatient(){
-
-}
-
 // Hàm xóa buffer input
 void clearInputBuffer() {
     cin.clear();
@@ -96,7 +93,7 @@ int displayRegisterMenu() {
 }
 
 int displayDoctorChoice(){
-    return runMenu(menuDoctor,6);
+    return runMenu(menuDoctor,7);
 }
 int displayPatientChoice(){
     return runMenu(menuPatient,9);
@@ -122,8 +119,7 @@ void registerUser(AuthSystem& authSystem, UserType type) {
     cout << "\n\n\n\n\t\t\t\t\t\t\t===== REGISTER " + temp + " ACCOUNT =====\n\n";
     SetColor(7);
     drawBox(boxX, boxY, boxW, boxH);
-
-    while (true) {
+    while(true) {
         // CHỈ XÓA VÀ CẬP NHẬT PHẦN ĐỘNG
         // XÓA DÒNG CŨ
         for (int i = 0; i < 3; ++i) {
@@ -138,7 +134,6 @@ void registerUser(AuthSystem& authSystem, UserType type) {
         cout << "Password: " << string(password1.length(), '*');
         gotoXY(boxX + 2, boxY + 5);
         cout << "Confirm password: " << string(password2.length(), '*');
-
         // Đặt con trỏ đúng vị trí
         if (position == 0)
             gotoXY(boxX + 17 + username.length(), boxY + 1); 
@@ -163,7 +158,7 @@ void registerUser(AuthSystem& authSystem, UserType type) {
                     } else {
                         gotoXY(boxX + 2, boxY + 8);
                         SetColor(12);
-                        cout << "Invalid identity card! Must be 12 digits, start with 0.";
+                        cout << "\nInvalid identity card! Must be 12 digits, start with 0.";
                         SetColor(7);
                         _getch();
                         // XÓA THÔNG BÁO LỖI
@@ -332,7 +327,19 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     wayBackMenu();
                     break;
                 }
-                case 3:{ // Xem thông tin cá nhân
+                case 3: { // cap nhat trang thai tham kham
+                    system("cls");
+                    showTitle("titleDoctor.txt");
+
+                    SetColor(2);
+                    cout << "\n\n\n\t\t\t\tUPDATE VISIT STATUS OF APPOINTMENT" << endl;
+                    SetColor(7);
+
+                    doctor->updateAppointmentStatus();
+                    wayBackMenu();
+                    break;
+                }
+                case 4:{ // Xem thông tin cá nhân
                     system("cls");
                     showTitle("titleDoctor.txt");
 
@@ -344,7 +351,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     wayBackMenu();
                     break;
                 }
-                case 4:{ // Cập nhật thông tin cá nhân
+                case 5:{ // Cập nhật thông tin cá nhân
                     system("cls");
                     showTitle("titleDoctor.txt");
 
@@ -359,7 +366,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     wayBackMenu();
                     break;
                 }
-                case 5:{ // Đổi Password
+                case 6:{ // Đổi Password
                     system("cls");
                     showTitle("titleDoctor.txt");
                     string oldPassword, newPassword, confirmPassword;
@@ -387,7 +394,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     wayBackMenu();
                     break;
                 }
-                case 6:
+                case 7:
                     system("cls");
                     authSystem.logout();
                     logout = true;
@@ -594,6 +601,27 @@ int main() {
     // Thiết lập UTF-8 cho console
     SetConsoleOutputCP(65001);
     SetConsoleCP(65001);
+    
+    const int boxX = 50, boxY = 10, boxW = 80, boxH = 12;
+    SetColor(2);
+    drawBox(boxX,boxY,boxW,boxH);
+    SetColor(7);
+    
+    gotoXY(boxX + 30, boxY + 1);
+    SetColor(6);
+    cout << "PBL2: DO AN LAP TRINH CO SO";
+    gotoXY(boxX + 20, boxY + 2);
+    cout << "DE TAI: XAY DUNG UNG DUNG DAT LICH KHAM BENH";
+    SetColor(7);
+    gotoXY(boxX + 20, boxY + 5);
+    cout << "LOP: 24T_KHDL";
+    gotoXY(boxX + 20, boxY + 6);
+    cout << "GVHG: ThS. Tran Ho Thuy Tien";
+    gotoXY(boxX + 20, boxY + 9);
+    cout << "MSSV: 102240262 - Phan Vu Long";
+    gotoXY(boxX + 20, boxY + 10);
+    cout << "MSSV: 102240282 - Tran Thi Tuyet Trinh\n\n\n\n\n\n";
+    system("pause");
 
     AuthSystem authSystem;
     bool exit = false;

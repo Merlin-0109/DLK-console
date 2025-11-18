@@ -92,15 +92,15 @@ bool AuthSystem::usernameExists(string identicalCard) {
 // Đăng ký Doctor
 bool AuthSystem::registerDoctor(string identicalCard, string password) {
     if (usernameExists(identicalCard)) {
-        cout << "Error: The identity card number already exists!" << endl;
+        cout << "\n\n\t\t\t\t\t\tError: The identity card number already exists!" << endl;
         return false;
     }
-
+    
     if (identicalCard.length() != 12){
-        cout << "Error: The identity card number must be exactly 12 digits long" << endl;
+        cout << "\n\nError: The identity card number must be exactly 12 digits long" << endl;
         return false;
     }
-
+    SetColor(7);
     string id = dataStore->generateDoctorID();
     Doctor* doctor = new Doctor(id, identicalCard, password);
     ostringstream oss;
@@ -125,10 +125,10 @@ bool AuthSystem::registerDoctor(string identicalCard, string password) {
 // Đăng ký Patient
 bool AuthSystem::registerPatient(string identicalCard, string password) {
     if (usernameExists(identicalCard)) {
-        cout << "Error: The identity card number already exists!" << endl;
+        cout << "\n\n\t\t\t\t\tError: The identity card number already exists!" << endl;
         return false;
     }
-    
+
     if (identicalCard.length() != 12){
         cout << "Error: The identity card number must be exactly 12 digits long" << endl;
         return false;
@@ -166,7 +166,7 @@ User* AuthSystem::login(string identicalCard, string password) {
 
     // Verify password
     if (user->getPassword() != password) {
-        cout << "\t\t\t\t\tLogin failed: incorrect password." << endl;
+        cout << "\t\t\t\t\t\n\nLogin failed: incorrect password." << endl;
         return nullptr;
     }
 

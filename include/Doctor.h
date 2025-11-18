@@ -37,11 +37,10 @@ public:
     
     bool viewAppointment();
     bool declineAppointment();
-    bool doneAppointment();
+    bool updateAppointmentStatus();
 
     // Doctor service
     vector<string> getDoctorIDs();
-    bool updateAppointmentStatus(const string& appointmentID, const string& newStatus);
 };
 
 #endif

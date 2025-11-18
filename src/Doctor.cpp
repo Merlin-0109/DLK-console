@@ -132,7 +132,7 @@ bool Doctor::isProfileComplete() const {
 // View Appointments
 bool Doctor::viewAppointment(){
     vector<string> appointments = DataStore::getDoctorAppointments(this->id);
-    
+
     if (appointments.empty()) {
         cout << "\nYou don't have any appointments yet" << endl;
         return false;
@@ -156,7 +156,7 @@ bool Doctor::declineAppointment(){
     vector<string> appointments = DataStore::getDoctorAppointments(this->id);
     Doctor::viewAppointment();
     if (appointments.empty()) {
-        cout << "\nYou have no appointment to decline" << endl;
+        cout << "\nYou don't have appointment to decline" << endl;
         return false;
     }
     // Nhập mã lịch hẹn cần từ chối
@@ -166,7 +166,7 @@ bool Doctor::declineAppointment(){
     getline(cin, appointmentId);
     
     if (appointmentId == "0") {
-        cout << "Operation has been canceled" << endl;
+        cout << "Operation has been cancelled" << endl;
         return false;
     }
     
@@ -201,5 +201,42 @@ bool Doctor::declineAppointment(){
     }
     
     cout << "Error: Cannot decline this appointment!" << endl;
+    return false;
+}
+
+bool Doctor::updateAppointmentStatus(){
+    vector<string> appointments = DataStore::getDoctorAppointments(this->id);
+    Doctor::viewAppointment();
+    if (appointments.empty()){
+        cout << "\nYou don't have appointment" << endl;
+        return false;
+    }
+    cout << "Enter the appointment code to update visist status (or 0 to cancel): ";
+    string appointmentId;
+    getline(cin,appointmentId);
+
+    if (appointmentId == "0"){
+        cout << "Operation has been cancelled" << endl;
+        return false;
+    }
+
+    if (!DataStore::appointmentExists(appointmentId)){
+        cout << "Not found appointment!" << endl;
+        return false;
+    }
+
+    DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
+    if (details.doctorId != this->id){
+        cout << "Error: This appointment does not belong to you!" << endl;
+        return false;
+    }
+
+    if (details.bookStatus != "Booked"){
+        cout << "Error: You can't update the visit status of this appointment!" << endl;
+        return false;
+    }
+    else DataStore::updateVisitAppointmentStatus(appointmentId,"Done");
+
+    cout << "Error: Update failed!" << endl;
     return false;
 }

@@ -69,90 +69,177 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         cout << "Error: Doctor code cannot be empty!" << endl;
         return false;
     }
-    string dayWeek[] = {"Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"};
+    string dayWeek[] = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
+    string dayWeek_runMenu[8];
+    string slots[] = {"07:00","08:00","09:00","10:00","13:30","14:30","15:30"};
+    vector<tm> dates;
+    
     if (chosenDate.empty()) {
         // Hiển thị 7 ngày gần nhất (từ hôm nay)
-        vector<string> dates;
-        vector<string> dayOfWeek;
+        
         time_t now = std::time(nullptr);
+        // chi dat trong vong 7 ngay, khong ke ngay hien tai va chu nhat
         for (int i = 0; i < 7; ++i) {
-            time_t t = now + i * 24 * 60 * 60;
-            tm* tm_ptr = localtime(&t);
-            if (tm_ptr->tm_wday == 0) dayOfWeek.push_back(dayWeek[0]);
-            else if (tm_ptr->tm_wday == 1) dayOfWeek.push_back(dayWeek[1]);
-            else if (tm_ptr->tm_wday == 2) dayOfWeek.push_back(dayWeek[2]);
-            else if (tm_ptr->tm_wday == 3) dayOfWeek.push_back(dayWeek[3]);
-            else if (tm_ptr->tm_wday == 4) dayOfWeek.push_back(dayWeek[4]);
-            else if (tm_ptr->tm_wday == 5) dayOfWeek.push_back(dayWeek[5]);
-            else dayOfWeek.push_back(dayWeek[6]); 
-            char buf[16];
-            strftime(buf, sizeof(buf), "%d/%m/%Y", tm_ptr);
-            dates.push_back(string(buf));
+            time_t t = now + (i+1) * 24 * 60 * 60;
+            tm tm_ptr = *localtime(&t);
+            dates.push_back(tm_ptr);
         }
 
-        vector<int> widths = {15,15,15,15,15,15,15,15};
-        vector<vector<string>> rows;
+        cout << "\n\n\t\t\t\t\t==========BOOKING CALENDAR==========" << endl;
+        cout << setw(15) << " ";
+        for (int i = 0; i < 7; i++){
+            tm d = dates[i];
+            if (d.tm_wday == 0) SetColor(12);
+            else SetColor(15);
+            // format day dd/mm
+            char buf[6];
+            strftime(buf,sizeof(buf),"%d/%m",&dates[i]);
 
-        drawTable(10,10,widths,rows);
-
-        cout << "\nSelect a date within next 7 days:\n";
-        for (size_t i = 0; i < dates.size(); ++i) {
-            cout << i+1 << ". " << dates[i] << endl;
+            cout << setw(15) << dayWeek[d.tm_wday] + "(" + buf +")";
+            dayWeek_runMenu[i] = dayWeek[d.tm_wday];
         }
-        cout << "Enter choice (1-7): ";
-        int di = 0;
-        string line;
-        getline(cin, line);
-        try { di = stoi(line); } catch(...) { di = 0; }
-        if (di < 1 || di > 7) {
-            cout << "Invalid date selection." << endl;
-            return false;
-        }
-        chosenDate = dates[di-1];
+        dayWeek_runMenu[7] = dayWeek[dates[6].tm_wday];
+        SetColor(7);
     }
+    cout << "\n\n";
+    string booked[7][8];
+    vector<string> appointments = DataStore::getDoctorAppointments(doctorId);
+    for (string listID : appointments){
+        DataStore::AppointmentDetails details = DataStore::readAppointment(listID);
+        size_t pos1 = details.date.find(":");
+        string key1 = details.date.substr(pos1 + 1);
+        size_t pos2 = details.time.find(":");
+        string key2 = details.time.substr(pos2 + 1);
+        
+    }
+    for (int row = 0; row < 7; row++){
+        cout << setw(15) << slots[row];
 
-    // Các khung giờ mặc định
-    vector<string> slots = {"07:00","08:00","09:00","10:00","13:30","14:30","15:30"};
+        for (int col = 0; col < 7; col++){
+            tm d = dates[col];
+            char buf[6];
+            strftime(buf, sizeof(buf),"%d/%m", &dates[col]);
+            string key = buf + slots[row];
 
-    // Đếm số appointment hiện có cho từng slot của bác sĩ vào ngày đó
-    vector<int> counts(slots.size(), 0);
-    vector<string> doctorApps = DataStore::getDoctorAppointments(doctorId);
-    for (const string& appId : doctorApps) {
-        DataStore::AppointmentDetails d = DataStore::readAppointment(appId);
-        if (d.date == chosenDate) {
-            for (size_t s = 0; s < slots.size(); ++s) {
-                if (d.time == slots[s]) counts[s]++;
+            if (d.tm_wday == 0){
+                SetColor(12);
+                cout << setw(15) << "[OFF]";
+                SetColor(7);
             }
+            else if(booked[row][col] != "null")
+                cout << setw(15) << "[✓]";
+            else cout << setw(15) << "[ ]";
+        }
+        cout << endl;
+    }
+    cout << "Note: " << endl;
+    cout << "- [OFF]: Unable to schedule (Sunday)" << endl;
+    cout << "- [✓]: Booked" << endl;
+    cout << "- [ ]: Empty slot" << endl;
+    system("pause");
+    // chon ngay
+    cout << "\n\n\t\t\t\t\tPlease choose an appointment date!" << endl;
+    int choiceDate = runMenu(dayWeek_runMenu,7);
+    switch(choiceDate){
+        case 1:{
+            tm d = dates[0];
+            if (d.tm_wday == 0) SetColor(12);
+            else SetColor(15);
+            // format day dd/mm
+            char buf[6];
+            strftime(buf,sizeof(buf),"%d/%m",&dates[0]);
+            chosenDate = string(buf);
+            break;
+        }
+        case 2:{
+            tm d = dates[1];
+            if (d.tm_wday == 0) SetColor(12);
+            else SetColor(15);
+
+            char buf[6];
+            strftime(buf,sizeof(buf),"%d/%m",&dates[1]);
+            chosenDate = string(buf);
+            break;
+        }
+        case 3:{
+            tm d = dates[2];
+            if (d.tm_wday == 0) SetColor(12);
+            else SetColor(15);
+
+            char buf[6];
+            strftime(buf,sizeof(buf),"%d/%m",&dates[2]);
+            chosenDate = string(buf);
+            break;
+        }
+        case 4:{
+            tm d = dates[3];
+            if (d.tm_wday == 0) SetColor(12);
+            else SetColor(15);
+            
+            char buf[6];
+            strftime(buf,sizeof(buf),"%d/%m",&dates[3]);
+            chosenDate = string(buf);
+            break;
+        }
+        case 5:{
+            tm d = dates[4];
+            if (d.tm_wday == 0) SetColor(12);
+            else SetColor(15);
+            
+            char buf[6];
+            strftime(buf,sizeof(buf),"%d/%m",&dates[4]);
+            chosenDate = string(buf);
+            break;
+        }
+        case 6:{
+            tm d = dates[5];
+            if (d.tm_wday == 0) SetColor(12);
+            else SetColor(15);
+            
+            char buf[6];
+            strftime(buf,sizeof(buf),"%d/%m",&dates[5]);
+            chosenDate = string(buf);
+            break;
+        }
+        case 7:{
+            tm d = dates[6];
+            if (d.tm_wday == 0) SetColor(12);
+            else SetColor(15);
+
+            char buf[6];
+            strftime(buf,sizeof(buf),"%d/%m",&dates[6]);
+            chosenDate = string(buf);
+            break;
         }
     }
 
-    // Hiển thị khung giờ và số slot còn lại
-    cout << "\nAvailable time slots for " << chosenDate << ":\n";
-    for (size_t s = 0; s < slots.size(); ++s) {
-        int remaining = 5 - counts[s];
-        if (remaining <= 0) {
-            SetColor(12); // đỏ
-            cout << s+1 << ". " << slots[s] << " - FULL\n";
-            SetColor(7);
-        } else {
-            cout << s+1 << ". " << slots[s] << " - " << remaining << " slots remaining\n";
-        }
+    cout << "\n\n\t\t\t\t\tPlease choose an appointment time!" << endl;
+    // chon khung gio
+    int choiceTime = runMenu(slots,7);
+    switch(choiceTime){
+        case 1: // 07:00
+            chosenTime = "07:00";
+            break;
+        case 2: // 08:00
+            chosenTime = "08:00";
+            break;
+        case 3: // 09:00
+            chosenTime = "09:00";
+            break;
+        case 4: // 10:00
+            chosenTime = "10:00";
+            break;
+        case 5: // 13:30
+            chosenTime = "13:30";
+            break;
+        case 6: // 14:30
+            chosenTime = "14:30";
+            break;
+        case 7: // 15:30
+            chosenTime = "15:30";
+            break;
     }
-
-    cout << "\nSelect slot number: ";
-    string slotLine;
-    getline(cin, slotLine);
-    int slotChoice = 0;
-    try { slotChoice = stoi(slotLine); } catch(...) { slotChoice = 0; }
-    if (slotChoice < 1 || slotChoice > (int)slots.size()) {
-        cout << "Invalid slot selection" << endl;
-        return false;
-    }
-    if (counts[slotChoice-1] >= 5) {
-        cout << "Selected slot is full. Please choose another slot" << endl;
-        return false;
-    }
-    chosenTime = slots[slotChoice-1];
+    
 
     // Nhập lý do nếu chưa có
     if (reasonInput.empty()) {
@@ -165,52 +252,6 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         }
         reasonInput = r;
     }
-
-    // Kiểm tra rằng ngày/giờ đã ở tương lai
-    if (!validateDate(chosenDate) || !validateTime(chosenTime) || !isDateInFuture(chosenDate, chosenTime)) {
-        cout << "Error: Cannot schedule for this date/time (must be in the future and valid)." << endl;
-        return false;
-    }
-
-    // Hiển thị hàng chờ cho khung giờ này (ai khám trước ai khám sau)
-    vector<string> queue = DataStore::getDoctorAppointmentsForDateSlot(doctorId, chosenDate, chosenTime);
-    cout << "\nCurrent queue for " << chosenDate << " " << chosenTime << ":" << endl;
-    if (queue.empty()) {
-        cout << "- (no appointments yet)" << endl;
-    } else {
-        for (size_t i = 0; i < queue.size(); ++i) {
-            // load patient name
-            DataStore::AppointmentDetails d = DataStore::readAppointment(queue[i]);
-            string patientInfo = d.patientId;
-            string pdata;
-            // read patient file directly
-            ifstream pf("data/patients/" + d.patientId + ".txt");
-            if (pf.is_open()) {
-                stringstream ssbuf;
-                ssbuf << pf.rdbuf();
-                pdata = ssbuf.str();
-                pf.close();
-            }
-            if (!pdata.empty()) {
-                stringstream ss(pdata);
-                string line;
-                while (getline(ss, line)) {
-                    size_t pos = line.find(":");
-                    if (pos != string::npos) {
-                        string key = line.substr(0, pos);
-                        string val = line.substr(pos+1);
-                        if (key == "Full name") {
-                            patientInfo = val + " (" + d.patientId + ")";
-                            break;
-                        }
-                    }
-                }
-            }
-            cout << i+1 << ". " << patientInfo << endl;
-        }
-    }
-
-    cout << "\nYour position will be: " << (queue.size() + 1) << "\n";
 
     // Tạo appointment ID
     string appointmentId = DataStore::generateAppointmentID();
@@ -469,13 +510,11 @@ bool Patient::viewUpcomingAppointments() const {
     if (upcomingCount == 0) {
         cout << "\n\t\t\t\t\tYou don't have any upcoming appointments" << endl;
         cout << "\t\t\t\t\t========================================" << endl;
-        system("pause");
         return false;
     }
     
     cout << "\n\t\t\t\t\tTotal number of upcoming appointments: " << upcomingCount << endl;
     cout << "\t\t\t\t\t========================================" << endl;
-    system("pause");
     return true;
 }
 

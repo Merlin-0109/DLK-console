@@ -23,13 +23,14 @@ private:
     void loadUsersFromDataStore();
     User* findUser(string username);
     User* findUserByID(string id);
-    bool usernameExists(string username);
-
+    
 public:
     // Constructor & Destructor
     AuthSystem();
     ~AuthSystem();
     
+    bool usernameExists(string username);
+
     // Authentication methods
     bool registerDoctor(string username, string password);
     bool registerPatient(string username, string password);

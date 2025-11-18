@@ -359,10 +359,17 @@ bool DataStore::updateVisitAppointmentStatus(const  string& appointmentId,const 
         size_t pos = line.find(":");
         string key = line.substr(0,pos);
         if (pos != string::npos){
-            if (key == "visitStatus"){
-                line = "visitStatus" + newvisitStatus;
+            if (key == "appointmentId") lines.push_back(line);
+            else if (key == "patientId") lines.push_back(line);
+            else if (key == "doctorId") lines.push_back(line);
+            else if (key == "date") lines.push_back(line);
+            else if (key == "time") lines.push_back(line);
+            else if (key == "reason") lines.push_back(line);
+            else if (key == "bookStatus") lines.push_back(line);
+            else if (key == "visitStatus"){
+                line = "visitStatus:" + newvisitStatus;
                 lines.push_back(line);
-            } 
+            }
         }
     }
     file.close();
