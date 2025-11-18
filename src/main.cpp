@@ -464,8 +464,14 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     cout << "\t\t\t\t\tDoctor ID:";
                     getline(cin, doctorId);
 
+                    system("cls");
+                    SetColor(4);
+                    showTitle("titlePatient.txt");
+                    SetColor(7);
+
                     // Let Patient::bookAppointment handle date/slot/reason selection interactively
                     patient->bookAppointment(doctorId, "", "", "");
+
                     break;
                 }
                 case 2: {// Xem lịch khám sắp tới
@@ -601,7 +607,9 @@ int main() {
     // Thiết lập UTF-8 cho console
     SetConsoleOutputCP(65001);
     SetConsoleCP(65001);
-    
+
+    system("cls");
+
     const int boxX = 50, boxY = 10, boxW = 80, boxH = 12;
     SetColor(2);
     drawBox(boxX,boxY,boxW,boxH);

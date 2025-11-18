@@ -160,14 +160,14 @@ bool Doctor::viewAppointment(){
         cout << "\nYou don't have any appointments yet" << endl;
         return false;
     }
-    vector<int> widths = {22,23,18,14,21};
+    vector<int> widths = {22,23,15,18,14,21};
     vector<vector<string>> rows;
 
-    rows.push_back({"Appointment ID", "Patient ID", "Date", "Time", "Reason"});
+    rows.push_back({"Appointment ID", "Patient ID","Clinic room", "Date", "Time", "Reason"});
     for (string listID : appointments){
         DataStore::AppointmentDetails d = DataStore::readAppointment(listID);
         if (d.bookStatus == "Booked" && d.visitStatus != "Done")
-            rows.push_back({d.appointmentId, d.patientId, d.date, d.time, d.reason});
+            rows.push_back({d.appointmentId, d.patientId, d.clinic, d.date, d.time, d.reason});
     }
     drawTable(5,8,widths,rows);
     cout << "\nTotal appointments: " << rows.size() - 1 << endl;

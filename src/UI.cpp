@@ -124,8 +124,8 @@ int runMenu(string items[], int count) {
     int consoleWidth  = csbi.srWindow.Right  - csbi.srWindow.Left + 1;
     int consoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top  + 1;
     int startX = (consoleWidth - menuWidth) / 2;
-    int startY = (consoleHeight - menuHeight) / 2;
-    
+    int startY = (consoleHeight - menuHeight)/2;
+
     // VẼ KHUNG NGOÀI 1 LẦN DUY NHẤT
     SetColor(11);
     drawBox(startX, startY, menuWidth, menuHeight);
@@ -200,6 +200,143 @@ int runMenu(string items[], int count) {
     // Hiển thị lại con trỏ
     cursorInfo.bVisible = true;
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
+
+    return choice;
+}
+
+int runMenuHorizontal(string items[], int count){
+    int choice = 1;
+    char key;
+    if (count == 0) return 0;
+
+    int totalWidth = 15*count;
+
+    const int menuWidth = totalWidth + count + 1; // count + 1 la so phan cach |
+    const int menuHeight = 2;
+    
+    // an con tro
+    CONSOLE_CURSOR_INFO cursorInfor;
+    GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE),&cursorInfor);
+    cursorInfor.bVisible = false;
+    SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE),&cursorInfor);
+
+    // lay kich thuoc
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    int consoleWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    int consoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+
+    int startX = (consoleWidth - menuWidth)/2;
+    int startY = csbi.dwCursorPosition.Y;
+
+    int cursorReturnY = startY;
+
+    SetColor(11);
+
+    // vien tren
+    gotoXY(startX, startY);
+    cout << "┌";
+    for (int i = 0; i < count; ++i) {
+        int w = 15;
+        for (int j = 0; j < w; ++j) {
+            cout << "─";
+        }
+        if (i == count - 1) {
+            cout << "┐"; 
+        } else {
+            cout << "┬"; 
+        }
+    }
+
+    gotoXY(startX, startY + 1);
+    cout << "│";
+    int currentX = startX + 1;
+    for (int i = 0; i < count; ++i) {
+        int w = 15;
+
+        if (i + 1 == choice) {
+            SetColor(4 * 16 + 15); 
+        } else {
+            SetColor(0 * 16 + 7); 
+        }
+        
+        string alignedText = centerText(items[i], w);
+        cout << alignedText;
+
+        SetColor(11);
+        cout << "│";
+        currentX += w + 1;
+    }
+    
+    // vien duoi
+    gotoXY(startX, startY + 2);
+    cout << "└";
+    for (int i = 0; i < count; ++i) {
+        int w = 15;
+        for (int j = 0; j < w; ++j) {
+            cout << "─";
+        }
+        if (i == count - 1) {
+            cout << "┘"; 
+        } else {
+            cout << "┴"; 
+        }
+    }
+    SetColor(7);
+    
+    int oldChoice = choice;
+
+    while (true){
+        key = _getch();
+
+        if (key == 0 || key == -32){
+            key = _getch();
+            if (key == 75 && choice > 1) choice--;
+            else if (key == 77 && choice < count) choice++;
+        }
+        else if (key == 13) break;
+        
+        // CHỈ VẼ LẠI 2 ITEMS BỊ THAY ĐỔI (nếu có thay đổi)
+        if (oldChoice != choice){
+            
+            // Tính toán vị trí X bắt đầu của mục cũ (oldChoice)
+            int x_old = startX + 1;
+            for(int k=0; k < oldChoice - 1; ++k) x_old += 15 + 1; 
+
+            // Vẽ lại mục cũ (unhighlight)
+            SetColor(0 * 16 + 7); 
+            gotoXY(x_old, startY + 1);
+            string alignedText_old = centerText(items[oldChoice - 1], 15);
+            cout << alignedText_old;
+
+            // Tính toán vị trí X bắt đầu của mục mới (choice)
+            int x_new = startX + 1;
+            for(int k=0; k < choice - 1; ++k) 
+                x_new += 15 + 1; 
+
+            // Vẽ lại mục mới (highlight)
+            SetColor(4 * 16 + 15);
+            gotoXY(x_new, startY + 1);
+            string alignedText_new = centerText(items[choice - 1], 15);
+            cout << alignedText_new;
+            
+            SetColor(7);
+            oldChoice = choice;
+        }
+    }
+
+    CONSOLE_CURSOR_INFO tempCursorInfo;
+    GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &tempCursorInfo);
+    tempCursorInfo.bVisible = true;
+    SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &tempCursorInfo);
+
+    // Xóa 3 dòng: viền trên, nội dung, viền dưới
+    for (int y = startY; y < startY + menuHeight + 1; ++y){
+        gotoXY(startX, y);
+        cout << string(menuWidth + 1, ' '); 
+    }
+
+    gotoXY(startX, cursorReturnY); 
 
     return choice;
 }
