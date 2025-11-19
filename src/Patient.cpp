@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <ctime>
 #include <vector>
+#include <set>
 #include <limits>
 
 // Constructor mặc định
@@ -77,6 +78,34 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         dates.push_back(tm_ptr);
     }
 
+    // lay ra nhung ngay benh nhan da dat => khong the dat 2 lich kham trong cung mot ngay...
+    auto patientApp = DataStore::getPatientAppointments(this->id);
+    set<string> bookDates;
+    for (auto &appID : patientApp){
+        DataStore::AppointmentDetails details = DataStore::readAppointment(appID);
+        if (details.bookStatus == "Booked")
+            bookDates.insert(details.date);
+    }
+
+    auto getSlotCount = [&](const string& d, const string& slot){
+        return DataStore::getDoctorAppointmentsForDateSlot(doctorId,d,slot).size();
+    };
+
+    // kiem tra ngay nao FULL thi ko hien thi tren menu de chon nua
+    bool isDateFull[7] = {false};
+    for (int i = 0; i < 7; i++){
+        char buf[16];
+        strftime(buf, sizeof(buf), "%d/%m", &dates[i]);
+        string day = buf;
+
+        int total = 0;
+        for (int s = 0; s < 7; s++){
+            // Đếm số appointment ở mỗi slot
+            total += (int)DataStore::getDoctorAppointmentsForDateSlot(doctorId, day, slots[s]).size();
+        }
+        if (total >= 35) isDateFull[i] = true;
+    }
+
     cout << "\n\n\t\t\t\t\t==================== BOOKING CALENDAR ====================" << "\n\n";
     cout << setw(15) << " ";
     for (int col = 0; col < 7; ++col) {
@@ -88,10 +117,6 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         SetColor(7);
     }
     cout << "\n";
-
-    auto getSlotCount = [&](const string& d, const string& slot){
-        return DataStore::getDoctorAppointmentsForDateSlot(doctorId,d,slot).size();
-    };
 
     for (int row = 0; row < 7; ++row) {
         cout << setw(15) << slots[row];
@@ -132,18 +157,47 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     cout << "- [n/5]: n patients booked, still available" << endl;
     cout << "- [ ]: Empty slot" << endl;
 
-    cout << "\nPlease choose an appointment date!" << endl;
-    string dayOptions[7];
-    for (int i = 0; i < 7; i++) {
-        char buf[6]; strftime(buf, sizeof(buf), "%d/%m", &dates[i]);
-        dayOptions[i] = dayWeek[dates[i].tm_wday] + "(" + string(buf) + ")";
+    // Input cua menuHorizontal
+    vector<string> dayChoice;
+    vector<int> indexSlotDay;
+    for (int i = 0; i < 7; i++){
+        char buf[16];
+        strftime(buf,sizeof(buf),"%d/%m",&dates[i]);
+        if (dates[i].tm_wday == 0) continue;
+        if (isDateFull[i]) continue;
+        if (bookDates.count(string(buf))) continue; // = 1(true) => co trong danh sach da dat thi bo qua
+
+        string showDay = dayWeek[dates[i].tm_wday] + "(" + string(buf) + ")";
+        dayChoice.push_back(showDay);
+        indexSlotDay.push_back(i);
     }
 
-    int choiceDate = runMenuHorizontal(dayOptions, 7);
-    while (dates[choiceDate-1].tm_wday == 0) // ko chon duoc ngay CN
-        choiceDate = runMenuHorizontal(dayOptions, 7);
+   
+    // kiem tra gio FULL 
+    vector<string> timeChoice;
+    vector<int> indexSlotTime;
+    for (int i = 0; i < 7; i++){
+        int count = (int)getSlotCount(chosenDate,slots[i]);
+        if (count < 7){
+            timeChoice.push_back(slots[i]);
+            indexSlotTime.push_back(i);
+        }
+    }
+    cout << "\nPlease choose an appointment date!" << endl;
 
-    char buf[6]; strftime(buf, sizeof(buf), "%d/%m", &dates[choiceDate-1]);
+    // int choiceDate = runMenuHorizontal(dayChoice.data(), (int)dayChoice.size());
+    // int realChoiceDate = indexSlotDay[choiceDate-1];
+    int realChoiceDate = -1;
+    while (true) {
+        int choiceDate = runMenuHorizontal(dayChoice.data(), (int)dayChoice.size());
+        if (choiceDate >= 1 && choiceDate <= (int)indexSlotDay.size()) {
+            realChoiceDate = indexSlotDay[choiceDate - 1];
+            break; // chọn hợp lệ, thoát vòng lặp
+        }
+    }
+
+    char buf[6];
+    strftime(buf, sizeof(buf), "%d/%m", &dates[realChoiceDate]);
     chosenDate = string(buf);
     SetColor(2);
     cout << "✔ You chose the appointment date: " << chosenDate << endl;
@@ -151,9 +205,17 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
 
     // --- Chọn giờ ---
     cout << "\nPlease choose an appointment time!" << endl;
-    int choiceTime = runMenuHorizontal(slots, 7);
-    if (choiceTime < 1 || choiceTime > 7) return false;
-    chosenTime = slots[choiceTime-1];
+    // int choiceTime = runMenuHorizontal(timeChoice.data(), (int)timeChoice.size());
+    // chosenTime = timeChoice[choiceTime-1];
+    int realChoiceTime = -1;
+    while (true) {
+        int choiceTime = runMenuHorizontal(timeChoice.data(), (int)timeChoice.size());
+        if (choiceTime >= 1 && choiceTime <= (int)timeChoice.size()) {
+            realChoiceTime = choiceTime - 1;
+            break; // chọn hợp lệ
+        }
+    }
+    chosenTime = timeChoice[realChoiceTime];
     SetColor(2);
     cout << "✔ You chose the appointment time: " << chosenTime << endl;
     SetColor(7);
@@ -161,7 +223,8 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     // --- nhập lý do nếu chưa có ---
     if (reasonInput.empty()) {
         cout << "Reason: ";
-        string r; getline(cin, r);
+        string r; 
+        getline(cin, r);
         if (r.empty()) {
             cout << "Error: Please enter the reason for the consultation!" << endl;
             return false;
@@ -364,14 +427,26 @@ bool Patient::viewAppointmentHistory() const {
         DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
         
         if (!details.appointmentId.empty()) {
-            displayAppointmentDetails(details);
-            
-            if (details.visitStatus == "Done") {
-                completedCount++;
-            } else if (details.bookStatus == "Cancelled") {
-                cancelledCount++;
-            } else {
-                activeCount++;
+            if (details.bookStatus == "Cancelled" || details.visitStatus == "Done"){
+                cout << "\n----------------------------------------" << endl;
+                cout << "Appointment ID: " << details.appointmentId << endl;
+                cout << "Doctor: " << getDoctorInfo(details.doctorId)[0] << endl;
+                cout << "Clinic: " << (details.clinic.empty() ? "Not updated" : details.clinic) << endl;
+                cout << "Date: " << details.date << endl;
+                cout << "Time: " << details.time << endl;
+                cout << "Reason: " << details.reason << endl;
+                cout << "Book status: ";
+
+                if (details.bookStatus == "Cancelled"){
+                    cout << "✗ Cancelled" << endl;
+                    cout << "Visit Status: " << "✗" << details.visitStatus << endl;
+                    cancelledCount++;
+                }
+                else {
+                    cout << "✓ Booked" << endl;
+                    cout << "Visit status: ✓ Done" << endl;
+                    completedCount++;
+                }
             }
         }
     }
@@ -380,7 +455,6 @@ bool Patient::viewAppointmentHistory() const {
     os << "\n========================================" << endl;
     os << "Statistics:" << endl;
     os << "- Total appointments: " << appointments.size() << endl;
-    os << "- Waiting for examination: " << activeCount << endl;
     os << "- Examination completed: " << completedCount << endl;
     os << "- Cancelled: " << cancelledCount << endl;
     os << "========================================" << endl;
@@ -413,7 +487,6 @@ bool Patient::viewUpcomingAppointments() const {
             details.visitStatus == "Not Done") {
             vector<string> infor = getDoctorInfo(details.doctorId);
             string clinicName = details.clinic.empty() ? "Not updated" : details.clinic;
-            // displayAppointmentDetails(details);
             rows.push_back({details.appointmentId,details.doctorId, infor[0],infor[1], clinicName, details.date,details.time,details.reason});
 
             upcomingCount++;
@@ -522,36 +595,6 @@ bool Patient::isDateInFuture(const string& date, const string& time) const {
     if (minute > currentTime->tm_min) return true;
     
     return false;
-}
-
-// Display appointment details (helper function)
-void Patient::displayAppointmentDetails(const DataStore::AppointmentDetails& details) const {
-    cout << "\n----------------------------------------" << endl;
-    cout << "Appointment ID: " << details.appointmentId << endl;
-    cout << "Doctor: " << getDoctorInfo(details.doctorId)[0] << endl;
-    cout << "Clinic: " << (details.clinic.empty() ? "Not updated" : details.clinic) << endl;
-    cout << "Date: " << details.date << endl;
-    cout << "Time: " << details.time << endl;
-    cout << "Reason: " << details.reason << endl;
-    cout << "Book status: ";
-    
-    if (details.bookStatus == "Booked") {
-        cout << "✓ Booked" << endl;
-    } else if (details.bookStatus == "Cancelled") {
-        cout << "✗ Cancelled" << endl;
-    } else {
-        cout << details.bookStatus << endl;
-    }
-    
-    cout << "Visit status: ";
-    if (details.visitStatus == "Done") {
-        cout << "✓ Done" << endl;
-    } else if (details.visitStatus == "Not Done") {
-        cout << "⧗ Not done" << endl;
-    } else {
-        cout << details.visitStatus << endl;
-    }
-    cout << "----------------------------------------" << endl;
 }
 
 // Count active appointments
