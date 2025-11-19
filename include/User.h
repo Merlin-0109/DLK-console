@@ -66,7 +66,7 @@ public:
     void setUserType(UserType type);
     // Update profile
     virtual bool updateProfile(User& user);
-    bool changePassword(const string& oldPassword, const string& newPassword);
+    bool changePassword();
     
     // Virtual methods
     virtual void displayInfo() const;

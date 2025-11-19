@@ -157,7 +157,6 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     cout << "- [n/5]: n patients booked, still available" << endl;
     cout << "- [ ]: Empty slot" << endl;
 
-    // Input cua menuHorizontal
     vector<string> dayChoice;
     vector<int> indexSlotDay;
     for (int i = 0; i < 7; i++){
@@ -185,8 +184,6 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     }
     cout << "\nPlease choose an appointment date!" << endl;
 
-    // int choiceDate = runMenuHorizontal(dayChoice.data(), (int)dayChoice.size());
-    // int realChoiceDate = indexSlotDay[choiceDate-1];
     int realChoiceDate = -1;
     while (true) {
         int choiceDate = runMenuHorizontal(dayChoice.data(), (int)dayChoice.size());
@@ -203,10 +200,7 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     cout << "✔ You chose the appointment date: " << chosenDate << endl;
     SetColor(7);
 
-    // --- Chọn giờ ---
     cout << "\nPlease choose an appointment time!" << endl;
-    // int choiceTime = runMenuHorizontal(timeChoice.data(), (int)timeChoice.size());
-    // chosenTime = timeChoice[choiceTime-1];
     int realChoiceTime = -1;
     while (true) {
         int choiceTime = runMenuHorizontal(timeChoice.data(), (int)timeChoice.size());

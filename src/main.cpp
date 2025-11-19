@@ -158,7 +158,7 @@ void registerUser(AuthSystem& authSystem, UserType type) {
                     } else {
                         gotoXY(boxX + 2, boxY + 8);
                         SetColor(12);
-                        cout << "\nInvalid identity card! Must be 12 digits, start with 0.";
+                        cout << "\nInvalid identity card! Must be 12 digits, start with 0";
                         SetColor(7);
                         _getch();
                         // XÓA THÔNG BÁO LỖI
@@ -170,7 +170,7 @@ void registerUser(AuthSystem& authSystem, UserType type) {
                 } else {
                     gotoXY(boxX + 2, boxY + 8);
                     SetColor(12);
-                    cout << "Passwords do not match! Please try again.";
+                    cout << "\nPasswords do not match! Please try again.";
                     SetColor(7);
                     _getch();
                     // XÓA THÔNG BÁO LỖI
@@ -372,19 +372,10 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     string oldPassword, newPassword, confirmPassword;
                     
                     SetColor(2);
-                    cout << "\n\n\n\t\t\t\t\tCHANGE PASSWORD" << endl;
+                    cout << "\n\n\n\t\t\t\t\t\t\t\tCHANGE PASSWORD" << endl;
                     SetColor(7);
-
-                    cout << "Old password:";
-                    cin >> oldPassword;
-                    cout << "New password:";
-                    cin >> newPassword;
-                    cout << "Enter new password again:";
-                    cin >> confirmPassword;
                     
-                    if (newPassword != confirmPassword) {
-                        cout << "Wrong password" << endl;
-                    } else if (user->changePassword(oldPassword, newPassword)) {
+                    if (user->changePassword()) {
                         if (authSystem.saveUserData(user)) {
                             cout << "Updated password successfully!" << endl;
                         } else {
@@ -423,7 +414,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     showTitle("titlePatient.txt");
 
                     SetColor(2);
-                    cout << "\n\n\n\t\t\t\t\t\t\t\t\t\t📋BOOK APPOINTMENT" << endl;
+                    cout << "\n\n\n\t\t\t\t\t\t\t📋BOOK APPOINTMENT" << endl;
                     SetColor(7);
 
                     string doctorId, date, time, reason;
@@ -435,14 +426,14 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                         break;
                     }
                     
-                    vector<int> widths = {20,30,15,25,20};
+                    vector<int> widths = {20,30,15,25,15,15};
                     vector<vector<string>> rows;
-                    rows.push_back({"Doctor ID", "Full name", "Gender","Specialization","Role"});
+                    rows.push_back({"Doctor ID", "Full name", "Gender","Specialization","Role", "Clinic room"});
                     for (const string& dId :doctorIDs) {
                         string data = authSystem.getDataStore()->loadDoctorData(dId);
                         if (!data.empty()) {
                             stringstream ss(data);
-                            string line, id, fullName, gender, spec, role;
+                            string line, id, fullName, gender, spec, role, clinic;
                             while(getline(ss,line)){
                                 size_t pos = line.find(":");
                                 string key = line.substr(0,pos);
@@ -452,9 +443,10 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                                 else if (key == "Gender") gender = value;
                                 else if (key == "Specialization") spec = value;
                                 else if (key == "Role") role = value; 
+                                else if (key == "Clinic") clinic = value;
                             }
                             
-                            rows.push_back({id,fullName,gender,spec,role});
+                            rows.push_back({id,fullName,gender,spec,role,clinic});
                         }
                     }
                     drawTable(15,10,widths,rows);
@@ -570,19 +562,10 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     string oldPassword, newPassword, confirmPassword;
                     
                     SetColor(2);
-                    cout << "\n\n\n\t\t\t\t\tCHANGE PASSWORD" << endl;
+                    cout << "\n\n\n\t\t\t\t\t\t\t\tCHANGE PASSWORD" << endl;
                     SetColor(7);
 
-                    cout << "Old password:";
-                    cin >> oldPassword;
-                    cout << "New password:";
-                    cin >> newPassword;
-                    cout << "Enter new password again:";
-                    cin >> confirmPassword;
-                    
-                    if (newPassword != confirmPassword) {
-                        cout << "Wrong password!" << endl;
-                    } else if (patient->changePassword(oldPassword, newPassword)) {
+                    if (patient->changePassword()) {
                         if (authSystem.saveUserData(patient)) {
                             cout << "Updated password successfully!" << endl;
                         } else {

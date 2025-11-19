@@ -1,7 +1,14 @@
+#include <windows.h>
+#ifdef byte
+#undef byte
+#endif
+
 #include "User.h"
 #include <sstream>
 #include <regex>
 #include <limits>
+#include "UI.h"
+#include <cstddef>
 
 User::User() :id(""), username(""), password(""), email(""), fullName(""), userType(PATIENT) {}
 
@@ -85,17 +92,79 @@ void User::setUserType(UserType type) {
     this->userType = type;
 }
 
-bool User::changePassword(const string& oldPassword, const string& newPassword) {
-    if (password != oldPassword) {
-        cout << "The old password is incorrect!" << endl;
-        return false;
+bool User::changePassword() {
+    string oldPassword = User::getPassword();
+    string oldPass, newPass, confirmNewPass;
+    const int boxX = 55, boxY = 12, boxW = 40, boxH = 6;
+    int pos = 0;
+    drawBox(boxX,boxY,boxW,boxH);
+    while(true){
+        for (int i = 0; i < 3; i++){
+            gotoXY(boxX + 2, boxY + 1 + i*2);
+            cout << string(boxW - 4, ' ');
+        }
+        gotoXY(boxX + 2, boxY + 1);
+        cout << "Old password: " << string(oldPass.length(), '*');
+        gotoXY(boxX + 2, boxY + 3);
+        cout << "New password: " << string(newPass.length(), '*');
+        gotoXY(boxX + 2, boxY + 5);
+        cout << "Confirm new password: " << string(confirmNewPass.length(), '*');
+
+        if (pos == 0)
+            gotoXY(boxX + 16 + oldPass.length(), boxY + 1);
+        else if (pos == 1)
+            gotoXY(boxX + 16 + newPass.length(),boxY + 3);
+        else gotoXY(boxX + 24 + confirmNewPass.length(), boxY + 5);
+
+        char key = _getch();
+
+        if (key == 72 && pos > 0) pos--;
+        else if (key == 80 && pos < 2) pos++;
+        else if (key == 13){
+            if (pos == 2 && !oldPass.empty() && !newPass.empty() && !confirmNewPass.empty()){
+                if (newPass == confirmNewPass){
+                    if (oldPass == oldPassword) {
+                        this->setPassword(newPass);
+                        return true;
+                    }
+                    else{
+                        gotoXY(boxX + 2, boxY + 8);
+                        SetColor(12);
+                        cout << "\nWrong old password";
+                        SetColor(7);
+                        _getch();
+
+                        gotoXY(boxX + 2, boxY + 8);
+                        cout << string(boxW - 4, ' ');
+                        oldPass = "";
+                        pos = 0;
+                    }
+                }
+                else{
+                    gotoXY(boxX + 2, boxY + 8);
+                    SetColor(12);
+                    cout << "\nNew passwords do not match! Please re-enter";
+                    SetColor(7);
+                    _getch();
+                    
+                    gotoXY(boxX + 2, boxY + 8);
+                    cout << string(boxW - 4, ' ');
+                    newPass = confirmNewPass = "";
+                    pos = 2;
+                }
+            }
+        }
+        else if (key == 8){
+            if (pos == 0 && !oldPass.empty()) oldPass.pop_back();
+            else if (pos == 1 && !newPass.empty()) newPass.pop_back();
+            else if (pos == 2 && !confirmNewPass.empty()) confirmNewPass.pop_back();
+        }
+        else if (isprint(key)){
+            if (pos == 0) oldPass += key;
+            else if (pos == 1) newPass += key;
+            else if (pos == 2) confirmNewPass += key;
+        }
     }
-    if (newPassword.empty()) {
-        cout << "The new password cannot be empty!" << endl;
-        return false;
-    }
-    password = newPassword;
-    cout << "Change password successfully" << endl;
     return true;
 }
 
