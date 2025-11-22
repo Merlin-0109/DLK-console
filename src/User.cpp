@@ -199,7 +199,7 @@ ostream& operator<<(ostream& out, const User& user){
         << "\nIdentity card:" << user.getIdenticalCard()
         << "\nPassword:" << user.getPassword()
         << "\nFull name:" << user.getFullName() 
-        << "\nDate of birth:" << user.getDateOfBirth()
+        << "\n of birth:" << user.getDateOfBirth()
         << "\nGender:" << user.getGender()
         << "\nEmail:" << user.getEmail()
         << "\nPhone number:" << user.getPhoneNumber()
@@ -237,7 +237,9 @@ istream& operator>>(istream& in, User& user){
     if (in.peek() == '\n') in.ignore();
     
     string temp_Name;
-    cout << "Full name:"; 
+    SetColor(9);
+    cout << "\t\t\t\t\tFull name:"; 
+    SetColor(7);
     getline(in,temp_Name);
     if (!temp_Name.empty()) {
         user.setFullName(temp_Name);
@@ -249,7 +251,9 @@ istream& operator>>(istream& in, User& user){
         bool check = false;
    
         while (!check){
-            cout << "Date of birth (dd/mm/yyyy):"; 
+            SetColor(9);
+            cout << "\t\t\t\t\tDate of birth (dd/mm/yyyy):"; 
+            SetColor(7);
             getline(in,temp_DOB);
             
             // Nếu nhấn Enter, giữ nguyên giá trị cũ
@@ -267,7 +271,7 @@ istream& operator>>(istream& in, User& user){
                 else check = true;
             }
             else check = false;
-            if (!check) cout << "Date of birth is invalid! Please re-enter" << endl;
+            if (!check) cout << "\t\t\t\t\tDate of birth is invalid! Please re-enter" << endl;
         }
         if (!temp_DOB.empty()) {
             user.setDateOfBirth(temp_DOB);
@@ -280,7 +284,9 @@ istream& operator>>(istream& in, User& user){
         bool check_g = false;
    
         while (!check_g){
-            cout << "Gender (Male/Female):"; 
+            SetColor(9);
+            cout << "\t\t\t\t\tGender (Male/Female):"; 
+            SetColor(7);
             getline(in,temp_g);
             
             // Nếu nhấn Enter, giữ nguyên giá trị cũ
@@ -298,7 +304,7 @@ istream& operator>>(istream& in, User& user){
                 check_g = false;
             if (temp1 == "male") temp_g = "Male";
             else if (temp1 == "female") temp_g = "Female";
-            if (!check_g) cout << "Please re-enter according to the instructions" << endl;
+            if (!check_g) cout << "\t\t\t\t\tPlease re-enter according to the instructions" << endl;
         }
         if (!temp_g.empty()) {
             user.setGender(temp_g);
@@ -311,7 +317,9 @@ istream& operator>>(istream& in, User& user){
         bool check_e = false;
     
         while(!check_e){
-            cout << "Email(No need to enter '@gmail.com'):";
+            SetColor(9);
+            cout << "\t\t\t\t\tEmail(No need to enter '@gmail.com'):";
+            SetColor(7);
             getline(in,temp_e);
             
             // Nếu nhấn Enter, giữ nguyên giá trị cũ
@@ -324,7 +332,7 @@ istream& operator>>(istream& in, User& user){
             if (regex_match(temp_e, local_part_e)) 
                 check_e = true;
             else check_e = false;
-            if (!check_e) cout << "Please re-enter" << endl;
+            if (!check_e) cout << "\t\t\t\t\tPlease re-enter" << endl;
         }
         if (!temp_e.empty()) {
             user.setEmail(temp_e + "@gmail.com");
@@ -337,7 +345,9 @@ istream& operator>>(istream& in, User& user){
         string temp_sdt;
         bool check_sdt = false;
         while (!check_sdt){
-            cout << "Phone number:"; 
+            SetColor(9);
+            cout << "\t\t\t\t\tPhone number:"; 
+            SetColor(7);
             getline(in,temp_sdt);
             
             // Nếu nhấn Enter, giữ nguyên giá trị cũ
@@ -351,7 +361,7 @@ istream& operator>>(istream& in, User& user){
                 check_sdt = true;
             else check_sdt = false;
             
-            if (!check_sdt) cout << "Phone number is invalid! Please re-enter the phone number" << endl;
+            if (!check_sdt) cout << "\t\t\t\t\tPhone number is invalid! Please re-enter the phone number" << endl;
         }
         if (!temp_sdt.empty()) {
             user.setPhoneNumber(temp_sdt);
@@ -360,7 +370,9 @@ istream& operator>>(istream& in, User& user){
 
     // Address
     string temp_Address;
-    cout << "Address:"; 
+    SetColor(9);
+    cout << "\t\t\t\t\tAddress:"; 
+    SetColor(7);
     getline(in,temp_Address);
     if (!temp_Address.empty()) {
         user.setAddress(temp_Address);

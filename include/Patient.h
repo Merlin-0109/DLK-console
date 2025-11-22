@@ -25,14 +25,10 @@ public:
     bool bookAppointment(const string& doctorId, const string& date, const string& time, const string& reason);
     bool viewMyAppointments() const;
     bool cancelAppointment(const string& appointmentId);
-    bool rescheduleAppointment(const string& appointmentId, const string& newDate, const string& newTime);
     bool viewAppointmentHistory() const;
     bool viewUpcomingAppointments() const;
     
     // Helper methods
-    bool validateDate(const string& date) const;
-    bool validateTime(const string& time) const;
-    bool isDateInFuture(const string& date, const string& time) const;
     void displayAppointmentDetails(const DataStore::AppointmentDetails& details) const;
     int countActiveAppointments() const;
     vector<string> getDoctorInfo(const string& doctorId) const;

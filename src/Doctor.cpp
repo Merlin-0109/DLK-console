@@ -58,8 +58,9 @@ void Doctor::displayInfo() const {
 
 bool Doctor::updateProfile(Doctor& doctor){
     User::updateProfile(doctor);
-    
-    cout << "Specialization:";
+    SetColor(9);
+    cout << "\t\t\t\t\tSpecialization:";
+    SetColor(7);
     string newSpec;
     getline(cin, newSpec);
     if (!newSpec.empty()) {
@@ -67,7 +68,9 @@ bool Doctor::updateProfile(Doctor& doctor){
     }
     
     // Cập nhật Role
-    cout << "Role:";
+    SetColor(9);
+    cout << "\t\t\t\t\tRole:";
+    SetColor(7);
     string newRole;
     getline(cin, newRole);
     if (!newRole.empty()) {
@@ -75,7 +78,9 @@ bool Doctor::updateProfile(Doctor& doctor){
     }
     
     // Cập nhật Clinic
-    cout << "Clinic:";
+    SetColor(9);
+    cout << "\t\t\t\t\tClinic:";
+    SetColor(7);
     string newClinic;
     getline(cin, newClinic);
     if (!newClinic.empty()) {

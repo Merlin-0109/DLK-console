@@ -166,12 +166,20 @@ User* AuthSystem::login(string identicalCard, string password) {
 
     // Verify password
     if (user->getPassword() != password) {
-        cout << "\t\t\t\t\t\n\nLogin failed: incorrect password." << endl;
+        gotoXY(70,21);
+        SetColor(4*16+6);
+        cout << "Login failed: incorrect password." << endl;
+        SetColor(7);
         return nullptr;
     }
+    gotoXY(70,21);
+    cout << string(50,' ');
 
     currentUser = user;
-    cout << "\n\nLogin successful. Welcome " << (user->getFullName().empty() ? user->getIdenticalCard() : user->getFullName()) << "!" << endl;
+    gotoXY(70,21);
+    SetColor(10*16+6);
+    cout << "Login successful. Welcome " << (user->getFullName().empty() ? user->getIdenticalCard() : user->getFullName()) << "!" << endl;
+    SetColor(7);
     // Successful login: check profile completeness and set current user
     if (!user->isProfileComplete()) {
         cout << "⚠ You have not fully updated your personal information. Please update it!" << endl;
@@ -245,29 +253,8 @@ User* AuthSystem::getCurrentUser() const {
     return currentUser;
 }
 
-// Lấy tất cả users
-vector<User*> AuthSystem::getAllUsers() const {
-    return users;
-}
 
 // Lấy DataStore
 DataStore* AuthSystem::getDataStore() const {
     return dataStore;
-}
-
-// Hiển thị tất cả users
-void AuthSystem::displayAllUsers() const {
-    if (users.empty()) {
-        cout << "There is no user in the system" << endl;
-        return;
-    }
-    
-    ostringstream oss;
-    oss << "\n========== ALL USER ==========" << endl;
-    cout << oss.str() << flush;
-    
-    for (const User* user : users) {
-        user->displayInfo();
-        cout << endl;
-    }
 }

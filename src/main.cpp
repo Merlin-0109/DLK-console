@@ -54,7 +54,6 @@ string menuPatient[] = {
     "Book appointment",
     "View upcomming appointment",
     "View medical examination history",
-    "Reschedule the appointment",
     "Cancel the appointment",
     "View personal information",
     "Update personal information",
@@ -96,7 +95,7 @@ int displayDoctorChoice(){
     return runMenu(menuDoctor,7);
 }
 int displayPatientChoice(){
-    return runMenu(menuPatient,9);
+    return runMenu(menuPatient,8);
 }
 
 void wayBackMenu(){
@@ -278,11 +277,6 @@ User* handleLogin(AuthSystem& authSystem) {
                 if (user){
                     system("pause");
                     return user;
-                }
-                else{
-                    gotoXY(boxX + 2, boxY + boxH + 1);
-                    cout << "Log in failed" << endl;
-                    _getch();
                 }
             }
         }
@@ -488,31 +482,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     patient->viewAppointmentHistory();
                     break;
                 }
-                case 4:{ // Đổi lịch khám
-                    system("cls");
-                    showTitle("titlePatient.txt");
-                    string appointmentId, newDate, newTime;
-                    
-                    SetColor(2);
-                    cout << "\n\n\n\t\t\t\t\tRESCHEDULE THE APPOINTMENT" << endl;
-                    SetColor(7);
-                    // Hiển thị lịch khám hiện tại
-                    patient->viewUpcomingAppointments();
-                    
-                    cin.ignore();
-                    cout << "\nEnter the appointment code to be changed:";
-                    getline(cin, appointmentId);
-                    
-                    cout << "New date (DD/MM/YYYY):";
-                    getline(cin, newDate);
-                    
-                    cout << "New time (HH:MM):";
-                    getline(cin, newTime);
-                    
-                    patient->rescheduleAppointment(appointmentId, newDate, newTime);
-                    break;
-                }
-                case 5:{ // Hủy lịch khám
+                case 4:{ // Hủy lịch khám
                     system("cls");
                     showTitle("titlePatient.txt");
                     string appointmentId;
@@ -530,7 +500,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     patient->cancelAppointment(appointmentId);
                     break;
                 }
-                case 6:{// Xem thông tin cá nhân
+                case 5:{// Xem thông tin cá nhân
                     system("cls");
                     showTitle("titlePatient.txt");
 
@@ -542,7 +512,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     wayBackMenu();
                     break;
                 }
-                case 7:{ // Cập nhật thông tin cá nhân
+                case 6:{ // Cập nhật thông tin cá nhân
                     system("cls");
                     showTitle("titlePatient.txt");
 
@@ -550,13 +520,19 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     cout << "\n\n\n\t\t\t\t\tUPDATE PERSONAL INFORMATION" << endl;
                     SetColor(7);
 
-                    if (authSystem.updateUserProfile(patient)) 
-                        cout << "✓ Information saved successfully!" << endl;
-                    else
-                        cout << "✗ Information saved unsuccessfully!" << endl;
+                    if (authSystem.updateUserProfile(patient)){
+                        SetColor(10*16+6);
+                        cout << "\t\t\t\t\t✓ Information saved successfully!" << endl;
+                        SetColor(7);
+                    }
+                    else{
+                        SetColor(4*16+6);
+                        cout << "\t\t\t\t\t✗ Information saved unsuccessfully!" << endl;
+                        SetColor(7);
+                    }
                     break;
                 }
-                case 8:{ // Đổi Password
+                case 7:{ // Đổi Password
                     system("cls");
                     showTitle("titlePatient.txt");
                     string oldPassword, newPassword, confirmPassword;
@@ -574,7 +550,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     }
                     break;
                 }
-                case 9:// Đăng xuất
+                case 8:// Đăng xuất
                     cout << "\n👋 Log out successfully! See you later" << endl;
                     system("cls");
                     authSystem.logout();

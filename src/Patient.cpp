@@ -263,31 +263,6 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     return false;
 }
 
-
-// View my appointments
-bool Patient::viewMyAppointments() const {
-    vector<string> appointments = DataStore::getPatientAppointments(this->id);
-    
-    if (appointments.empty()) {
-        cout << "\nYou don't have any appointments yet" << endl;
-        return false;
-    }
-    
-    vector<int> widths = {22,23,18,15,14,21};
-    vector<vector<string>> rows;
-
-    rows.push_back({"Appointment ID", "Doctor","Clinic room", "Date", "Time", "Reason"});
-    
-    for (const string& appointmentId : appointments) {
-        DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
-        vector<string> infor = getDoctorInfo(details.doctorId);
-        rows.push_back({details.appointmentId, infor[0], details.clinic,details.date, details.time});
-    }
-    drawTable(5,8,widths, rows);
-    cout << "\nTotal appointments: " << appointments.size() << endl;
-    return true;
-}
-
 // Cancel appointment
 bool Patient::cancelAppointment(const string& appointmentId) {
     // Kiểm tra appointment có tồn tại không
@@ -332,72 +307,6 @@ bool Patient::cancelAppointment(const string& appointmentId) {
     return false;
 }
 
-// Reschedule appointment
-bool Patient::rescheduleAppointment(const string& appointmentId, const string& newDate, const string& newTime) {
-    // Kiểm tra appointment có tồn tại không
-    if (!DataStore::appointmentExists(appointmentId)) {
-        cout << "Error: Not found appointment " << appointmentId << endl;
-        return false;
-    }
-    
-    // Đọc thông tin appointment
-    DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
-    
-    // Kiểm tra appointment có phải của Patient này không
-    if (details.patientId != this->id) {
-        cout << "Error: This appointment does not belong to you!" << endl;
-        return false;
-    }
-    
-    // Kiểm tra trạng thái
-    if (details.bookStatus == "Cancelled") {
-        cout << "Cannot reschedule an appointment that has been canceled!" << endl;
-        return false;
-    }
-    
-    if (details.visitStatus == "Done") {
-        cout << "Cannot reschedule an appointment that has been completed!" << endl;
-        return false;
-    }
-    
-    // Validate ngày giờ mới
-    if (!validateDate(newDate)) {
-        cout << "Error: Invalid date format! Please enter in the format DD/MM/YYYY" << endl;
-        return false;
-    }
-    
-    if (!validateTime(newTime)) {
-        cout << "Error: Invalid time format! Please enter in HH:MM format" << endl;
-        return false;
-    }
-    
-    if (!isDateInFuture(newDate, newTime)) {
-        cout << "Error: Cannot schedule for a time in the past!" << endl;
-        return false;
-    }
-    
-    // Cập nhật thông tin
-    details.date = newDate;
-    details.time = newTime;
-    
-    // Lưu lại appointment
-    if (DataStore::writeAppointment(appointmentId, details)) {
-        ostringstream oss;
-        oss << "\n========================================" << endl;
-        oss << "   RESCHEDULED APPOINTMENT SUCCESSFULLY!" << endl;
-        oss << "========================================" << endl;
-        oss << "Appointment ID: " << appointmentId << endl;
-        oss << "Date: " << newDate << endl;
-        oss << "Time: " << newTime << endl;
-        oss << "========================================" << endl;
-        cout << oss.str() << flush;
-        return true;
-    }
-    
-    cout << "Error: Unable to reschedule the appointment!" << endl;
-    return false;
-}
-
 // View appointment history (all appointments including cancelled and completed)
 bool Patient::viewAppointmentHistory() const {
     vector<string> appointments = DataStore::getPatientAppointments(this->id);
@@ -406,12 +315,6 @@ bool Patient::viewAppointmentHistory() const {
         cout << "\nYou do not have any medical appointments" << endl;
         return false;
     }
-    
-    ostringstream oss;
-    oss << "\n========================================" << endl;
-    oss << "   MEDICAL EXAMINATION HISTORY" << endl;
-    oss << "========================================" << endl;
-    cout << oss.str() << flush;
     
     int completedCount = 0;
     int cancelledCount = 0;
@@ -422,23 +325,23 @@ bool Patient::viewAppointmentHistory() const {
         
         if (!details.appointmentId.empty()) {
             if (details.bookStatus == "Cancelled" || details.visitStatus == "Done"){
-                cout << "\n----------------------------------------" << endl;
-                cout << "Appointment ID: " << details.appointmentId << endl;
-                cout << "Doctor: " << getDoctorInfo(details.doctorId)[0] << endl;
-                cout << "Clinic: " << (details.clinic.empty() ? "Not updated" : details.clinic) << endl;
-                cout << "Date: " << details.date << endl;
-                cout << "Time: " << details.time << endl;
-                cout << "Reason: " << details.reason << endl;
-                cout << "Book status: ";
+                cout << "\n\t\t\t\t\t----------------------------------------" << endl;
+                cout << "\t\t\t\t\tAppointment ID: " << details.appointmentId << endl;
+                cout << "\t\t\t\t\tDoctor: " << getDoctorInfo(details.doctorId)[0] << endl;
+                cout << "\t\t\t\t\tClinic: " << (details.clinic.empty() ? "Not updated" : details.clinic) << endl;
+                cout << "\t\t\t\t\tDate: " << details.date << endl;
+                cout << "\t\t\t\t\tTime: " << details.time << endl;
+                cout << "\t\t\t\t\tReason: " << details.reason << endl;
+                cout << "\t\t\t\t\tBook status: ";
 
                 if (details.bookStatus == "Cancelled"){
                     cout << "✗ Cancelled" << endl;
-                    cout << "Visit Status: " << "✗" << details.visitStatus << endl;
+                    cout << "\t\t\t\t\tVisit Status: " << "✗" << details.visitStatus << endl;
                     cancelledCount++;
                 }
                 else {
                     cout << "✓ Booked" << endl;
-                    cout << "Visit status: ✓ Done" << endl;
+                    cout << "\t\t\t\t\tVisit status: ✓ Done" << endl;
                     completedCount++;
                 }
             }
@@ -446,13 +349,16 @@ bool Patient::viewAppointmentHistory() const {
     }
     
     ostringstream os;
-    os << "\n========================================" << endl;
-    os << "Statistics:" << endl;
-    os << "- Total appointments: " << appointments.size() << endl;
-    os << "- Examination completed: " << completedCount << endl;
-    os << "- Cancelled: " << cancelledCount << endl;
-    os << "========================================" << endl;
+    os << "\n\t\t\t\t\t========================================" << endl;
+    os << "\t\t\t\t\tStatistics:" << endl;
+    os << "\t\t\t\t\t- Total appointments: " << appointments.size() << endl;
+    os << "\t\t\t\t\t- Examination completed: " << completedCount << endl;
+    os << "\t\t\t\t\t- Cancelled: " << cancelledCount << endl;
+    os << "\t\t\t\t\t========================================" << endl;
+    
+    SetColor(14);
     cout << os.str() << flush;
+    SetColor(7);
     system("pause");
     return true;
 }
@@ -498,97 +404,6 @@ bool Patient::viewUpcomingAppointments() const {
     cout << "\t\t\t\t\t========================================" << endl;
     system("pause");
     return true;
-}
-
-// Validate date format DD/MM/YYYY
-bool Patient::validateDate(const string& date) const {
-    if (date.length() != 10) return false;
-    if (date[2] != '/' || date[5] != '/') return false;
-    
-    // Kiểm tra các ký tự là số
-    for (int i = 0; i < 10; i++) {
-        if (i == 2 || i == 5) continue;
-        if (!isdigit(date[i])) return false;
-    }
-    
-    // Kiểm tra giá trị ngày, tháng, năm
-    int day = stoi(date.substr(0, 2));
-    int month = stoi(date.substr(3, 2));
-    int year = stoi(date.substr(6, 4));
-    
-    if (month < 1 || month > 12) return false;
-    if (day < 1 || day > 31) return false;
-    if (year < 2024 || year > 2100) return false;
-    
-    // Kiểm tra số ngày trong tháng
-    int daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    
-    // Năm nhuận
-    if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) {
-        daysInMonth[1] = 29;
-    }
-    
-    if (day > daysInMonth[month - 1]) return false;
-    
-    return true;
-}
-
-// Validate time format HH:MM
-bool Patient::validateTime(const string& time) const {
-    if (time.length() != 5) return false;
-    if (time[2] != ':') return false;
-    
-    // Kiểm tra các ký tự là số
-    for (int i = 0; i < 5; i++) {
-        if (i == 2) continue;
-        if (!isdigit(time[i])) return false;
-    }
-    
-    // Kiểm tra giá trị giờ và phút
-    int hour = stoi(time.substr(0, 2));
-    int minute = stoi(time.substr(3, 2));
-    
-    if (hour < 0 || hour > 23) return false;
-    if (minute < 0 || minute > 59) return false;
-    
-    return true;
-}
-
-// Check if date and time is in the future
-bool Patient::isDateInFuture(const string& date, const string& time) const {
-    if (!validateDate(date) || !validateTime(time)) return false;
-    
-    // Lấy thời gian hiện tại
-    time_t now = std::time(0);
-    tm* currentTime = localtime(&now);
-    
-    // Parse ngày giờ đặt lịch
-    int day = stoi(date.substr(0, 2));
-    int month = stoi(date.substr(3, 2));
-    int year = stoi(date.substr(6, 4));
-    int hour = stoi(time.substr(0, 2));
-    int minute = stoi(time.substr(3, 2));
-    
-    // So sánh năm
-    if (year > currentTime->tm_year + 1900) return true;
-    if (year < currentTime->tm_year + 1900) return false;
-    
-    // So sánh tháng
-    if (month > currentTime->tm_mon + 1) return true;
-    if (month < currentTime->tm_mon + 1) return false;
-    
-    // So sánh ngày
-    if (day > currentTime->tm_mday) return true;
-    if (day < currentTime->tm_mday) return false;
-    
-    // So sánh giờ
-    if (hour > currentTime->tm_hour) return true;
-    if (hour < currentTime->tm_hour) return false;
-    
-    // So sánh phút
-    if (minute > currentTime->tm_min) return true;
-    
-    return false;
 }
 
 // Count active appointments

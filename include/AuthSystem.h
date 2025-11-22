@@ -44,11 +44,7 @@ public:
     
     // Getters
     User* getCurrentUser() const;
-    vector<User*> getAllUsers() const;
     DataStore* getDataStore() const;
-    
-    // Display methods
-    void displayAllUsers() const;
 };
 
 #endif
