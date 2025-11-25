@@ -1,13 +1,14 @@
 #ifndef AUTHSYSTEM_H
 #define AUTHSYSTEM_H
 
+#include <vector>
+#include <fstream>
+
 #include "User.h"
 #include "Doctor.h"
 #include "Patient.h"
 #include "DataStore.h"
 #include "HashTable.h"
-#include <vector>
-#include <fstream>
 
 class AuthSystem{
 private:
@@ -16,8 +17,8 @@ private:
     User* currentUser;
     
     // HashTables for O(1) lookup
-    HashTable<string, User*>* userByIdenticalCard;  // Tìm theo CCCD - O(1)
-    HashTable<string, User*>* userByID;             // Tìm theo ID - O(1)
+    HashTable<string, User*>* userByIdenticalCard;  
+    HashTable<string, User*>* userByID;           
 
     // Private helper methods
     void loadUsersFromDataStore();
@@ -32,9 +33,11 @@ public:
     bool usernameExists(string username);
 
     // Authentication methods
+    void registerUser(UserType type);
     bool registerDoctor(string username, string password);
     bool registerPatient(string username, string password);
     
+    User* handleLogin(AuthSystem& authSystem);
     User* login(string username, string password);
     void logout();
     

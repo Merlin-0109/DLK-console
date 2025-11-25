@@ -1,12 +1,13 @@
-#include "DataStore.h"
-#include "User.h"
-#include "Doctor.h"
-#include "Patient.h"
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <iomanip>
 #include <algorithm>
+
+#include "DataStore.h"
+#include "User.h"
+#include "Doctor.h"
+#include "Patient.h"
 
 // Constructor
 DataStore::DataStore() :dataFolderPath("data") {

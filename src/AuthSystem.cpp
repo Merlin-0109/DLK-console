@@ -1,11 +1,15 @@
-#include "AuthSystem.h"
-#include "UI.h"
-#include "Doctor.h"
-#include "Patient.h"
 #include <sstream>
 #include <algorithm> 
 #include <iostream>
 #include <iomanip>
+#include <regex>
+
+#include "AuthSystem.h"
+#include "Doctor.h"
+#include "Patient.h"
+#include "UI.h"
+#include "Menu.h"
+
 
 // Constructor
 AuthSystem::AuthSystem() : currentUser(nullptr) {
@@ -89,6 +93,101 @@ bool AuthSystem::usernameExists(string identicalCard) {
     return findUser(identicalCard) != nullptr;
 }
 
+void AuthSystem::registerUser(UserType type) {
+    const string temp = (type == DOCTOR) ? "DOCTOR" : "PATIENT";
+    const int boxX = 55, boxY = 15;
+    const int boxW = 40, boxH = 6;
+
+    string username = "", password1 = "", password2 = "";
+    int position = 0; // 0 = CCCD, 1 = pass1, 2 = pass2
+
+    // VẼ PHẦN TĨNH 1 LẦN DUY NHẤT
+    system("cls");
+    showTitle("title.txt");
+    SetColor(14);
+    cout << "\n\n\n\n\t\t\t\t\t\t\t===== REGISTER " + temp + " ACCOUNT =====\n\n";
+    SetColor(7);
+    drawBox(boxX, boxY, boxW, boxH);
+    while(true) {
+        // CHỈ XÓA VÀ CẬP NHẬT PHẦN ĐỘNG
+        // XÓA DÒNG CŨ
+        for (int i = 0; i < 3; ++i) {
+            gotoXY(boxX + 2, boxY + 1 + i * 2);
+            cout << string(boxW - 4, ' ');
+        }
+
+        // Viết lại nhãn + dữ liệu
+        gotoXY(boxX + 2, boxY + 1);
+        cout << "Identity card: " << username;
+        gotoXY(boxX + 2, boxY + 3);
+        cout << "Password: " << string(password1.length(), '*');
+        gotoXY(boxX + 2, boxY + 5);
+        cout << "Confirm password: " << string(password2.length(), '*');
+        // Đặt con trỏ đúng vị trí
+        if (position == 0)
+            gotoXY(boxX + 17 + username.length(), boxY + 1); 
+        else if (position == 1)
+            gotoXY(boxX + 12 + password1.length(), boxY + 3);
+        else gotoXY(boxX + 20 + password2.length(), boxY + 5);
+
+        char key = _getch();
+
+        // DI CHUYỂN
+        if (key == 72 && position > 0) position--;        // Lên
+        else if (key == 80 && position < 2) position++;   // Xuống
+
+        // ENTER
+        else if (key == 13) {
+            if (position == 2 && !username.empty() && !password1.empty() && !password2.empty()) {
+                if (password1 == password2) {
+                    // KIỂM TRA CCCD
+                    regex cccd("^0[0-9]{11}$");
+                    if (regex_match(username, cccd)) {
+                        break; // THÀNH CÔNG
+                    } else {
+                        gotoXY(boxX + 2, boxY + 8);
+                        SetColor(12);
+                        cout << "\nInvalid identity card! Must be 12 digits, start with 0";
+                        SetColor(7);
+                        _getch();
+                        // XÓA THÔNG BÁO LỖI
+                        gotoXY(boxX + 2, boxY + 8);
+                        cout << string(boxW - 4, ' ');
+                        username = "";
+                        position = 0;
+                    }
+                } else {
+                    gotoXY(boxX + 2, boxY + 8);
+                    SetColor(12);
+                    cout << "\nPasswords do not match! Please try again.";
+                    SetColor(7);
+                    _getch();
+                    // XÓA THÔNG BÁO LỖI
+                    gotoXY(boxX + 2, boxY + 8);
+                    cout << string(boxW - 4, ' ');
+                    password1 = password2 = "";
+                    position = 1;
+                }
+            }
+        }
+
+        // BACKSPACE
+        else if (key == 8) {
+            if (position == 0 && !username.empty()) username.pop_back();
+            else if (position == 1 && !password1.empty()) password1.pop_back();
+            else if (position == 2 && !password2.empty()) password2.pop_back();
+        }
+
+        // NHẬP KÝ TỰ
+        else if (isprint(key)) {
+            if (position == 0 && username.length() < 12) username += key;
+            else if (position == 1) password1 += key;
+            else if (position == 2) password2 += key;
+        }
+    }
+    (type == DOCTOR) ? registerDoctor(username, password1): registerPatient(username,password1);
+}
+
 // Đăng ký Doctor
 bool AuthSystem::registerDoctor(string identicalCard, string password) {
     if (usernameExists(identicalCard)) {
@@ -154,6 +253,62 @@ bool AuthSystem::registerPatient(string identicalCard, string password) {
     
     delete patient;
     return false;
+}
+
+User* AuthSystem::handleLogin(AuthSystem& authSystem) {
+    const int boxX = 70, boxY = 15;
+    const int boxW = 40, boxH = 4;
+
+    string username = "", password = "";
+    int position = 0; // 0 = CCCD, 1 = password
+
+    // VẼ PHẦN TĨNH 1 LẦN DUY NHẤT
+    system("cls");
+    showTitle("title.txt");
+    drawBox(boxX, boxY, boxW, boxH);
+
+    while (true) {
+        // CHỈ CẬP NHẬT PHẦN ĐỘNG
+        gotoXY(boxX + 2, boxY + 1);
+        cout << string(boxW - 4, ' ');  // xóa dòng Identity card
+        gotoXY(boxX + 2, boxY + 3);
+        cout << string(boxW - 4, ' ');  // xóa dòng Password
+
+        // Viết lại nhãn + dữ liệu
+        gotoXY(boxX + 2, boxY + 1);
+        cout << "Identity card: " << username;
+
+        gotoXY(boxX + 2, boxY + 3);
+        cout << "Password: " << string(password.length(), '*');
+        
+        // Đặt con trỏ đúng vị trí
+        if (position == 0)
+            gotoXY(boxX + 17 + username.length(), boxY + 1); 
+        else
+            gotoXY(boxX + 12 + password.length(), boxY + 3); 
+
+        char key = _getch();
+        if (key == 72) position = 0; // mũi tên lên
+        else if (key == 80) position = 1; // mũi tên xuống
+        else if (key == 8) { // backspace
+            if (position == 0 && !username.empty()) username.pop_back();
+            if (position == 1 && !password.empty()) password.pop_back();
+        }
+        else if (isprint(key)) { // chỉ thêm ký tự in được
+            if (position == 0) username += key;
+            else password += key;
+        } 
+        else if (key == 13) {
+            if (!username.empty() && !password.empty()){
+                // enter khi đầy đủ
+                User* user = authSystem.login(username,password);
+                if (user){
+                    system("pause");
+                    return user;
+                }
+            }
+        }
+    }
 }
 
 // Đăng nhập
@@ -248,13 +403,10 @@ bool AuthSystem::saveUserData(User* user) {
     }
 }
 
-// Lấy user hiện tại
-User* AuthSystem::getCurrentUser() const {
-    return currentUser;
-}
-
-
 // Lấy DataStore
 DataStore* AuthSystem::getDataStore() const {
     return dataStore;
 }
+
+
+

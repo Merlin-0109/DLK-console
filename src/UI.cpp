@@ -1,7 +1,9 @@
-#include "UI.h"
 #include <iostream>
 #include <vector>
 #include <sstream>
+#include <fstream>
+
+#include "UI.h"
 
 using namespace std;
 
@@ -339,4 +341,18 @@ int runMenuHorizontal(string items[], int count){
     gotoXY(startX, cursorReturnY); 
 
     return choice;
+}
+
+void showTitle(string fileName){
+    ostringstream oss;
+    ifstream file(fileName);
+    string line;
+    while(getline(file,line)){
+        oss << line << endl;
+    }
+    file.close();
+    
+    SetColor(14);
+    cout << oss.str() << flush;
+    SetColor(7);
 }

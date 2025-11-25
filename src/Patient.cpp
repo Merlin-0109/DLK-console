@@ -1,15 +1,13 @@
-#include "Patient.h"
-#include "DataStore.h"
-#include "AuthSystem.h"
-#include "UI.h"
-#include <cstdlib>
-#include <sstream>
-#include <fstream>
 #include <iomanip>
 #include <ctime>
 #include <vector>
 #include <set>
 #include <limits>
+
+#include "Patient.h"
+#include "DataStore.h"
+#include "AuthSystem.h"
+#include "UI.h"
 
 // Constructor mặc định
 Patient::Patient() :User() {
@@ -214,14 +212,13 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     cout << "✔ You chose the appointment time: " << chosenTime << endl;
     SetColor(7);
 
-    // --- nhập lý do nếu chưa có ---
     if (reasonInput.empty()) {
         cout << "Reason: ";
         string r; 
         getline(cin, r);
         if (r.empty()) {
             cout << "Error: Please enter the reason for the consultation!" << endl;
-            return false;
+            // return false;
         }
         reasonInput = r;
     }
@@ -240,6 +237,7 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     details.clinic = clinicName;
     details.bookStatus = "Booked";
     details.visitStatus = "Not Done";
+    system("cls");
 
     if(DataStore::writeAppointment(appointmentId, details)) {
         cout << "\n========================================" << endl;
@@ -250,15 +248,16 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         cout << "Appointment ID: " << appointmentId << endl;
         cout << "Patient: " << fullName << " (" << id << ")" << endl;
         cout << "Doctor: " << doctorInfo[0] << endl;
+        cout << "Specialization: " << doctorInfo[1] << endl;
         cout << "Clinic: " << clinicName << endl;
         cout << "Date: " << chosenDate << endl;
         cout << "Time: " << chosenTime << endl;
         cout << "Reason: " << reasonInput << endl;
         cout << "========================================" << endl;
         cout << "⚠ Please arrive on time and bring your Identity Card!" << endl;
+        system("pause");
         return true;
     }
-
     cout << "Error: Unable to schedule an appointment!" << endl;
     return false;
 }

@@ -3,12 +3,13 @@
 #undef byte
 #endif
 
-#include "User.h"
 #include <sstream>
 #include <regex>
 #include <limits>
-#include "UI.h"
 #include <cstddef>
+
+#include "User.h"
+#include "UI.h"
 
 User::User() :id(""), username(""), password(""), email(""), fullName(""), userType(PATIENT) {}
 

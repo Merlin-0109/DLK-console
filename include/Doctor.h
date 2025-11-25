@@ -1,8 +1,9 @@
 #ifndef DOCTOR_H
 #define DOCTOR_H
 
-#include "User.h"
 #include <vector>
+
+#include "User.h"
 
 class Doctor :public User {
 private:
