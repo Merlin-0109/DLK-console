@@ -77,10 +77,6 @@ class DataStore {
         vector<string> getAllPatientIDs();
         vector<string> getAllDoctorIDs();
         
-        // Delete user data
-        bool deletePatientData(const string& id);
-        bool deleteDoctorData(const string& id);
-        
         // Get file paths
         string getPatientFilePath(const string& id);
         string getDoctorFilePath(const string& id);

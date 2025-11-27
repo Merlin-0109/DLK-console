@@ -23,7 +23,6 @@ private:
     // Private helper methods
     void loadUsersFromDataStore();
     User* findUser(string username);
-    User* findUserByID(string id);
     
 public:
     // Constructor & Destructor

@@ -79,15 +79,6 @@ User* AuthSystem::findUser(string identicalCard) {
     return nullptr;
 }
 
-// Tìm user theo ID - SỬ DỤNG HASHTABLE O(1)
-User* AuthSystem::findUserByID(string id) {
-    User* result = nullptr;
-    if (userByID->find(id, result)) {
-        return result;
-    }
-    return nullptr;
-}
-
 // Kiểm tra số CCCD đã tồn tại
 bool AuthSystem::usernameExists(string identicalCard) {
     return findUser(identicalCard) != nullptr;

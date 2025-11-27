@@ -226,18 +226,6 @@ vector<string> DataStore::getAllDoctorIDs() {
     return ids;
 }
 
-// Delete patient data
-bool DataStore::deletePatientData(const string& id) {
-    string filepath = getPatientFilePath(id);
-    return remove(filepath.c_str()) == 0;
-}
-
-// Delete doctor data
-bool DataStore::deleteDoctorData(const string& id) {
-    string filepath = getDoctorFilePath(id);
-    return remove(filepath.c_str()) == 0;
-}
-
 // Get patient file path
 string DataStore::getPatientFilePath(const string& id) {
     return patientsFolder + "/" + id + ".txt";
