@@ -2,29 +2,18 @@
 #ifdef byte
 #undef byte
 #endif
-
 #include <sstream>
 #include <regex>
 #include <limits>
 #include <cstddef>
-
 #include "User.h"
 #include "UI.h"
-
 User::User() :id(""), username(""), password(""), email(""), fullName(""), userType(PATIENT) {}
-
-// construct cho đăng ký
 User::User(string id, string identicalCard,string password, UserType type)
     :id(id),identicalCard(identicalCard), password(password), fullName(""), userType(type) {}
-
-// constructor đầy đủ
 User::User(string id, string identicalCard, string password, string fullname, string dateofbirth, string gender, string email, string phoneNumber, string address, UserType type)
     :id(id),identicalCard(identicalCard),  password(password), fullName(fullname), dateOfBirth(dateofbirth), gender(gender), email(email), phoneNumber(phoneNumber),address(address), userType(type) {}
-
-// Destructor
 User::~User() {}
-
-// Getters
 string User::getID() const {
     return id;
 }
@@ -46,7 +35,6 @@ string User::getGender() const{
 string User::getEmail() const {
     return email;
 }
-
 string User::getPhoneNumber() const {
     return phoneNumber;
 }
@@ -56,12 +44,9 @@ string User::getAddress() const {
 bool User::isProfileComplete() const {
     return !fullName.empty();
 }
-
 UserType User::getUserType() const {
     return userType;
 }
-
-// Setters
 void User::setID(string id) {
     this->id = id;
 }
@@ -92,7 +77,6 @@ void User::setAddress(string address) {
 void User::setUserType(UserType type) {
     this->userType = type;
 }
-
 bool User::changePassword() {
     string oldPassword = User::getPassword();
     string oldPass, newPass, confirmNewPass;
@@ -110,15 +94,12 @@ bool User::changePassword() {
         cout << "New password: " << string(newPass.length(), '*');
         gotoXY(boxX + 2, boxY + 5);
         cout << "Confirm new password: " << string(confirmNewPass.length(), '*');
-
         if (pos == 0)
             gotoXY(boxX + 16 + oldPass.length(), boxY + 1);
         else if (pos == 1)
             gotoXY(boxX + 16 + newPass.length(),boxY + 3);
         else gotoXY(boxX + 24 + confirmNewPass.length(), boxY + 5);
-
         char key = _getch();
-
         if (key == 72 && pos > 0) pos--;
         else if (key == 80 && pos < 2) pos++;
         else if (key == 13){
@@ -134,7 +115,6 @@ bool User::changePassword() {
                         cout << "\nWrong old password";
                         SetColor(7);
                         _getch();
-
                         gotoXY(boxX + 2, boxY + 8);
                         cout << string(boxW - 4, ' ');
                         oldPass = "";
@@ -147,7 +127,6 @@ bool User::changePassword() {
                     cout << "\nNew passwords do not match! Please re-enter";
                     SetColor(7);
                     _getch();
-                    
                     gotoXY(boxX + 2, boxY + 8);
                     cout << string(boxW - 4, ' ');
                     newPass = confirmNewPass = "";
@@ -168,8 +147,6 @@ bool User::changePassword() {
     }
     return true;
 }
-
-// Hiển thị thông tin
 void User::displayInfo() const {
     cout << "\t\t\t\t\tID:" << id << endl;
     cout << "\t\t\t\t\tIdentity card:" << identicalCard << endl;
@@ -180,13 +157,10 @@ void User::displayInfo() const {
     cout << "\t\t\t\t\tGender:" << (gender.empty() ? "[Not updated]" : gender) << endl;
     cout << "\t\t\t\t\tAddress:" << (address.empty() ? "[Not updated]" : address) << endl;
 }
-
 bool User::updateProfile(User& user){
     cin >> user;
     return true;
 }
-
-// Lấy chuỗi loại người dùng, chuyển mô tả enum thành string cụ thể khi in ra màn hình
 string User::getUserTypeString() const {
     switch (userType) {
         case DOCTOR:return "Doctor";
@@ -194,7 +168,6 @@ string User::getUserTypeString() const {
         default:return "Undefined";
     }
 }
-
 ostream& operator<<(ostream& out, const User& user){
     out << "ID:" << user.getID()
         << "\nIdentity card:" << user.getIdenticalCard()
@@ -205,10 +178,8 @@ ostream& operator<<(ostream& out, const User& user){
         << "\nEmail:" << user.getEmail()
         << "\nPhone number:" << user.getPhoneNumber()
         << "\nAddress:" << user.getAddress() << endl;
-
         return out;
 }
-
 istream& operator>>(istream& in, User& user){
     bool isInteract = (&in == &cin);
     if (!isInteract){
@@ -218,8 +189,6 @@ istream& operator>>(istream& in, User& user){
             if (pos != string::npos){
                 string key = line.substr(0,pos);
                 string val = line.substr(pos+1);
-
-                // Chỉ đọc các field của User, dừng lại nếu gặp field không phải của User
                 if (key == "ID") user.setID(val);
                 else if (key == "Identity card") user.setIdenticalCard(val);
                 else if (key == "Password") user.setPassword(val);
@@ -234,9 +203,7 @@ istream& operator>>(istream& in, User& user){
         }
         return in;
     }
-
     if (in.peek() == '\n') in.ignore();
-    
     string temp_Name;
     SetColor(9);
     cout << "\t\t\t\t\tFull name:"; 
@@ -245,24 +212,18 @@ istream& operator>>(istream& in, User& user){
     if (!temp_Name.empty()) {
         user.setFullName(temp_Name);
     }
-
-    // Đảm bảo sự đúng đắn khi nhập Date of birth
     if (isInteract){
         string temp_DOB;
         bool check = false;
-   
         while (!check){
             SetColor(9);
             cout << "\t\t\t\t\tDate of birth (dd/mm/yyyy):"; 
             SetColor(7);
             getline(in,temp_DOB);
-            
-            // Nếu nhấn Enter, giữ nguyên giá trị cũ
             if (temp_DOB.empty()) {
                 check = true;
                 break;
             }
-
             regex dob("^(0[1-9]|1[0-9]|2[0-9]|3[0-1])/(0[1-9]|1[0-2])/(19[0-9]{2}|20(0[0-9]|1[0-9]|2[0-5]))$");
             if (regex_match(temp_DOB,dob)){ // đoạn ni kiểm tra định dạng 
                 int dd = stoi(temp_DOB.substr(0,2));
@@ -278,24 +239,18 @@ istream& operator>>(istream& in, User& user){
             user.setDateOfBirth(temp_DOB);
         }
     }
-
-    // Gender
     if (isInteract){
         string temp_g;
         bool check_g = false;
-   
         while (!check_g){
             SetColor(9);
             cout << "\t\t\t\t\tGender (Male/Female):"; 
             SetColor(7);
             getline(in,temp_g);
-            
-            // Nếu nhấn Enter, giữ nguyên giá trị cũ
             if (temp_g.empty()) {
                 check_g = true;
                 break;
             }
-
             check_g = true;
             string temp1 = temp_g;
             for (char &c :temp1){
@@ -311,24 +266,18 @@ istream& operator>>(istream& in, User& user){
             user.setGender(temp_g);
         }
     }
-    
-    // Email
     if (isInteract){
         string temp_e;
         bool check_e = false;
-    
         while(!check_e){
             SetColor(9);
             cout << "\t\t\t\t\tEmail(No need to enter '@gmail.com'):";
             SetColor(7);
             getline(in,temp_e);
-            
-            // Nếu nhấn Enter, giữ nguyên giá trị cũ
             if (temp_e.empty()) {
                 check_e = true;
                 break;
             }
-            
             regex local_part_e("^(?!.*\\.\\.)([A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)$");
             if (regex_match(temp_e, local_part_e)) 
                 check_e = true;
@@ -339,9 +288,6 @@ istream& operator>>(istream& in, User& user){
             user.setEmail(temp_e + "@gmail.com");
         }
     }
-    
-
-    // sđt
     if (isInteract){
         string temp_sdt;
         bool check_sdt = false;
@@ -350,26 +296,20 @@ istream& operator>>(istream& in, User& user){
             cout << "\t\t\t\t\tPhone number:"; 
             SetColor(7);
             getline(in,temp_sdt);
-            
-            // Nếu nhấn Enter, giữ nguyên giá trị cũ
             if (temp_sdt.empty()) {
                 check_sdt = true;
                 break;
             }
-            
             regex sdt("^0[0-9]{9}$");
             if (regex_match(temp_sdt,sdt))
                 check_sdt = true;
             else check_sdt = false;
-            
             if (!check_sdt) cout << "\t\t\t\t\tPhone number is invalid! Please re-enter the phone number" << endl;
         }
         if (!temp_sdt.empty()) {
             user.setPhoneNumber(temp_sdt);
         }
     }
-
-    // Address
     string temp_Address;
     SetColor(9);
     cout << "\t\t\t\t\tAddress:"; 
@@ -378,6 +318,5 @@ istream& operator>>(istream& in, User& user){
     if (!temp_Address.empty()) {
         user.setAddress(temp_Address);
     }
-
     return in;
 }
