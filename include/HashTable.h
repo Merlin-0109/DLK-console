@@ -13,6 +13,7 @@ public:
     void insert(const K& key, const V& value);
     bool remove(const K& key);
     bool find(const K& key, V& value) const;
+    void rehash();
 
 private:
     struct HashNode {
@@ -56,6 +57,9 @@ HashTable<K,V>::~HashTable() {
 // Time Complexity: O(1) average case, O(n) worst case (khi có nhiều collision)
 template<typename K, typename V>
 void HashTable<K,V>::insert(const K& key, const V& value) {
+    if ((double)capacity / tableSize > 0.7) {
+        rehash();  
+    }
     size_t index = hash(key);
     HashNode* current = table[index];
     
@@ -127,4 +131,35 @@ bool HashTable<K,V>::find(const K& key, V& value) const {
 template<typename K, typename V>
 size_t HashTable<K,V>::hash(const K& key) const {
     return std::hash<K>()(key) % tableSize;
+}
+
+template<typename K, typename V>
+void HashTable<K,V>::rehash() {
+    size_t oldTableSize = tableSize;
+    HashNode** oldTable = table;
+    
+    tableSize *= 2;
+    table = new HashNode*[tableSize]();
+    capacity = 0;
+    
+    for (size_t i = 0; i < tableSize; i++) {
+        table[i] = nullptr;
+    }
+    
+    for (size_t i = 0; i < oldTableSize; i++) {
+        HashNode* entry = oldTable[i];
+        while (entry != nullptr) {
+            size_t newIndex = hash(entry->key);
+            HashNode* newNode = new HashNode(entry->key, entry->value);
+            newNode->next = table[newIndex];
+            table[newIndex] = newNode;
+            capacity++;
+            
+            HashNode* prev = entry;
+            entry = entry->next;
+            delete prev;
+        }
+    }
+    
+    delete[] oldTable;
 }
