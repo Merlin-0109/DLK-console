@@ -6,28 +6,28 @@ using namespace std;
 
 template <typename K, typename V>
 class HashTable {
-public:
-    HashTable(size_t size);
-    ~HashTable();
+    public:
+        HashTable(size_t size);
+        ~HashTable();
 
-    void insert(const K& key, const V& value);
-    bool remove(const K& key);
-    bool find(const K& key, V& value) const;
-    void rehash();
+        void insert(const K& key, const V& value);
+        bool remove(const K& key);
+        bool find(const K& key, V& value) const;
+        void rehash();
 
-private:
-    struct HashNode {
-        K key;
-        V value;
-        HashNode* next;
-        
-        HashNode(const K& k, const V& v) : key(k), value(v), next(nullptr) {}
-    };
+    private:
+        struct HashNode {
+            K key;
+            V value;
+            HashNode* next;
+            
+            HashNode(const K& k, const V& v) : key(k), value(v), next(nullptr) {}
+        };
 
-    HashNode** table;
-    size_t tableSize;
-    size_t capacity;
-    size_t hash(const K& key) const;
+        HashNode** table;
+        size_t tableSize;
+        size_t capacity;
+        size_t hash(const K& key) const;
 };
 
 // Constructor - Khởi tạo hash table với kích thước cho trước

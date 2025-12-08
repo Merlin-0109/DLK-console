@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+#include "User.h"
 #include "AuthSystem.h"
 
 using namespace std;

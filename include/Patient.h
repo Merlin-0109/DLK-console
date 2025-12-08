@@ -1,6 +1,13 @@
 #ifndef PATIENT_H
 #define PATIENT_H
 
+#include <iomanip>
+#include <ctime>
+#include <vector>
+#include <set>
+#include <limits>
+#include <map>
+
 #include "User.h"
 #include "DataStore.h"
 
@@ -8,8 +15,8 @@ class Patient :public User {
 public:
     // Constructor
     Patient();
-    Patient(string id, string identicalCard, string password);
-    Patient(string id, string identicalCard, string password,string fullName,string dateofbirth, string gender, string email, string phoneNumber, string address);
+    Patient(string id, string identityCard, string password);
+    Patient(string id, string identityCard, string password,string fullName,string dateofbirth, string gender, string email, string phoneNumber, string address);
     
     // Destructor
     ~Patient();
@@ -23,7 +30,6 @@ public:
 
     // Appointment methods
     bool bookAppointment(const string& doctorId, const string& date, const string& time, const string& reason);
-    bool viewMyAppointments() const;
     bool cancelAppointment(const string& appointmentId);
     bool viewAppointmentHistory() const;
     bool viewUpcomingAppointments() const;

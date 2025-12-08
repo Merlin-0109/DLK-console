@@ -1,5 +1,4 @@
 #include <sstream>
-#include <algorithm> 
 #include <iostream>
 #include <iomanip>
 #include <regex>
@@ -10,13 +9,12 @@
 #include "UI.h"
 #include "Menu.h"
 
-
 // Constructor
 AuthSystem::AuthSystem() : currentUser(nullptr) {
     dataStore = new DataStore();
     
     // Khởi tạo HashTables với kích thước hợp lý
-    userByIdenticalCard = new HashTable<string, User*>(1009);  // Số nguyên tố cho phân bổ tốt
+    userByIdentityCard = new HashTable<string, User*>(1009);  // Số nguyên tố cho phân bổ tốt
     userByID = new HashTable<string, User*>(1009);
     
     loadUsersFromDataStore();
@@ -30,7 +28,7 @@ AuthSystem::~AuthSystem() {
     users.clear();
     
     // Giải phóng HashTables
-    delete userByIdenticalCard;
+    delete userByIdentityCard;
     delete userByID;
     delete dataStore;
 }
@@ -48,7 +46,7 @@ void AuthSystem::loadUsersFromDataStore() {
             users.push_back(patient);
             
             // Thêm vào HashTables để tìm kiếm O(1)
-            userByIdenticalCard->insert(patient->getIdenticalCard(), patient);
+            userByIdentityCard->insert(patient->getIdentityCard(), patient);
             userByID->insert(patient->getID(), patient);
         }
     }
@@ -64,24 +62,24 @@ void AuthSystem::loadUsersFromDataStore() {
             users.push_back(doctor);
             
             // Thêm vào HashTables để tìm kiếm O(1)
-            userByIdenticalCard->insert(doctor->getIdenticalCard(), doctor);
+            userByIdentityCard->insert(doctor->getIdentityCard(), doctor);
             userByID->insert(doctor->getID(), doctor);
         }
     }
 }
 
 // Tìm user theo username - SỬ DỤNG HASHTABLE O(1)
-User* AuthSystem::findUser(string identicalCard) {
+User* AuthSystem::findUser(string identityCard) {
     User* result = nullptr;
-    if (userByIdenticalCard->find(identicalCard, result)) {
+    if (userByIdentityCard->find(identityCard, result)) {
         return result;
     }
     return nullptr;
 }
 
 // Kiểm tra số CCCD đã tồn tại
-bool AuthSystem::usernameExists(string identicalCard) {
-    return findUser(identicalCard) != nullptr;
+bool AuthSystem::usernameExists(string identityCard) {
+    return findUser(identityCard) != nullptr;
 }
 
 void AuthSystem::registerUser(UserType type) {
@@ -180,29 +178,31 @@ void AuthSystem::registerUser(UserType type) {
 }
 
 // Đăng ký Doctor
-bool AuthSystem::registerDoctor(string identicalCard, string password) {
-    if (usernameExists(identicalCard)) {
+bool AuthSystem::registerDoctor(string identityCard, string password) {
+    if (usernameExists(identityCard)) {
         cout << "\n\n\t\t\t\t\t\tError: The identity card number already exists!" << endl;
         return false;
     }
     
-    if (identicalCard.length() != 12){
+    if (identityCard.length() != 12){
         cout << "\n\nError: The identity card number must be exactly 12 digits long" << endl;
         return false;
     }
     SetColor(7);
     string id = dataStore->generateDoctorID();
-    Doctor* doctor = new Doctor(id, identicalCard, password);
+    Doctor* doctor = new Doctor(id, identityCard, password);
     ostringstream oss;
     oss << *doctor;
     // Lưu vào DataStore
     if (dataStore->saveDoctorData(id,oss.str())) {
         users.push_back(doctor);
         // Insert into hash tables for O(1) lookup
-        userByIdenticalCard->insert(identicalCard, doctor);
+        userByIdentityCard->insert(identityCard, doctor);
         userByID->insert(id, doctor);
         SetColor(2);
-        cout << "\n\nRegistration successful! Your ID is:" << id << endl;
+        gotoXY(55,23);
+        cout << "Registration successful! Your ID is:" << id << endl;
+        gotoXY(55,24);
         cout << "Please log in to update your personal information" << endl;
         SetColor(7);
         system("pause");
@@ -213,29 +213,31 @@ bool AuthSystem::registerDoctor(string identicalCard, string password) {
 }
 
 // Đăng ký Patient
-bool AuthSystem::registerPatient(string identicalCard, string password) {
-    if (usernameExists(identicalCard)) {
+bool AuthSystem::registerPatient(string identityCard, string password) {
+    if (usernameExists(identityCard)) {
         cout << "\n\n\t\t\t\t\tError: The identity card number already exists!" << endl;
         return false;
     }
 
-    if (identicalCard.length() != 12){
+    if (identityCard.length() != 12){
         cout << "Error: The identity card number must be exactly 12 digits long" << endl;
         return false;
     }
 
     string id = dataStore->generatePatientID();
-    Patient* patient = new Patient(id, identicalCard, password);
+    Patient* patient = new Patient(id, identityCard, password);
     ostringstream ss;
     ss << *patient;
     // Lưu vào DataStore
     if (dataStore->savePatientData(id,ss.str())) {
         users.push_back(patient);
         // Insert into hash tables for O(1) lookup
-        userByIdenticalCard->insert(identicalCard, patient);
+        userByIdentityCard->insert(identityCard, patient);
         userByID->insert(id, patient);
         SetColor(2);
-        cout << "\n\nRegistration successful! Your ID is " << id << endl;
+        gotoXY(55,23);
+        cout << "Registration successful! Your ID is " << id << endl;
+        gotoXY(55,24);
         cout << "Please log in to update your personal information" << endl;
         SetColor(7);
         system("pause");
@@ -294,6 +296,7 @@ User* AuthSystem::handleLogin(AuthSystem& authSystem) {
                 // enter khi đầy đủ
                 User* user = authSystem.login(username,password);
                 if (user){
+                    cout << endl;
                     system("pause");
                     return user;
                 }
@@ -303,8 +306,8 @@ User* AuthSystem::handleLogin(AuthSystem& authSystem) {
 }
 
 // Đăng nhập
-User* AuthSystem::login(string identicalCard, string password) {
-    User* user = findUser(identicalCard);
+User* AuthSystem::login(string identityCard, string password) {
+    User* user = findUser(identityCard);
     if (user == nullptr) {
         cout << "\t\t\t\t\t\t\n\nLogin failed: account not found." << endl;
         return nullptr;
@@ -324,7 +327,7 @@ User* AuthSystem::login(string identicalCard, string password) {
     currentUser = user;
     gotoXY(70,21);
     SetColor(10*16+6);
-    cout << "Login successful. Welcome " << (user->getFullName().empty() ? user->getIdenticalCard() : user->getFullName()) << "!" << endl;
+    cout << "Login successful. Welcome " << (user->getFullName().empty() ? user->getIdentityCard() : user->getFullName()) << "!" << endl;
     SetColor(7);
     // Successful login: check profile completeness and set current user
     if (!user->isProfileComplete()) {
@@ -336,7 +339,7 @@ User* AuthSystem::login(string identicalCard, string password) {
 // Đăng xuất
 void AuthSystem::logout() {
     if (currentUser != nullptr) {
-        string name = currentUser->getFullName().empty() ? currentUser->getIdenticalCard() : currentUser->getFullName();
+        string name = currentUser->getFullName().empty() ? currentUser->getIdentityCard() : currentUser->getFullName();
         cout << "See you later, " << name << "!" << endl;
         currentUser = nullptr;
     }

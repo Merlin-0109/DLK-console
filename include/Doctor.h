@@ -14,8 +14,8 @@ private:
 public:
     // Constructor
     Doctor();
-    Doctor(string id, string identicalCard, string password);
-    Doctor(string id, string identicalCard, string password,string fullName,string dateofbirth, string gender, string email, string phoneNumber, string address,
+    Doctor(string id, string identityCard, string password);
+    Doctor(string id, string identityCard, string password,string fullName,string dateofbirth, string gender, string email, string phoneNumber, string address,
            string specialization, string doctorRole, string clinic = "");
     
     // Destructor
@@ -40,7 +40,7 @@ public:
     friend istream& operator>>(istream&, Doctor&);
     
     bool viewAppointment();
-    bool declineAppointment();
+    bool remarkAsBusy();
     bool updateAppointmentStatus();
 
     // Doctor service

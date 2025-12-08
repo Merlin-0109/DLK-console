@@ -1,52 +1,48 @@
+#pragma once
 #ifndef AUTHSYSTEM_H
 #define AUTHSYSTEM_H
 
 #include <vector>
 #include <fstream>
 
+#include "HashTable.h"
 #include "User.h"
 #include "Doctor.h"
 #include "Patient.h"
 #include "DataStore.h"
-#include "HashTable.h"
 
 class AuthSystem{
-private:
-    vector<User*> users;
-    DataStore* dataStore;
-    User* currentUser;
-    
-    // HashTables for O(1) lookup
-    HashTable<string, User*>* userByIdenticalCard;  
-    HashTable<string, User*>* userByID;           
+    private:
+        vector<User*> users;
+        DataStore* dataStore;
+        User* currentUser;
+        
+        HashTable<string, User*>* userByIdentityCard;  
+        HashTable<string, User*>* userByID;           
 
-    // Private helper methods
-    void loadUsersFromDataStore();
-    User* findUser(string username);
-    
-public:
-    // Constructor & Destructor
-    AuthSystem();
-    ~AuthSystem();
-    
-    bool usernameExists(string username);
+        void loadUsersFromDataStore();
+        User* findUser(string username);
+        
+    public:
+        AuthSystem();
+        ~AuthSystem();
+        
+        bool usernameExists(string username);
 
-    // Authentication methods
-    void registerUser(UserType type);
-    bool registerDoctor(string username, string password);
-    bool registerPatient(string username, string password);
-    
-    User* handleLogin(AuthSystem& authSystem);
-    User* login(string username, string password);
-    void logout();
-    
-    // Update user data
-    bool updateUserProfile(User* user);
-    bool saveUserData(User* user);
-    
-    // Getters
-    User* getCurrentUser() const;
-    DataStore* getDataStore() const;
+        void registerUser(UserType type);
+        bool registerDoctor(string username, string password);
+        bool registerPatient(string username, string password);
+        
+        User* handleLogin(AuthSystem& authSystem);
+        User* login(string username, string password);
+        void logout();
+        
+        bool updateUserProfile(User* user);
+        bool saveUserData(User* user);
+        
+        // Getters
+        User* getCurrentUser() const;
+        DataStore* getDataStore() const;
 };
 
 #endif

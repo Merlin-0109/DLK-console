@@ -25,7 +25,7 @@ string menuLogIn_Out[] = {
 // chức năng dành cho bác sĩ
 string menuDoctor[] = {
     "View appointment",
-    "Decline appointment",
+    "Mark as busy",
     "Update visit status of appointment",
     "View personal information",
     "Update personal information",
@@ -77,7 +77,7 @@ void wayBackMenu(){
 void handleRegistration(AuthSystem& authSystem) {
     int choice;
         SetColor(2);
-        cout << "\n\n\n\n\n\n\n\t\t\t\t\t\t\t\t\t\tWHICH ROLE ARE YOU REGISTERING FOR?" << endl;
+        cout << "\n\n\n\n\n\n\n\t\t\t\t\t\t\t\t\tWHICH ROLE ARE YOU REGISTERING FOR?" << endl;
         SetColor(7);
 
         choice = displayRegisterMenu();
@@ -133,10 +133,10 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     showTitle("titleDoctor.txt");
 
                     SetColor(2);
-                    cout << "\n\n\n\t\t\t\t\tDECLINE APPOINTMENT" << endl;
+                    cout << "\n\n\n\t\t\t\t\t\t\tREMARK AS BUSY" << endl;
                     SetColor(7);
                     
-                    doctor->declineAppointment();
+                    doctor->remarkAsBusy();
                     wayBackMenu();
                     break;
                 }
@@ -172,8 +172,12 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     cout << "\n\n\n\t\t\t\t\tUPDATE PERSONAL INFORMATION" << endl;
                     SetColor(7);
 
-                    if (authSystem.updateUserProfile(doctor)) 
+                    if (authSystem.updateUserProfile(doctor)){
+                            gotoXY(50,20);
+                            SetColor(10*16+6);
                             cout << "Information saved successfully!" << endl;
+                            SetColor(7);
+                    }
                     else
                         cout << "Error saving information!" << endl;
                     wayBackMenu();
@@ -190,7 +194,10 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     
                     if (user->changePassword()) {
                         if (authSystem.saveUserData(user)) {
+                            gotoXY(55,20);
+                            SetColor(10*16+6);
                             cout << "Updated password successfully!" << endl;
+                            SetColor(7);
                         } else {
                             cout << "Updated password unsuccessfully!" << endl;
                         }
@@ -239,7 +246,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                         break;
                     }
                     
-                    vector<int> widths = {20,30,15,25,15,15};
+                    vector<int> widths = {20,30,15,25,20,15};
                     vector<vector<string>> rows;
                     rows.push_back({"Doctor ID", "Full name", "Gender","Specialization","Role", "Clinic room"});
                     for (const string& dId :doctorIDs) {

@@ -1,8 +1,10 @@
 #include <sstream>
 #include <limits>
 #include <iomanip>
+#include <map>
 
 #include "Doctor.h"
+#include "Calendar.h"
 #include "DataStore.h"
 #include "UI.h"
 
@@ -15,12 +17,12 @@ Doctor::Doctor() :User(){
 }
 
 // Constructor đơn giản cho đăng ký
-Doctor::Doctor(string id, string identicalCard, string password)
-    :User(id,identicalCard , password, DOCTOR), specialization(""), doctorRole(""), clinic(""){}
+Doctor::Doctor(string id, string identityCard, string password)
+    :User(id,identityCard , password, DOCTOR), specialization(""), doctorRole(""), clinic(""){}
 
 // Constructor đầy đủ
-Doctor::Doctor(string id, string identicalCard, string password,string fullName,string dateofbirth, string gender, string email, string phoneNumber, string address ,string specialization, string doctorRole, string clinic)
-    :User(id,identicalCard,password,fullName,dateofbirth,gender,email,phoneNumber,address, DOCTOR),
+Doctor::Doctor(string id, string identityCard, string password,string fullName,string dateofbirth, string gender, string email, string phoneNumber, string address ,string specialization, string doctorRole, string clinic)
+    :User(id,identityCard,password,fullName,dateofbirth,gender,email,phoneNumber,address, DOCTOR),
     specialization(specialization), doctorRole(doctorRole), clinic(clinic) {}
 
 // Destructor
@@ -111,7 +113,7 @@ istream& operator>>(istream& in, Doctor& doctor){
                 string val = line.substr(pos + 1);
                 
                 if (key == "ID") doctor.setID(val);
-                else if (key == "Identity card") doctor.setIdenticalCard(val);
+                else if (key == "Identity card") doctor.setIdentityCard(val);
                 else if (key == "Password") doctor.setPassword(val);
                 else if (key == "Full name") doctor.setFullName(val);
                 else if (key == "Date of birth") doctor.setDateOfBirth(val);
@@ -155,7 +157,8 @@ bool Doctor::isProfileComplete() const {
            !phoneNumber.empty() && 
            !address.empty() &&
            !specialization.empty() &&
-           !doctorRole.empty();
+           !doctorRole.empty()&&
+           !clinic.empty();
 }
 
 // View Appointments
@@ -175,63 +178,127 @@ bool Doctor::viewAppointment(){
         if (d.bookStatus == "Booked" && d.visitStatus != "Done")
             rows.push_back({d.appointmentId, d.patientId, d.clinic, d.date, d.time, d.reason});
     }
-    drawTable(5,8,widths,rows);
+    drawTable(20,8,widths,rows);
     cout << "\nTotal appointments: " << rows.size() - 1 << endl;
     return true;
 }
 
-// decline appointments from patients
-bool Doctor::declineAppointment(){
-    // Hiển thị danh sách lịch hẹn
-    vector<string> appointments = DataStore::getDoctorAppointments(this->id);
-    Doctor::viewAppointment();
-    if (appointments.empty()) {
-        cout << "\nYou don't have appointment to decline" << endl;
-        return false;
-    }
-    // Nhập mã lịch hẹn cần từ chối
-    cout << "\nEnter the appointment code to decline (or 0 to cancel) ";
-    string appointmentId;
+bool Doctor::remarkAsBusy(){
+    DataStore dataStore;
 
-    getline(cin, appointmentId);
-    
-    if (appointmentId == "0") {
-        cout << "Operation has been cancelled" << endl;
-        return false;
+    vector<string> busyDate = dataStore.getBusyDate(this->id);
+    vector<string> oneDate;
+    map<string,vector<string>> busyTime;
+    for (const string& date : busyDate){
+        oneDate = dataStore.getBusyTime(this->id,date);
+        busyTime[date].insert(busyTime[date].end(), oneDate.begin(),oneDate.end());
     }
+
     
-    // Kiểm tra appointment có tồn tại không
-    if (!DataStore::appointmentExists(appointmentId)) {
-        cout << "Not found appointment!" << endl;
-        return false;
+    Calendar calendar;
+    calendar.showCalendar(this->id);
+
+    cout << "Please choose your busy day" << endl;
+    vector<string> dayChoice;
+    vector<int> indexSlotDay;
+    vector<tm> dates;
+    time_t now = std::time(nullptr);
+    for (int i = 0; i < 7; i++){
+        time_t t = now + (i+1)*24*3600;
+        tm tm_ptr = *localtime(&t);
+        dates.push_back(tm_ptr);
     }
-    
-    // Đọc thông tin appointment
-    DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
-    
-    // Kiểm tra appointment có phải của bác sĩ này không
-    if (details.doctorId != this->id) {
-        cout << "Error: This appointment does not belong to you!" << endl;
-        return false;
+
+    for (int i = 0; i < 7; i++){
+        char buf[6];
+        strftime(buf,sizeof(buf),"%d/%m", &dates[i]);
+        if (dates[i].tm_wday == 0) continue;
+
+        bool isAllDay = false;
+        if (busyTime.find(string(buf)) != busyTime.end()){
+            for (const string& time : busyTime[string(buf)]){
+                if (time == "AllDay"){
+                    isAllDay = true;
+                    break;
+                }
+            }
+        }
+
+        if (!isAllDay){
+            string showDay = dateWeek[dates[i].tm_wday] + "(" + string(buf) + ")";
+            dayChoice.push_back(showDay);
+            indexSlotDay.push_back(i);
+        }
     }
-    
-    // Kiểm tra trạng thái
-    if (details.bookStatus != "Booked") {
-        cout << "Error: Cannot decline this appointment!" << endl;
-        return false;
+
+    int realChoiceDate = -1;
+    while(true){
+        int choice = runMenuHorizontal(dayChoice.data(), (int)dayChoice.size());
+        if (choice >= 1 &&  choice <= (int)dayChoice.size()){
+            realChoiceDate = indexSlotDay[choice-1];
+            break;
+        }
     }
+    char buf[6];
+    strftime(buf, sizeof(buf), "%d/%m", &dates[realChoiceDate]);
+    string chosenDate = string(buf);
+    SetColor(2);
+    cout << "✔ Busy day: " << chosenDate << endl;
+    SetColor(7);
+
+    cout << "\nPlease choose your busy time" << endl;
+    vector<string> timeChoice;
+    vector<int> indexSlotTime;
     
-    // Cập nhật trạng thái thành Cancelled
-    if (DataStore::updateBookAppointmentStatus(appointmentId, "Cancelled")) {
-        SetColor(2);
-        cout << "DECLINED APPOINTMENT SUCCESSFULLY!" << endl;
-        SetColor(7);
-        cout << "Declined appointment ID: " << appointmentId << endl;
-        return true;
+    bool isBusyTime[7] = {false};
+    for (const string& time : busyTime[chosenDate]){
+        if (time == "07:00")
+            isBusyTime[0] = true;
+        if (time == "08:00")
+            isBusyTime[1] = true;
+        if (time == "09:00")
+            isBusyTime[2] = true;
+        if (time == "10:00")
+            isBusyTime[3] = true;
+        if (time == "13:30")
+            isBusyTime[4] = true;
+        if (time == "14:30")
+            isBusyTime[5] = true;
+        if (time == "15:30")
+            isBusyTime[6] = true;
     }
+
+    int index = 0;
+    for (int i = 0; i < 7; i++){
+        if (isBusyTime[i] == false){
+            timeChoice.push_back(timeSlot[i]);
+            indexSlotTime.push_back(i);
+            ++index;
+        }
+    }
+    timeChoice.push_back("AllDay");
+    indexSlotTime.push_back(timeChoice.size());
+
+    int realChoiceTime = -1;
+    while(true){
+        int choice = runMenuHorizontal(timeChoice.data(), (int)timeChoice.size());
+        if (choice >= 1 && choice <= (int)timeChoice.size()){
+            realChoiceTime = indexSlotTime[choice - 1];
+            break;
+        }
+    }
+    string chosenTime;
+    if (realChoiceTime == timeChoice.size()){
+        chosenTime = "AllDay";
+    }
+    else chosenTime = timeSlot[realChoiceTime];
+    SetColor(2);
+    cout << "✔ Busy time: " << chosenTime << endl;
+    SetColor(7);
+
+    calendar.saveCalendarToFile(this->id, chosenDate, chosenTime);
     
-    cout << "Error: Cannot decline this appointment!" << endl;
-    return false;
+    return true;
 }
 
 bool Doctor::updateAppointmentStatus(){

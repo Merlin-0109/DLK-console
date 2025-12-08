@@ -38,6 +38,9 @@ class DataStore {
         string dataFolderPath;
         string patientsFolder;
         string doctorsFolder;
+        string busyFolder;
+        string appointmentsFolder;
+
         
         string patientIDsFile;
         string doctorIDsFile;
@@ -80,9 +83,14 @@ class DataStore {
         // Get file paths
         string getPatientFilePath(const string& id);
         string getDoctorFilePath(const string& id);
+        string getBusyFilePath(const string& doctorID);
+
+        bool saveBusyCalendarToFile(const string& doctorID, string date, string time);
+        vector<string> getBusyDate(const string& doctorID);
+        vector<string> getBusyTime(const string& doctorID, const string& date);
 
         // Lien quan den appointments
-        static bool writeAppointment(const  string& appointmentId, const AppointmentDetails& details);
+        static bool writeAppointment(const string& appointmentId, const AppointmentDetails& details);
         static AppointmentDetails readAppointment(const  string& appointmentId);
     
         static bool updateBookAppointmentStatus(const  string& appointmentId, const  string& newStatus); // cap nhat tu benh nhan, neu bn dat xong thi "Booked" neu huy thi "Cancelled"

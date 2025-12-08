@@ -11,15 +11,15 @@
 #include "User.h"
 #include "UI.h"
 
-User::User() :id(""), username(""), password(""), email(""), fullName(""), userType(PATIENT) {}
+User::User() :id(""), identityCard(""), password(""), email(""), fullName(""), userType(PATIENT) {}
 
 // construct cho đăng ký
-User::User(string id, string identicalCard,string password, UserType type)
-    :id(id),identicalCard(identicalCard), password(password), fullName(""), userType(type) {}
+User::User(string id, string identityCard,string password, UserType type)
+    :id(id),identityCard(identityCard), password(password), fullName(""), userType(type) {}
 
 // constructor đầy đủ
-User::User(string id, string identicalCard, string password, string fullname, string dateofbirth, string gender, string email, string phoneNumber, string address, UserType type)
-    :id(id),identicalCard(identicalCard),  password(password), fullName(fullname), dateOfBirth(dateofbirth), gender(gender), email(email), phoneNumber(phoneNumber),address(address), userType(type) {}
+User::User(string id, string identityCard, string password, string fullname, string dateofbirth, string gender, string email, string phoneNumber, string address, UserType type)
+    :id(id),identityCard(identityCard),  password(password), fullName(fullname), dateOfBirth(dateofbirth), gender(gender), email(email), phoneNumber(phoneNumber),address(address), userType(type) {}
 
 // Destructor
 User::~User() {}
@@ -31,8 +31,8 @@ string User::getID() const {
 string User::getPassword() const {
     return password;
 }
-string User::getIdenticalCard() const{
-    return identicalCard;
+string User::getIdentityCard() const{
+    return identityCard;
 }
 string User::getFullName() const {
     return fullName;
@@ -68,8 +68,8 @@ void User::setID(string id) {
 void User::setPassword(string password) {
     this->password = password;
 }
-void User::setIdenticalCard(string Identitycard){
-    this->identicalCard = Identitycard;
+void User::setIdentityCard(string Identitycard){
+    this->identityCard = Identitycard;
 }
 void User::setFullName(string fullName) {
     this->fullName = fullName;
@@ -172,7 +172,7 @@ bool User::changePassword() {
 // Hiển thị thông tin
 void User::displayInfo() const {
     cout << "\t\t\t\t\tID:" << id << endl;
-    cout << "\t\t\t\t\tIdentity card:" << identicalCard << endl;
+    cout << "\t\t\t\t\tIdentity card:" << identityCard << endl;
     cout << "\t\t\t\t\tPassword:" << password << endl;
     cout << "\t\t\t\t\tFull name:" << (fullName.empty() ? "[Not updated]" :fullName) << endl;
     cout << "\t\t\t\t\tEmail:" << (email.empty()?"[Not updated]" : email) << endl;
@@ -197,10 +197,10 @@ string User::getUserTypeString() const {
 
 ostream& operator<<(ostream& out, const User& user){
     out << "ID:" << user.getID()
-        << "\nIdentity card:" << user.getIdenticalCard()
+        << "\nIdentity card:" << user.getIdentityCard()
         << "\nPassword:" << user.getPassword()
         << "\nFull name:" << user.getFullName() 
-        << "\n of birth:" << user.getDateOfBirth()
+        << "\nDate of birth:" << user.getDateOfBirth()
         << "\nGender:" << user.getGender()
         << "\nEmail:" << user.getEmail()
         << "\nPhone number:" << user.getPhoneNumber()
@@ -221,7 +221,7 @@ istream& operator>>(istream& in, User& user){
 
                 // Chỉ đọc các field của User, dừng lại nếu gặp field không phải của User
                 if (key == "ID") user.setID(val);
-                else if (key == "Identity card") user.setIdenticalCard(val);
+                else if (key == "Identity card") user.setIdentityCard(val);
                 else if (key == "Password") user.setPassword(val);
                 else if (key == "Full name") user.setFullName(val);
                 else if (key == "Date of birth") user.setDateOfBirth(val);

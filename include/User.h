@@ -3,6 +3,11 @@
 
 #include <string>
 #include <iostream>
+#ifdef byte
+#undef byte
+#endif
+
+
 
 using namespace std;
 
@@ -16,9 +21,8 @@ enum UserType {
 class User {
 protected:
     string id;
-    string username;
     string password;
-    string identicalCard;
+    string identityCard;
 
     string fullName;
     string dateOfBirth;
@@ -32,15 +36,15 @@ protected:
 public:
     // Constructor
     User();
-    User(string id,string identicalCard, string password,  UserType type);
-    User(string id,string identicalCard, string password, string fullname, string dateofbirth, string gender, string email, string phoneNumber, string address , UserType type);
+    User(string id,string identityCard, string password,  UserType type);
+    User(string id,string identityCard, string password, string fullname, string dateofbirth, string gender, string email, string phoneNumber, string address , UserType type);
     
     // Destructor
     virtual ~User();
     
     // Getters
     string getID() const;
-    string getIdenticalCard() const;
+    string getIdentityCard() const;
     string getPassword() const;
     string getFullName() const;
     string getDateOfBirth() const;
@@ -54,7 +58,7 @@ public:
     
     // Setters
     void setID(string id);
-    void setIdenticalCard(string cccd);
+    void setIdentityCard(string cccd);
     void setPassword(string password);
     void setFullName(string fullName);
     void setDateOfBirth(string dateOfBirth);
