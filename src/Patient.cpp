@@ -55,13 +55,6 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     DataStore dataStore;
 
     vector<string> busyDate = dataStore.getBusyDate(doctorId);
-    vector<string> oneDay;
-    map<string,vector<string>> busyTime;
-
-    for (const string& date: busyDate){
-        oneDay = dataStore.getBusyTime(doctorId,date);
-        busyTime[date].insert(busyTime[date].end(), oneDay.begin(),oneDay.end());
-    }
 
     vector<tm> dates;
     time_t now = std::time(nullptr);
@@ -113,19 +106,14 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         if (dates[i].tm_wday == 0) continue;
         if (isDateFull[i]) continue;
 
-        bool isAllDay = false;
+        bool isBusyDay = false;
         for (const string& date : busyDate){
             if (buf == date){
-                for (const string& time : busyTime[date]){
-                    if (time == "AllDay"){
-                        isAllDay = true;
-                        break;
-                    }
-                }
-                if (isAllDay) break;
+                isBusyDay = true;
+                break;
             }
         }
-        if (isAllDay) continue;
+        if (isBusyDay) continue;
         string showDay = dateWeek[dates[i].tm_wday] + "(" + string(buf) + ")"; // khi show menu
         dayChoice.push_back(showDay);
         indexSlotDay.push_back(i);
@@ -153,15 +141,6 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     for (int i = 0; i < 7; i++){
         int count = (int)getSlotCount(chosenDate,timeSlot[i]);
         if (count >= 7) continue;
-
-        bool isBusyTime = false;
-        for (const string& time : busyTime[chosenDate]){
-            if (timeSlot[i] == time){
-                isBusyTime = true;
-                break;
-            }
-        }
-        if (isBusyTime) continue;
 
         bool checkTime = false;
         for (auto & booked : bookSlots){
@@ -216,21 +195,7 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     details.visitStatus = "Not Done";
     if(DataStore::writeAppointment(appointmentId, details)) {
         system("cls");
-        gotoXY(40,15); cout << "========================================" << endl;
-        SetColor(14);
-        gotoXY(40,15); cout << "   ✓ BOOKED APPOINTMENT SUCCESSFULL!" << endl;
-        SetColor(7);
-        gotoXY(40,15); cout << "========================================" << endl;
-        gotoXY(40,15); cout << "Appointment ID: " << appointmentId << endl;
-        gotoXY(40,15); cout << "Patient: " << fullName << " (" << id << ")" << endl;
-        gotoXY(40,15); cout << "Doctor: " << doctorInfo[0] << endl;
-        gotoXY(40,15); cout << "Specialization: " << doctorInfo[1] << endl;
-        gotoXY(40,15); cout << "Clinic: " << clinicName << endl;
-        gotoXY(40,15); cout << "Date: " << chosenDate << endl;
-        gotoXY(40,15); cout << "Time: " << chosenTime << endl;
-        gotoXY(40,15); cout << "Reason: " << reasonInput << endl;
-        gotoXY(40,15); cout << "========================================" << endl;
-        gotoXY(40,15); cout << "⚠ Please arrive on time and bring your Identity Card!" << endl;
+        calendar.printTicket(appointmentId,fullName,doctorInfo[0],doctorInfo[1],clinicName,chosenDate,chosenTime,reasonInput);
         system("pause");
         return true;
     }

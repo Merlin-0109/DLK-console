@@ -13,5 +13,8 @@ class Calendar{
         Calendar();
         ~Calendar();
         void showCalendar(string doctorID);
-        bool saveCalendarToFile(string doctorID, string date, string time);
+        bool saveCalendarToFile(string doctorID, string date);
+        void printTicket(string appointmentId, string fullName, string doctor, 
+                          string specialization, string clinic, string date, 
+                          string time, string reason);
 };
