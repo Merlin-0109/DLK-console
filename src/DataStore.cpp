@@ -3,13 +3,11 @@
 #include <fstream>
 #include <iomanip>
 #include <algorithm>
-
 #include "DataStore.h"
 #include "User.h"
 #include "Doctor.h"
 #include "Patient.h"
 
-// Constructor
 DataStore::DataStore() :dataFolderPath("data") {
     patientsFolder = dataFolderPath + "/patients";
     doctorsFolder = dataFolderPath + "/doctors";
@@ -18,10 +16,8 @@ DataStore::DataStore() :dataFolderPath("data") {
     
     patientIDsFile = dataFolderPath + "/patient_ids.txt";
     doctorIDsFile = dataFolderPath + "/doctor_ids.txt";
-    
     initializeDirectories();
 }
-
 DataStore::DataStore(const string& basePath) :dataFolderPath(basePath) {
     patientsFolder = dataFolderPath + "/patients";
     doctorsFolder = dataFolderPath + "/doctors";
@@ -30,19 +26,14 @@ DataStore::DataStore(const string& basePath) :dataFolderPath(basePath) {
     
     patientIDsFile = dataFolderPath + "/patient_ids.txt";
     doctorIDsFile = dataFolderPath + "/doctor_ids.txt";
-    
     initializeDirectories();
 }
-
-// Create directory if it doesn't exist
 void DataStore::createDirectoryIfNotExists(const string& path) {
     struct stat info;
     if (stat(path.c_str(), &info) != 0) {
         _mkdir(path.c_str());
     }
 }
-
-// Initialize all directories
 void DataStore::initializeDirectories() {
     createDirectoryIfNotExists(dataFolderPath);
     createDirectoryIfNotExists(patientsFolder);
@@ -50,55 +41,39 @@ void DataStore::initializeDirectories() {
     createDirectoryIfNotExists(appointmentsFolder);
     createDirectoryIfNotExists(busyFolder);
 }
-
 string DataStore::generatePatientID() {
     int lastNumber = getLastPatientNumber();
     int newNumber = lastNumber + 1;
-    
     stringstream ss;
     ss << "01" << setfill('0') << setw(3) << newNumber;
     string newID = ss.str();
-    
     saveIDToFile(patientIDsFile, newID);
     return newID;
 }
-
-// Generate Doctor ID
 string DataStore::generateDoctorID() {
     int lastNumber = getLastDoctorNumber();
     int newNumber = lastNumber + 1;
-    
     stringstream ss;
     ss << "02" << setfill('0') << setw(3) << newNumber;
     string newID = ss.str();
-    
     saveIDToFile(doctorIDsFile, newID);
     return newID;
 }
-
-// Get last patient number
 int DataStore::getLastPatientNumber() {
     vector<string> ids = loadIDsFromFile(patientIDsFile);
     if (ids.empty()) return 0;
-    
     string lastID = ids.back();
     return stoi(lastID.substr(2));  // Bỏ "01" ở đầu
 }
-
-// Get last doctor number
 int DataStore::getLastDoctorNumber() {
     vector<string> ids = loadIDsFromFile(doctorIDsFile);
     if (ids.empty()) return 0;
-    
     string lastID = ids.back();
     return stoi(lastID.substr(2));  // Bỏ "02" ở đầu
 }
-
-// Load IDs from file
 vector<string> DataStore::loadIDsFromFile(const string& filename) {
     vector<string> ids;
     ifstream file(filename);
-    
     if (file.is_open()) {
         string id;
         while (getline(file, id)) {
@@ -110,8 +85,6 @@ vector<string> DataStore::loadIDsFromFile(const string& filename) {
     } 
     return ids;
 }
-
-// Save ID to file
 void DataStore::saveIDToFile(const string& filename, const string& id) {
     ofstream file(filename, ios::app);
     if (file.is_open()) {
@@ -119,24 +92,17 @@ void DataStore::saveIDToFile(const string& filename, const string& id) {
         file.close();
     }
 }
-
-// Check if patient ID exists
 bool DataStore::patientIDExists(const string& id) {
     vector<string> ids = getAllPatientIDs();
     return find(ids.begin(), ids.end(), id) != ids.end();
 }
-
-// Check if doctor ID exists
 bool DataStore::doctorIDExists(const string& id) {
     vector<string> ids = getAllDoctorIDs();
     return find(ids.begin(), ids.end(), id) != ids.end();
 }
-
-// Save patient data
 bool DataStore::savePatientData(const string& id, const string& data) {
     string filepath = getPatientFilePath(id);
     ofstream file(filepath);
-    
     if (file.is_open()) {
         file << data;
         file.close();
@@ -144,12 +110,9 @@ bool DataStore::savePatientData(const string& id, const string& data) {
     }
     return false;
 }
-
-// Save doctor data
 bool DataStore::saveDoctorData(const string& id, const string& data) {
     string filepath = getDoctorFilePath(id);
     ofstream file(filepath);
-    
     if (file.is_open()) {
         file << data;
         file.close();
@@ -157,38 +120,28 @@ bool DataStore::saveDoctorData(const string& id, const string& data) {
     }
     return false;
 }
-
-// Load patient data
 string DataStore::loadPatientData(const string& id) {
     string filepath = getPatientFilePath(id);
     ifstream file(filepath);
-    
     if (file.is_open()) {
         stringstream buffer;
         buffer << file.rdbuf();
         file.close();
         return buffer.str();
     }
-    
     return "";
 }
-
-// Load doctor data
 string DataStore::loadDoctorData(const string& id) {
     string filepath = getDoctorFilePath(id);
     ifstream file(filepath);
-    
     if (file.is_open()) {
         stringstream buffer;
         buffer << file.rdbuf();
         file.close();
         return buffer.str();
     }
-    
     return "";
 }
-
-// Get all patient IDs
 vector<string> DataStore::getAllPatientIDs() {
     vector<string> ids;
     
@@ -197,34 +150,27 @@ vector<string> DataStore::getAllPatientIDs() {
         ss << "01" << setfill('0') << setw(3) << i;
         string id = ss.str();
         string filepath = getPatientFilePath(id);
-        
         ifstream file(filepath);
         if (file.good()) {
             ids.push_back(id);
         }
         file.close();
     }
-    
     return ids;
 }
-
-// Get all doctor IDs
 vector<string> DataStore::getAllDoctorIDs() {
     vector<string> ids;
-
     for (int i = 1; i <= 999; i++) {
         stringstream ss;
         ss << "02" << setfill('0') << setw(3) << i;
         string id = ss.str();
         string filepath = getDoctorFilePath(id);
-        
         ifstream file(filepath);
         if (file.good()) {
             ids.push_back(id);
         }
         file.close();
     }
-    
     return ids;
 }
 
@@ -352,7 +298,6 @@ vector<string> DataStore::getBusyTime(const string& doctorID, const string& date
 bool  DataStore::writeAppointment(const  string& appointmentId, const AppointmentDetails& details){
     string filepath = "data/appointments/" + appointmentId + ".txt";
     ofstream file(filepath);
-
     if (!file.is_open()){
         cout << "Can not open file " + appointmentId << endl;
         return false;
@@ -366,7 +311,6 @@ bool  DataStore::writeAppointment(const  string& appointmentId, const Appointmen
     file << "clinic:" << details.clinic << endl;
     file << "bookStatus:" << details.bookStatus << endl; // booked/cancelled
     file << "visitStatus:" << details.visitStatus << endl; // done/not done
-
     file.close();
     return true;
 }
@@ -374,19 +318,16 @@ DataStore::AppointmentDetails DataStore::readAppointment(const  string& appointm
     AppointmentDetails details;
     string filepath = "data/appointments/" + appointmentId + ".txt";
     ifstream file(filepath);
-
     if (!file.is_open()){
         cout << "Can not open file " + appointmentId << endl;
         return details;
     }
-
     string line;
     while(getline(file,line)){
         size_t pos = line.find(":");
         if (pos != string::npos){ // npos:khong tim thay gi
             string key = line.substr(0,pos); 
             string value = line.substr(pos+1);
-
             if (key == "appointmentId") details.appointmentId = value;
             else if (key == "patientId") details.patientId = value;
             else if (key == "doctorId") details.doctorId = value;
@@ -401,23 +342,18 @@ DataStore::AppointmentDetails DataStore::readAppointment(const  string& appointm
     file.close();
     return details;
 }
-
-// cap nhat trang thai cuoc hen tu benh nhan
 bool DataStore::updateBookAppointmentStatus(const  string& appointmentId, const  string& newStatus){
     string filepath = "data/appointments/" + appointmentId + ".txt";
     fstream file(filepath);
-
     if (!file.is_open()){
         cout << "Can not open file " + appointmentId + " to update the bookstatus";
         return false;
     }
-
     vector<string> lines;
     string line;
     while(getline(file,line)){
         size_t pos = line.find(":");
         string key = line.substr(0,pos);
-
         if (pos != string::npos){
             if (key == "appointmentId") lines.push_back(line);
             else if (key == "patientId") lines.push_back(line);
@@ -438,25 +374,19 @@ bool DataStore::updateBookAppointmentStatus(const  string& appointmentId, const 
         cout << "Can not open file to update the book status" << endl;
         return false;
     }
-
     for (auto& line :lines){
         fileWrite << line << endl; 
     }
-
     fileWrite.close();
-
     return true;
 }
-// cap nhap trang thai tham kham tu bac si
 bool DataStore::updateVisitAppointmentStatus(const  string& appointmentId,const  string& newvisitStatus){
     string filepath = "data/appointments/" + appointmentId + ".txt";
     ifstream file(filepath);
-
     if (!file.is_open()){
         cout << "Can not open file " + appointmentId;
         return false;
     }
-
     vector<string> lines;
     string line;
     while(getline(file,line)){
@@ -477,28 +407,21 @@ bool DataStore::updateVisitAppointmentStatus(const  string& appointmentId,const 
         }
     }
     file.close();
-
     ofstream fileWrite(filepath);
     if (!fileWrite.is_open()){
         cout << "Can not open file to update the visit status" << endl;
         return false;
     }
-
     for (auto& line :lines){
         fileWrite << line << endl; 
     }
-
     fileWrite.close();
     return true;
 }
-// Generate Appointment ID
 string DataStore::generateAppointmentID() {
     static int counter = 0;
-    
-    // Lay thoi gian hien tai
     time_t now = time(0);
     tm* ltm = localtime(&now);
-    
     stringstream ss;
     ss << "APT" 
        << setfill('0') << setw(4) << (1900 + ltm->tm_year)
@@ -508,27 +431,19 @@ string DataStore::generateAppointmentID() {
        << setw(2) << ltm->tm_min
        << setw(2) << ltm->tm_sec
        << setw(3) << (counter++ % 1000);
-    
     return ss.str();
 }
-
-// Get patient appointments
 vector<string> DataStore::getPatientAppointments(const string& patientId) {
     vector<string> appointments;
     string appointmentsFolder = "data/appointments";
-    
-    // Scan thư mục appointments để lấy tất cả các file
     WIN32_FIND_DATAA findData;
     HANDLE hFind = FindFirstFileA((appointmentsFolder + "\\*.txt").c_str(), &findData);
-    
     if (hFind != INVALID_HANDLE_VALUE) {
         do {
             string filename = findData.cFileName;
-            // Loại bỏ extension .txt
             if (filename.length() > 4) {
                 string appointmentId = filename.substr(0, filename.length() - 4);
                 AppointmentDetails details = readAppointment(appointmentId);
-                
                 if (!details.appointmentId.empty() && details.patientId == patientId) {
                     appointments.push_back(details.appointmentId);
                 }
@@ -536,27 +451,19 @@ vector<string> DataStore::getPatientAppointments(const string& patientId) {
         } while (FindNextFileA(hFind, &findData) != 0);
         FindClose(hFind);
     }
-    
     return appointments;
 }
-
-// Get doctor appointments
 vector<string> DataStore::getDoctorAppointments(const string& doctorId) {
     vector<string> appointments;
     string appointmentsFolder = "data/appointments";
-    
-    // Scan thư mục appointments để lấy tất cả các file
     WIN32_FIND_DATAA findData;
     HANDLE hFind = FindFirstFileA((appointmentsFolder + "\\*.txt").c_str(), &findData);
-    
     if (hFind != INVALID_HANDLE_VALUE) {
         do {
             string filename = findData.cFileName;
-            // Loại bỏ extension .txt
             if (filename.length() > 4) {
                 string appointmentId = filename.substr(0, filename.length() - 4);
                 AppointmentDetails details = readAppointment(appointmentId);
-
                 if (!details.appointmentId.empty() && details.doctorId == doctorId && details.bookStatus != "Cancelled") {
                     appointments.push_back(details.appointmentId);
                 }
@@ -564,11 +471,8 @@ vector<string> DataStore::getDoctorAppointments(const string& doctorId) {
         } while (FindNextFileA(hFind, &findData) != 0);
         FindClose(hFind);
     }
-    
     return appointments;
 }
-
-// Check if appointment exists
 bool DataStore::appointmentExists(const string& appointmentId) {
     string filepath = "data/appointments/" + appointmentId + ".txt";
     ifstream file(filepath);
@@ -576,14 +480,11 @@ bool DataStore::appointmentExists(const string& appointmentId) {
     file.close();
     return exists;
 }
-
-// Get appointments for a specific doctor on a specific date and time slot (ordered by appointmentId)
 vector<string> DataStore::getDoctorAppointmentsForDateSlot(const string& doctorId, const string& date, const string& timeSlot) {
     vector<string> appointments;
     string appointmentsFolder = "data/appointments";
     WIN32_FIND_DATAA findData;
     HANDLE hFind = FindFirstFileA((appointmentsFolder + "\\*.txt").c_str(), &findData);
-
     if (hFind != INVALID_HANDLE_VALUE) {
         do {
             string filename = findData.cFileName;
@@ -597,7 +498,6 @@ vector<string> DataStore::getDoctorAppointmentsForDateSlot(const string& doctorI
         } while (FindNextFileA(hFind, &findData) != 0);
         FindClose(hFind);
     }
-
     sort(appointments.begin(), appointments.end());
     return appointments;
 }

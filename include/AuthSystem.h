@@ -1,7 +1,6 @@
 #pragma once
 #ifndef AUTHSYSTEM_H
 #define AUTHSYSTEM_H
-
 #include <vector>
 #include <fstream>
 
@@ -44,5 +43,4 @@ class AuthSystem{
         User* getCurrentUser() const;
         DataStore* getDataStore() const;
 };
-
 #endif

@@ -15,12 +15,8 @@
 Patient::Patient() :User() {
     userType = PATIENT;
 }
-
-// Constructor đơn giản cho đăng ký
 Patient::Patient(string id, string identicalCard, string password)
     :User(id, identicalCard, password, PATIENT) {}
-
-// Constructor đầy đủ
 Patient::Patient(string id, string identicalCard, string password,string fullName,string dateofbirth, string gender, string email, string phoneNumber, string address)
     :User(id,identicalCard,password,fullName,dateofbirth,gender,email,phoneNumber,address,PATIENT) {}
 
@@ -31,12 +27,10 @@ void Patient::displayInfo() const {
     User::displayInfo();
     cout << "\t\t\t\t\t==================================" << endl;
 }
-
 ostream& operator<<(ostream& o, const Patient& patient){
     o << static_cast<const User&>(patient);
     return o;
 }
-
 bool Patient::isProfileComplete() const {
     return !fullName.empty() && 
            !dateOfBirth.empty() && 
@@ -47,16 +41,13 @@ bool Patient::isProfileComplete() const {
 istream& operator>>(istream& in, Patient& patient){
     in >> static_cast<User&>(patient);
     if (in.peek() == '\n') in.ignore();
-
     return in;
 }
-// Book appointment
 bool Patient::bookAppointment(const string& doctorId, const string& date, const string& time, const string& reason) {
     if (!isProfileComplete()) {
         cout << "\n⚠ Please complete your personal information before scheduling an appointment!" << endl;
         return false;
     }
-
     string chosenDate = date;
     string chosenTime = time;
     string reasonInput = reason;
@@ -79,7 +70,6 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         tm tm_ptr = *localtime(&t);
         dates.push_back(tm_ptr);
     }
-
     auto patientApp = DataStore::getPatientAppointments(this->id);
     vector<pair<string, set<string>>> bookSlots; // pair: date + set (time)
     for (auto &appID : patientApp){
@@ -88,12 +78,9 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
             bookSlots.emplace_back(details.date,set<string>{details.time});
         }
     }
-
     auto getSlotCount = [&](const string& d, const string& slot){
         return DataStore::getDoctorAppointmentsForDateSlot(doctorId,d,slot).size();
     };
-
-    // kiem tra ngay nao FULL thi ko hien thi tren menu de chon nua
     bool isDateFull[7] = {false};
     for (int i = 0; i < 7; i++){
         int total = 0;
@@ -103,7 +90,6 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
         }
         if (total >= 35) isDateFull[i] = true;
     }
-
     cout << "\n\n\t\t\t\t\t==================== BOOKING CALENDAR ====================" << "\n\n";
 
     Calendar calendar;
@@ -146,7 +132,6 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     }
 
     cout << "\nPlease choose an appointment date!" << endl;
-
     int realChoiceDate = -1;
     while (true) {
         int choiceDate = runMenuHorizontal(dayChoice.data(), (int)dayChoice.size());
@@ -155,7 +140,6 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
             break;
         }
     }
-
     char buf[6];
     strftime(buf, sizeof(buf), "%d/%m", &dates[realChoiceDate]);
     chosenDate = string(buf);
@@ -205,7 +189,6 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     SetColor(2);
     cout << "✔ You chose the appointment time: " << chosenTime << endl;
     SetColor(7);
-
     if (reasonInput.empty()) {
         cout << "Reason: ";
         string r; 
@@ -221,7 +204,6 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     string appointmentId = DataStore::generateAppointmentID();
     vector<string> doctorInfo = getDoctorInfo(doctorId);
     string clinicName = (doctorInfo.size()>=3)? doctorInfo[2]:"Not updated";
-
     DataStore::AppointmentDetails details;
     details.appointmentId = appointmentId;
     details.patientId = this->id;
@@ -232,7 +214,6 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     details.clinic = clinicName;
     details.bookStatus = "Booked";
     details.visitStatus = "Not Done";
-
     if(DataStore::writeAppointment(appointmentId, details)) {
         system("cls");
         gotoXY(40,15); cout << "========================================" << endl;
@@ -300,33 +281,23 @@ bool Patient::viewUpcomingAppointments() const {
 
 // Cancel appointment
 bool Patient::cancelAppointment(const string& appointmentId) {
-    // Kiểm tra appointment có tồn tại không
     if (!DataStore::appointmentExists(appointmentId)) {
         cout << "Error: Not found appointment " << appointmentId << endl;
         return false;
     }
-    
-    // Đọc thông tin appointment
     DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
-    
-    // Kiểm tra appointment có phải của Patient này không
     if (details.patientId != this->id) {
         cout << "Error: This appointment does not belong to you!" << endl;
         return false;
     }
-    
-    // Kiểm tra trạng thái hiện tại
     if (details.bookStatus == "Cancelled") {
         cout << "This appointment has been canceled previously." << endl;
         return false;
     }
-    
     if (details.visitStatus == "Done") {
         cout << "Cannot cancel an appointment that has been completed!" << endl;
         return false;
     }
-    
-    // Cập nhật trạng thái
     if (DataStore::updateBookAppointmentStatus(appointmentId, "Cancelled")) {
         ostringstream oss;
         oss << "\n========================================" << endl;
@@ -337,27 +308,20 @@ bool Patient::cancelAppointment(const string& appointmentId) {
         cout << oss.str() << flush;
         return true;
     }
-    
     cout << "Error: Cannot cancel the appointment!" << endl;
     return false;
 }
-
-// View appointment history (all appointments including cancelled and completed)
 bool Patient::viewAppointmentHistory() const {
     vector<string> appointments = DataStore::getPatientAppointments(this->id);
-    
     if (appointments.empty()) {
         cout << "\nYou do not have any medical appointments" << endl;
         return false;
     }
-    
     int completedCount = 0;
     int cancelledCount = 0;
     int activeCount = 0;
-    
     for (const string& appointmentId : appointments) {
         DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
-        
         if (!details.appointmentId.empty()) {
             if (details.bookStatus == "Cancelled" || details.visitStatus == "Done"){
                 cout << "\n\t\t\t\t\t----------------------------------------" << endl;
@@ -368,7 +332,6 @@ bool Patient::viewAppointmentHistory() const {
                 cout << "\t\t\t\t\tTime: " << details.time << endl;
                 cout << "\t\t\t\t\tReason: " << details.reason << endl;
                 cout << "\t\t\t\t\tBook status: ";
-
                 if (details.bookStatus == "Cancelled"){
                     cout << "✗ Cancelled" << endl;
                     cout << "\t\t\t\t\tVisit Status: " << "✗" << details.visitStatus << endl;
@@ -382,7 +345,6 @@ bool Patient::viewAppointmentHistory() const {
             }
         }
     }
-    
     ostringstream os;
     os << "\n\t\t\t\t\t========================================" << endl;
     os << "\t\t\t\t\tStatistics:" << endl;
@@ -390,7 +352,6 @@ bool Patient::viewAppointmentHistory() const {
     os << "\t\t\t\t\t- Examination completed: " << completedCount << endl;
     os << "\t\t\t\t\t- Cancelled: " << cancelledCount << endl;
     os << "\t\t\t\t\t========================================" << endl;
-    
     SetColor(14);
     cout << os.str() << flush;
     SetColor(7);
@@ -404,26 +365,20 @@ int Patient::countActiveAppointments() const {
     int count = 0;
     for (const string& appointmentId : appointments) {
         DataStore::AppointmentDetails details = DataStore::readAppointment(appointmentId);
-        
         if (!details.appointmentId.empty() && 
             details.bookStatus == "Booked" && 
             details.visitStatus == "Not Done") {
             count++;
         }
     }
-    
     return count;
 }
-
-// Get doctor information for display
 vector<string> Patient::getDoctorInfo(const string& doctorId) const {
     string filepath = "data/doctors/" + doctorId + ".txt";
     ifstream file(filepath);
-    
     if (!file.is_open()) {
         return { doctorId + " [Not found information]"};
     }
-
     string line;
     string name = "";
     string specialization = "";
@@ -434,7 +389,6 @@ vector<string> Patient::getDoctorInfo(const string& doctorId) const {
         if (pos != string::npos) {
             string key = line.substr(0, pos);
             string value = line.substr(pos + 1);
-            
             if (key == "Full name") {
                 name = value;
             } else if (key == "Specialization") {
@@ -455,6 +409,5 @@ vector<string> Patient::getDoctorInfo(const string& doctorId) const {
     if (!clinic.empty()) {
         infor.push_back(clinic);
     }
-    
     return infor;
 }

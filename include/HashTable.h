@@ -1,9 +1,7 @@
 #pragma once
 #include <iostream>
 #include <functional>
-
 using namespace std;
-
 template <typename K, typename V>
 class HashTable {
     public:
@@ -29,8 +27,6 @@ class HashTable {
         size_t capacity;
         size_t hash(const K& key) const;
 };
-
-// Constructor - Khởi tạo hash table với kích thước cho trước
 template<typename K, typename V>
 HashTable<K,V>::HashTable(size_t size): tableSize(size), capacity(0) {
     table = new HashNode*[tableSize];
@@ -38,8 +34,6 @@ HashTable<K,V>::HashTable(size_t size): tableSize(size), capacity(0) {
         table[i] = nullptr;
     }
 }
-
-// Destructor - Giải phóng bộ nhớ
 template<typename K, typename V>
 HashTable<K,V>::~HashTable() {
     for(size_t i = 0; i < tableSize; i++) {
@@ -52,9 +46,6 @@ HashTable<K,V>::~HashTable() {
     }
     delete[] table;
 }
-
-// Insert - Thêm hoặc cập nhật cặp key-value
-// Time Complexity: O(1) average case, O(n) worst case (khi có nhiều collision)
 template<typename K, typename V>
 void HashTable<K,V>::insert(const K& key, const V& value) {
     if ((double)capacity / tableSize > 0.7) {
@@ -62,8 +53,6 @@ void HashTable<K,V>::insert(const K& key, const V& value) {
     }
     size_t index = hash(key);
     HashNode* current = table[index];
-    
-    // Tìm xem key đã tồn tại chưa, nếu có thì cập nhật value
     while(current != nullptr) {
         if(current->key == key) {
             current->value = value;  // Cập nhật giá trị
@@ -71,30 +60,21 @@ void HashTable<K,V>::insert(const K& key, const V& value) {
         }
         current = current->next;
     }
-    
-    // Key chưa tồn tại, thêm node mới vào đầu danh sách
     HashNode* newNode = new HashNode(key, value);
     newNode->next = table[index];
     table[index] = newNode;
     capacity++;
 }
-
-// Remove - Xóa một cặp key-value
-// Time Complexity: O(1) average case, O(n) worst case
 template<typename K, typename V>
 bool HashTable<K,V>::remove(const K& key) {
     size_t index = hash(key);
     HashNode* current = table[index];
     HashNode* prev = nullptr;
-    
     while(current != nullptr) {
         if(current->key == key) {
-            // Tìm thấy node cần xóa
             if(prev == nullptr) {
-                // Node cần xóa ở đầu danh sách
                 table[index] = current->next;
             } else {
-                // Node cần xóa ở giữa hoặc cuối danh sách
                 prev->next = current->next;
             }
             delete current;
@@ -104,17 +84,12 @@ bool HashTable<K,V>::remove(const K& key) {
         prev = current;
         current = current->next;
     }
-    
     return false;  // Không tìm thấy key
 }
-
-// Find - Tìm kiếm value theo key
-// Time Complexity: O(1) average case, O(n) worst case
 template<typename K, typename V>
 bool HashTable<K,V>::find(const K& key, V& value) const {
     size_t index = hash(key);
     HashNode* current = table[index];
-    
     while(current != nullptr) {
         if(current->key == key) {
             value = current->value;  // Gán giá trị tìm được vào tham số value
@@ -122,30 +97,22 @@ bool HashTable<K,V>::find(const K& key, V& value) const {
         }
         current = current->next;
     }
-    
     return false;  // Không tìm thấy key
 }
-
-// Hash Function - Tính toán index từ key
-// Time Complexity: O(1)
 template<typename K, typename V>
 size_t HashTable<K,V>::hash(const K& key) const {
     return std::hash<K>()(key) % tableSize;
 }
-
 template<typename K, typename V>
 void HashTable<K,V>::rehash() {
     size_t oldTableSize = tableSize;
     HashNode** oldTable = table;
-    
     tableSize *= 2;
     table = new HashNode*[tableSize]();
     capacity = 0;
-    
     for (size_t i = 0; i < tableSize; i++) {
         table[i] = nullptr;
     }
-    
     for (size_t i = 0; i < oldTableSize; i++) {
         HashNode* entry = oldTable[i];
         while (entry != nullptr) {
@@ -154,12 +121,10 @@ void HashTable<K,V>::rehash() {
             newNode->next = table[newIndex];
             table[newIndex] = newNode;
             capacity++;
-            
             HashNode* prev = entry;
             entry = entry->next;
             delete prev;
         }
     }
-    
     delete[] oldTable;
 }
