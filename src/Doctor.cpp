@@ -7,6 +7,11 @@
 #include "Calendar.h"
 #include "DataStore.h"
 #include "UI.h"
+
+// Khởi tạo biến static
+int Doctor::busyDaysCount = 0;
+int Doctor::lastResetMonth = -1;
+
 Doctor::Doctor() :User(){
     specialization = "";
     doctorRole = "";
@@ -155,25 +160,39 @@ bool Doctor::viewAppointment(){
 }
 
 bool Doctor::remarkAsBusy(){
-    DataStore dataStore;
-
-    vector<string> busyDate = dataStore.getBusyDate(this->id);
-    vector<string> oneDate;
-    map<string,vector<string>> busyTime;
-    for (const string& date : busyDate){
-        oneDate = dataStore.getBusyTime(this->id,date);
-        busyTime[date].insert(busyTime[date].end(), oneDate.begin(),oneDate.end());
+    // Kiểm tra và reset nếu sang tháng mới
+    time_t now = std::time(nullptr);
+    tm* currentTime = localtime(&now);
+    int currentMonth = currentTime->tm_mon;
+    
+    if (lastResetMonth != currentMonth) {
+        busyDaysCount = 0;
+        lastResetMonth = currentMonth;
     }
-
+    
+    // Kiểm tra đã đủ 3 ngày bận chưa
+    if (busyDaysCount >= 3) {
+        SetColor(12);
+        cout << "\n✘ You have reached the maximum limit of 3 busy days per month!" << endl;
+        cout << "Busy days used this month: " << busyDaysCount << "/3" << endl;
+        SetColor(7);
+        system("pause");
+        return false;
+    }
+    
+    DataStore dataStore;
+    vector<string> busyDate = dataStore.getBusyDate(this->id);
     
     Calendar calendar;
     calendar.showCalendar(this->id);
 
+    cout << "\nBusy days used this month: " << busyDaysCount << "/3" << endl;
     cout << "Please choose your busy day" << endl;
+    
     vector<string> dayChoice;
     vector<int> indexSlotDay;
     vector<tm> dates;
-    time_t now = std::time(nullptr);
+    
     for (int i = 0; i < 7; i++){
         time_t t = now + (i+1)*24*3600;
         tm tm_ptr = *localtime(&t);
@@ -183,23 +202,30 @@ bool Doctor::remarkAsBusy(){
     for (int i = 0; i < 7; i++){
         char buf[6];
         strftime(buf,sizeof(buf),"%d/%m", &dates[i]);
-        if (dates[i].tm_wday == 0) continue;
+        if (dates[i].tm_wday == 0) continue; // Bỏ qua Chủ nhật
 
-        bool isAllDay = false;
-        if (busyTime.find(string(buf)) != busyTime.end()){
-            for (const string& time : busyTime[string(buf)]){
-                if (time == "AllDay"){
-                    isAllDay = true;
-                    break;
-                }
+        // Kiểm tra ngày này đã được đánh dấu bận chưa
+        bool isAlreadyBusy = false;
+        for (const string& date : busyDate){
+            if (date == string(buf)){
+                isAlreadyBusy = true;
+                break;
             }
         }
 
-        if (!isAllDay){
+        if (!isAlreadyBusy){
             string showDay = dateWeek[dates[i].tm_wday] + "(" + string(buf) + ")";
             dayChoice.push_back(showDay);
             indexSlotDay.push_back(i);
         }
+    }
+
+    if (dayChoice.empty()){
+        SetColor(12);
+        cout << "\n✘ All available days in the next 7 days are already marked as busy!" << endl;
+        SetColor(7);
+        system("pause");
+        return false;
     }
 
     int realChoiceDate = -1;
@@ -210,6 +236,7 @@ bool Doctor::remarkAsBusy(){
             break;
         }
     }
+    
     char buf[6];
     strftime(buf, sizeof(buf), "%d/%m", &dates[realChoiceDate]);
     string chosenDate = string(buf);
@@ -217,57 +244,16 @@ bool Doctor::remarkAsBusy(){
     cout << "✔ Busy day: " << chosenDate << endl;
     SetColor(7);
 
-    cout << "\nPlease choose your busy time" << endl;
-    vector<string> timeChoice;
-    vector<int> indexSlotTime;
+    // Lưu ngày bận với thời gian "AllDay"
+    calendar.saveCalendarToFile(this->id, chosenDate, "AllDay");
     
-    bool isBusyTime[7] = {false};
-    for (const string& time : busyTime[chosenDate]){
-        if (time == "07:00")
-            isBusyTime[0] = true;
-        if (time == "08:00")
-            isBusyTime[1] = true;
-        if (time == "09:00")
-            isBusyTime[2] = true;
-        if (time == "10:00")
-            isBusyTime[3] = true;
-        if (time == "13:30")
-            isBusyTime[4] = true;
-        if (time == "14:30")
-            isBusyTime[5] = true;
-        if (time == "15:30")
-            isBusyTime[6] = true;
-    }
-
-    int index = 0;
-    for (int i = 0; i < 7; i++){
-        if (isBusyTime[i] == false){
-            timeChoice.push_back(timeSlot[i]);
-            indexSlotTime.push_back(i);
-            ++index;
-        }
-    }
-    timeChoice.push_back("AllDay");
-    indexSlotTime.push_back(timeChoice.size());
-
-    int realChoiceTime = -1;
-    while(true){
-        int choice = runMenuHorizontal(timeChoice.data(), (int)timeChoice.size());
-        if (choice >= 1 && choice <= (int)timeChoice.size()){
-            realChoiceTime = indexSlotTime[choice - 1];
-            break;
-        }
-    }
-    string chosenTime;
-    if (realChoiceTime == timeChoice.size()){
-        chosenTime = "AllDay";
-    }
-    else chosenTime = timeSlot[realChoiceTime];
+    // Tăng số ngày bận đã sử dụng
+    busyDaysCount++;
+    
     SetColor(2);
-    cout << "✔ Busy time: " << chosenTime << endl;
+    cout << "\n✔ Successfully marked " << chosenDate << " as busy day!" << endl;
+    cout << "Remaining busy days this month: " << (3 - busyDaysCount) << "/3" << endl;
     SetColor(7);
-
-    calendar.saveCalendarToFile(this->id, chosenDate, chosenTime);
     
     return true;
 }

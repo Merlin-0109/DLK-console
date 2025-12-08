@@ -116,6 +116,11 @@ bool DataStore::saveDoctorData(const string& id, const string& data) {
     if (file.is_open()) {
         file << data;
         file.close();
+        
+        string busyFilepath = getBusyFilePath(id);
+        ofstream busyFile(busyFilepath, ios::app);
+        busyFile.close();
+        
         return true;
     }
     return false;
@@ -188,6 +193,9 @@ string DataStore::getBusyFilePath(const string& doctorID){
 
 bool DataStore::saveBusyCalendarToFile(const string& doctorID, string date, string time){
     string filePath = DataStore::getBusyFilePath(doctorID);
+
+    ofstream createFile(filePath, ios::app);
+    createFile.close();
 
     ifstream file(filePath);
     if (!file.is_open()){
