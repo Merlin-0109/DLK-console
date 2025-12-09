@@ -7,8 +7,7 @@ private:
     string specialization;
     string doctorRole;
     string clinic;
-    static int busyDaysCount;
-    static int lastResetMonth;
+    int getBusyDaysInCurrentMonth() const;
 public:
     Doctor();
     Doctor(string id, string identityCard, string password);

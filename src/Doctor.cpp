@@ -8,10 +8,6 @@
 #include "DataStore.h"
 #include "UI.h"
 
-// Khởi tạo biến static
-int Doctor::busyDaysCount = 0;
-int Doctor::lastResetMonth = -1;
-
 Doctor::Doctor() :User(){
     specialization = "";
     doctorRole = "";
@@ -160,20 +156,13 @@ bool Doctor::viewAppointment(){
 }
 
 bool Doctor::remarkAsBusy(){
-    // Kiểm tra và reset nếu sang tháng mới
+    // Get current time for date calculations
     time_t now = std::time(nullptr);
-    tm* currentTime = localtime(&now);
-    int currentMonth = currentTime->tm_mon;
     
-    if (lastResetMonth != currentMonth) {
-        busyDaysCount = 0;
-        lastResetMonth = currentMonth;
-    }
-    DataStore dataStore;
-    vector<string> busyDate = dataStore.getBusyDate(this->id);
-
-    busyDaysCount = busyDate.size();
-    // Kiểm tra đã đủ 3 ngày bận chưa
+    // Get current busy days count for this month only
+    int busyDaysCount = getBusyDaysInCurrentMonth();
+    
+    // Check if reached the limit of 3 busy days per month
     if (busyDaysCount >= 3) {
         SetColor(12);
         cout << "\n✘ You have reached the maximum limit of 3 busy days per month!" << endl;
@@ -182,6 +171,9 @@ bool Doctor::remarkAsBusy(){
         system("pause");
         return false;
     }
+    
+    DataStore dataStore;
+    vector<string> busyDate = dataStore.getBusyDate(this->id);
     
     Calendar calendar;
     calendar.showCalendar(this->id);
@@ -207,7 +199,14 @@ bool Doctor::remarkAsBusy(){
         // Kiểm tra ngày này đã được đánh dấu bận chưa
         bool isAlreadyBusy = false;
         for (const string& date : busyDate){
-            if (date == string(buf)){
+            // Handle both formats: "dd/mm" and "dd/mm: AllDay"
+            string datePart = date;
+            size_t colonPos = date.find(':');
+            if (colonPos != string::npos) {
+                datePart = date.substr(0, colonPos);
+            }
+            
+            if (datePart == string(buf)){
                 isAlreadyBusy = true;
                 break;
             }
@@ -246,7 +245,8 @@ bool Doctor::remarkAsBusy(){
 
     calendar.saveCalendarToFile(this->id, chosenDate);
 
-    busyDaysCount++;
+    // Recalculate busy days count after adding new busy day
+    busyDaysCount = getBusyDaysInCurrentMonth();
     
     SetColor(2);
     cout << "\n✔ Successfully marked " << chosenDate << " as busy day!" << endl;
@@ -284,4 +284,45 @@ bool Doctor::updateAppointmentStatus(){
     }
     else DataStore::updateVisitAppointmentStatus(appointmentId,"Done");
     return false;
+}
+
+// Helper method to count busy days in current month only
+int Doctor::getBusyDaysInCurrentMonth() const {
+    DataStore dataStore;
+    vector<string> busyDates = dataStore.getBusyDate(this->id);
+    
+    // Get current month and year
+    time_t now = std::time(nullptr);
+    tm* currentTime = localtime(&now);
+    int currentMonth = currentTime->tm_mon + 1; // tm_mon is 0-11
+    int currentYear = currentTime->tm_year + 1900;
+    
+    int count = 0;
+    for (const string& dateStr : busyDates) {
+        // Handle both formats: "dd/mm" and "dd/mm: AllDay"
+        string datePart = dateStr;
+        size_t colonPos = dateStr.find(':');
+        if (colonPos != string::npos) {
+            datePart = dateStr.substr(0, colonPos);
+        }
+        
+        // Parse date format "dd/mm"
+        size_t slashPos = datePart.find('/');
+        if (slashPos != string::npos && slashPos > 0) {
+            try {
+                int day = stoi(datePart.substr(0, slashPos));
+                int month = stoi(datePart.substr(slashPos + 1));
+                
+                // Only count if it's in current month
+                if (month == currentMonth) {
+                    count++;
+                }
+            } catch (...) {
+                // Skip invalid date formats
+                continue;
+            }
+        }
+    }
+    
+    return count;
 }

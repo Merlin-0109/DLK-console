@@ -52,13 +52,20 @@ void Calendar::showCalendar(string doctorID){
 
             bool isBusy = false;
             for (const string& date : busyDate){
-                if (buf == date){
+                // Handle both formats: "dd/mm" and "dd/mm: AllDay"
+                string datePart = date;
+                size_t colonPos = date.find(':');
+                if (colonPos != string::npos) {
+                    datePart = date.substr(0, colonPos);
+                }
+                
+                if (buf == datePart){
                     SetColor(5);
                     cout << setw(15) << "[BUSY]";
                     SetColor(7);
                     isBusy = true;
+                    break;
                 }
-                if (isBusy) break;
             } 
             if (isBusy) continue;
             
