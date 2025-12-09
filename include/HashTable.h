@@ -55,7 +55,7 @@ void HashTable<K,V>::insert(const K& key, const V& value) {
     HashNode* current = table[index];
     while(current != nullptr) {
         if(current->key == key) {
-            current->value = value;  // Cập nhật giá trị
+            current->value = value;  
             return;
         }
         current = current->next;
@@ -84,7 +84,7 @@ bool HashTable<K,V>::remove(const K& key) {
         prev = current;
         current = current->next;
     }
-    return false;  // Không tìm thấy key
+    return false;  
 }
 template<typename K, typename V>
 bool HashTable<K,V>::find(const K& key, V& value) const {
@@ -92,12 +92,12 @@ bool HashTable<K,V>::find(const K& key, V& value) const {
     HashNode* current = table[index];
     while(current != nullptr) {
         if(current->key == key) {
-            value = current->value;  // Gán giá trị tìm được vào tham số value
+            value = current->value;  
             return true;
         }
         current = current->next;
     }
-    return false;  // Không tìm thấy key
+    return false;
 }
 template<typename K, typename V>
 size_t HashTable<K,V>::hash(const K& key) const {

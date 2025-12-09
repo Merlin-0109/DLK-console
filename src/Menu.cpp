@@ -263,10 +263,11 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     cout << "\n\n\n\t\t\t\t\tCANCEL THE APPOINTMENT" << endl;
                     SetColor(7);
                     patient->viewUpcomingAppointments();
-                    cin.ignore();
+                    // cin.ignore();
                     cout << "\nEnter the appointment code to cancel:";
                     getline(cin, appointmentId);
                     patient->cancelAppointment(appointmentId);
+                    wayBackMenu();
                     break;
                 }
                 case 5:{// Xem thông tin cá nhân
@@ -295,6 +296,7 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                         cout << "\t\t\t\t\t✗ Information saved unsuccessfully!" << endl;
                         SetColor(7);
                     }
+                    wayBackMenu();
                     break;
                 }
                 case 7:{ // Đổi Password
@@ -306,11 +308,15 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
                     SetColor(7);
                     if (patient->changePassword()) {
                         if (authSystem.saveUserData(patient)) {
+                            gotoXY(55,20);
+                            SetColor(10*16+6);
                             cout << "Updated password successfully!" << endl;
+                            SetColor(7);
                         } else {
                             cout << "Updated password unsuccessfully!" << endl;
                         }
                     }
+                    wayBackMenu();
                     break;
                 }
                 case 8:// Đăng xuất

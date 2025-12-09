@@ -131,7 +131,7 @@ bool User::changePassword() {
                 else{
                     gotoXY(boxX + 2, boxY + 8);
                     SetColor(12);
-                    cout << "\nNew passwords do not match! Please re-enter";
+                    cout << "New passwords do not match! Please re-enter";
                     SetColor(7);
                     _getch();
                     gotoXY(boxX + 2, boxY + 8);
