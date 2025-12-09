@@ -13,18 +13,11 @@ Calendar::~Calendar(){
 void Calendar::showCalendar(string doctorID){
     DataStore dataStore;
     vector<string> busyDate = dataStore.getBusyDate(doctorID);
-    map<string,vector<string>> busyTime;
-    vector<string> oneDate;
-    for (const string& date : busyDate){
-        oneDate = dataStore.getBusyTime(doctorID,date); // Lấy ra các khung giờ bận trong một ngày
-        busyTime[date].insert(busyTime[date].end(),oneDate.begin(),oneDate.end()); // tổng hợp khung giờ bận 
-    }
 
     auto getSlotCount = [&](const string &date, const string& time){
         return DataStore::getDoctorAppointmentsForDateSlot(doctorID, date, time).size();
     };
    
-
     vector<tm> dates;
     time_t now = std::time(nullptr);
     for (int i = 0; i < 7; i++){
@@ -60,19 +53,13 @@ void Calendar::showCalendar(string doctorID){
             bool isBusy = false;
             for (const string& date : busyDate){
                 if (buf == date){
-                    for (const string& time : busyTime[date]){
-                        if (time == "AllDay" || time == timeSlot[row]){
-                            SetColor(5);
-                            cout << setw(15) << "[BUSY]";
-                            SetColor(7);
-                            isBusy = true;
-                            break;
-                        }
-                    }
-                    if (isBusy) break;
+                    SetColor(5);
+                    cout << setw(15) << "[BUSY]";
+                    SetColor(7);
+                    isBusy = true;
                 }
+                if (isBusy) break;
             } 
-
             if (isBusy) continue;
             
             int count = getSlotCount(string(buf),timeSlot[row]);
@@ -94,8 +81,59 @@ void Calendar::showCalendar(string doctorID){
     }
 }
 
-bool Calendar::saveCalendarToFile(string doctorID, string date, string time){
+bool Calendar::saveCalendarToFile(string doctorID, string date){
     DataStore dataStore;
-    dataStore.saveBusyCalendarToFile(doctorID,date,time);
+    dataStore.saveBusyCalendarToFile(doctorID,date);
     return true;
+}
+
+void Calendar::printTicket(string appointmentId, string fullName, string doctor, 
+                          string specialization, string clinic, string date, 
+                          string time, string reason) {
+    int startX = 40;
+    int startY = 5;
+    int width = 60;
+    int totalHeight = 14; 
+    
+    drawBox(startX, startY, width, totalHeight);
+
+    gotoXY(startX + 2, startY + 1); cout << string(width - 2, ' ');
+    gotoXY(startX + (width - 18) / 2, startY + 2);
+    cout << "MEDICAL APPOINTMENT";
+    
+    gotoXY(startX + 2, startY + 3); cout << string(width - 2, ' ');
+
+    gotoXY(startX, startY + 4); cout << "├";
+    for (int i = 1; i < width; i++) {
+        gotoXY(startX + i, startY + 4); cout << "─";
+    }
+    gotoXY(startX + width, startY + 4); cout << "┤";
+
+    int contentY = startY + 5;
+    
+    gotoXY(startX + 2, contentY); 
+    cout << "   Appointment ID: " << appointmentId;
+    gotoXY(startX + 2, contentY + 1); 
+    cout << "   Patient: " << fullName;
+    gotoXY(startX + 2, contentY + 2); 
+    cout << "   Doctor: " << doctor;
+    gotoXY(startX + 2, contentY + 3); 
+    cout << "   Specialization: " << specialization;
+    gotoXY(startX + 2, contentY + 4); 
+    cout << "   Clinic: " << clinic;
+    gotoXY(startX + 2, contentY + 5); 
+    cout << "   Date: " << date << "  Time: " << time;
+    gotoXY(startX + 2, contentY + 6); 
+    cout << "   Reason: " << reason;
+
+    gotoXY(startX, startY + 12); cout << "├";
+    for (int i = 1; i < width; i++) {
+        gotoXY(startX + i, startY + 12); cout << "─";
+    }
+    gotoXY(startX + width, startY + 12); cout << "┤";
+    
+    gotoXY(startX + 2, startY + 13);
+    cout << "⚠ Please arrive on time and bring your Identity Card!";
+    
+    gotoXY(0, startY + totalHeight + 3);
 }

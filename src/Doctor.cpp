@@ -169,7 +169,10 @@ bool Doctor::remarkAsBusy(){
         busyDaysCount = 0;
         lastResetMonth = currentMonth;
     }
-    
+    DataStore dataStore;
+    vector<string> busyDate = dataStore.getBusyDate(this->id);
+
+    busyDaysCount = busyDate.size();
     // Kiểm tra đã đủ 3 ngày bận chưa
     if (busyDaysCount >= 3) {
         SetColor(12);
@@ -179,9 +182,6 @@ bool Doctor::remarkAsBusy(){
         system("pause");
         return false;
     }
-    
-    DataStore dataStore;
-    vector<string> busyDate = dataStore.getBusyDate(this->id);
     
     Calendar calendar;
     calendar.showCalendar(this->id);
@@ -240,14 +240,12 @@ bool Doctor::remarkAsBusy(){
     char buf[6];
     strftime(buf, sizeof(buf), "%d/%m", &dates[realChoiceDate]);
     string chosenDate = string(buf);
-    SetColor(2);
+    SetColor(12);
     cout << "✔ Busy day: " << chosenDate << endl;
     SetColor(7);
 
-    // Lưu ngày bận với thời gian "AllDay"
-    calendar.saveCalendarToFile(this->id, chosenDate, "AllDay");
-    
-    // Tăng số ngày bận đã sử dụng
+    calendar.saveCalendarToFile(this->id, chosenDate);
+
     busyDaysCount++;
     
     SetColor(2);

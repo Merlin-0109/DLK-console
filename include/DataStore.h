@@ -63,9 +63,8 @@ class DataStore {
         string getDoctorFilePath(const string& id);
         string getBusyFilePath(const string& doctorID);
 
-        bool saveBusyCalendarToFile(const string& doctorID, string date, string time);
+        bool saveBusyCalendarToFile(const string& doctorID, string date);
         vector<string> getBusyDate(const string& doctorID);
-        vector<string> getBusyTime(const string& doctorID, const string& date);
 
         // Lien quan den appointments
         static bool writeAppointment(const string& appointmentId, const AppointmentDetails& details);

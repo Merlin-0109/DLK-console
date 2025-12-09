@@ -191,7 +191,7 @@ string DataStore::getBusyFilePath(const string& doctorID){
     return busyFolder + "/" + doctorID + ".txt";
 }
 
-bool DataStore::saveBusyCalendarToFile(const string& doctorID, string date, string time){
+bool DataStore::saveBusyCalendarToFile(const string& doctorID, string date){
     string filePath = DataStore::getBusyFilePath(doctorID);
 
     ofstream createFile(filePath, ios::app);
@@ -205,24 +205,12 @@ bool DataStore::saveBusyCalendarToFile(const string& doctorID, string date, stri
 
     string line;
     vector<string> lines;
-    bool dateFound = false;
     while(getline(file,line)){
-        size_t pos = line.find(":");
-        if (pos != string::npos){
-            string key = line.substr(0,pos);
-
-            if (key == date ){
-                dateFound = true;
-                if (time == "AllDay") lines.push_back(date + ": " + time);
-                else lines.push_back(line + " " + time);
-            }
-            else lines.push_back(line);
-        }
-        else lines.push_back(line);
+        if (line != date)
+            lines.push_back(line);
     }
-    file.close(); 
-    
-    if (!dateFound) lines.push_back(date + ": " + time);
+    file.close();
+    lines.push_back(date);
 
     ofstream file1(filePath);
     if (!file1.is_open()){
@@ -251,56 +239,10 @@ vector<string> DataStore::getBusyDate(const string& doctorID){
 
     string line;
     while(getline(file,line)){
-        size_t pos = line.find(":");
-        if (pos != string::npos){
-            string key = line.substr(0,pos);
-
-            dateBusy.push_back(key);
-        }
+        dateBusy.push_back(line);
     }
     file.close();
     return dateBusy;
-}
-
-vector<string> DataStore::getBusyTime(const string& doctorID, const string& date){
-    string filePath = DataStore::getBusyFilePath(doctorID);
-
-    ifstream file(filePath);
-
-    if (!file.is_open()){
-        cout << "Can not open the busy file! _ getTime" << endl;
-        return {};
-    }
-
-    vector<string> timeBusy;
-
-    string line;
-    while (getline(file,line)){
-        size_t pos = line.find(":");
-        int countTime = 0; // đếm số khoảng ' ' - là số khung giờ được đánh dấu bận
-        for (char c : line){
-            if (c == ' ') countTime++;
-        }
-        if (pos != string::npos){
-            string key = line.substr(0,pos);
-            string value;
-            if (key == date){
-                    if (countTime == 1){
-                    value = line.substr(pos+2);
-                    timeBusy.push_back(value);
-                }
-                else {
-                    for (int i = 1; i <= countTime; i++){
-                        value = line.substr(pos + 2,5); // lấy ra 5 ký tự giờ, ví dụ : 10:00
-                        pos += 6;
-                        timeBusy.push_back(value);
-                    }
-                }
-            }   
-        }
-    }
-    file.close();
-    return timeBusy;
 }
 
 bool  DataStore::writeAppointment(const  string& appointmentId, const AppointmentDetails& details){
