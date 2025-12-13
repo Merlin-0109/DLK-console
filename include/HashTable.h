@@ -101,7 +101,12 @@ bool HashTable<K,V>::find(const K& key, V& value) const {
 }
 template<typename K, typename V>
 size_t HashTable<K,V>::hash(const K& key) const {
-    return std::hash<K>()(key) % tableSize;
+    size_t hash = 0;
+    string keyStr = key;
+    for (size_t i = 0; i < keyStr.length(); i++) {
+        hash = (hash << 5) + hash + keyStr[i];
+    }
+    return hash % tableSize;
 }
 template<typename K, typename V>
 void HashTable<K,V>::rehash() {
