@@ -15,4 +15,4 @@ void drawTable(int x, int y, vector<int> widths, vector<vector<string>> rows);
 int runMenu(string items[], int count);
 int runMenuHorizontal(string items[], int count);
 void showTitle(string fileName);
-#endif // UI_H
+#endif 

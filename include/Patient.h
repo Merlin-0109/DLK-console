@@ -20,16 +20,17 @@ public:
 
     void displayInfo() const override;
     bool isProfileComplete() const override;
-    
-    bool bookAppointment(const string& doctorId, const string& date, const string& time, const string& reason);
-    bool cancelAppointment(const string& appointmentId);
-    bool viewAppointmentHistory() const;
-    bool viewUpcomingAppointments() const;
-    void displayAppointmentDetails(const DataStore::AppointmentDetails& details) const;
-    int countActiveAppointments() const;
-    vector<string> getDoctorInfo(const string& doctorId) const;
 
     friend ostream& operator<<(ostream&, const Patient&);
     friend istream& operator>>(istream&, Patient&);
+    
+    bool bookAppointment(const string& doctorId, const string& date, const string& time, const string& reason);
+    bool viewUpcomingAppointments() const;
+    bool cancelAppointment(const string& appointmentId);
+    bool viewAppointmentHistory() const;
+    
+    void displayAppointmentDetails(const DataStore::AppointmentDetails& details) const;
+    int countActiveAppointments() const;
+    vector<string> getDoctorInfo(const string& doctorId) const;  
 };
 #endif

@@ -4,16 +4,20 @@
 #include <fstream>
 #include "UI.h"
 using namespace std;
+
 void gotoXY(int x, int y) {
     COORD c{ (SHORT)x, (SHORT)y };
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
 }
+
 void SetColor(int color) {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 }
+
 void clearScreen() {
     cout << "\033[2J\033[H" << flush;
 }
+
 void drawBox(int x, int y, int w, int h) {
     gotoXY(x, y); cout << "┌";
     gotoXY(x + w, y); cout << "┐";
@@ -28,6 +32,7 @@ void drawBox(int x, int y, int w, int h) {
         gotoXY(x + w, y + i); cout << "│";
     }
 }
+
 string centerText(const string& text, int width){
     int len = text.length();
     if (len >= width)
@@ -36,6 +41,7 @@ string centerText(const string& text, int width){
     int right = width - len - left;
     return string(left,' ') + text + string(right, ' ');
 }
+
 void drawTable(int x, int y, vector<int> widths, vector<vector<string>> rows){
     int cols = widths.size();
     gotoXY(x,y);
@@ -77,6 +83,7 @@ void drawTable(int x, int y, vector<int> widths, vector<vector<string>> rows){
         }
     }
 }
+
 int runMenu(string items[], int count) {
     int choice = 1; 
     char key;
@@ -157,6 +164,7 @@ int runMenu(string items[], int count) {
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
     return choice;
 }
+
 int runMenuHorizontal(string items[], int count){
     int choice = 1;
     char key;
@@ -257,6 +265,7 @@ int runMenuHorizontal(string items[], int count){
     gotoXY(startX, cursorReturnY); 
     return choice;
 }
+
 void showTitle(string fileName){
     ostringstream oss;
     ifstream file(fileName);

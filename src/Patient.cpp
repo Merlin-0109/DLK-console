@@ -11,26 +11,30 @@
 #include "UI.h"
 #include "Calendar.h"
 
-// Constructor mặc định
+/*--------------------------------------------------------------
+                    CONSTRUCTOR - DESTRUCTOR
+---------------------------------------------------------------*/
 Patient::Patient() :User() {
     userType = PATIENT;
 }
+
 Patient::Patient(string id, string identicalCard, string password)
     :User(id, identicalCard, password, PATIENT) {}
+
 Patient::Patient(string id, string identicalCard, string password,string fullName,string dateofbirth, string gender, string email, string phoneNumber, string address)
     :User(id,identicalCard,password,fullName,dateofbirth,gender,email,phoneNumber,address,PATIENT) {}
 
 Patient::~Patient() {}
 
+/*--------------------------------------------------------------
+                    HIỂN THỊ THÔNG TIN CÁ NHÂN
+---------------------------------------------------------------*/
 void Patient::displayInfo() const {
     cout << "\t\t\t\t\t==================================" << endl;
     User::displayInfo();
     cout << "\t\t\t\t\t==================================" << endl;
 }
-ostream& operator<<(ostream& o, const Patient& patient){
-    o << static_cast<const User&>(patient);
-    return o;
-}
+
 bool Patient::isProfileComplete() const {
     return !fullName.empty() && 
            !dateOfBirth.empty() && 
@@ -38,11 +42,24 @@ bool Patient::isProfileComplete() const {
            !phoneNumber.empty() && 
            !address.empty();
 }
+
+/*--------------------------------------------------------------
+                ĐA NĂNG HÓA TOÁN TỬ NHẬP - XUẤT
+---------------------------------------------------------------*/
+ostream& operator<<(ostream& o, const Patient& patient){
+    o << static_cast<const User&>(patient);
+    return o;
+}
+
 istream& operator>>(istream& in, Patient& patient){
     in >> static_cast<User&>(patient);
     if (in.peek() == '\n') in.ignore();
     return in;
 }
+
+/*--------------------------------------------------------------
+                CÁC CHỨC NĂNG DÀNH CHO BỆNH NHÂN
+---------------------------------------------------------------*/
 bool Patient::bookAppointment(const string& doctorId, const string& date, const string& time, const string& reason) {
     if (!isProfileComplete()) {
         cout << "\n⚠ Please complete your personal information before scheduling an appointment!" << endl;
@@ -202,8 +219,7 @@ bool Patient::bookAppointment(const string& doctorId, const string& date, const 
     cout << "Error: Unable to schedule an appointment!" << endl;
     return false;
 }
-
-// View upcoming appointments 
+ 
 bool Patient::viewUpcomingAppointments() const {
     vector<string> appointments = DataStore::getPatientAppointments(this->id);
     
@@ -244,7 +260,6 @@ bool Patient::viewUpcomingAppointments() const {
     return true;
 }
 
-// Cancel appointment
 bool Patient::cancelAppointment(const string& appointmentId) {
     if (!DataStore::appointmentExists(appointmentId)) {
         cout << "Error: Not found appointment " << appointmentId << endl;
@@ -276,6 +291,7 @@ bool Patient::cancelAppointment(const string& appointmentId) {
     cout << "Error: Cannot cancel the appointment!" << endl;
     return false;
 }
+
 bool Patient::viewAppointmentHistory() const {
     vector<string> appointments = DataStore::getPatientAppointments(this->id);
     if (appointments.empty()) {
@@ -324,7 +340,9 @@ bool Patient::viewAppointmentHistory() const {
     return true;
 }
 
-// Count active appointments
+/*--------------------------------------------------------------
+            ĐẾM SỐ LỊCH KHÁM SẮP TỚI CỦA BỆNH NHÂN
+---------------------------------------------------------------*/
 int Patient::countActiveAppointments() const {
     vector<string> appointments = DataStore::getPatientAppointments(this->id);
     int count = 0;
@@ -338,6 +356,10 @@ int Patient::countActiveAppointments() const {
     }
     return count;
 }
+
+/*--------------------------------------------------------------
+                LẤY THÔNG TIN CƠ BẢN CỦA BÁC SĨ
+---------------------------------------------------------------*/
 vector<string> Patient::getDoctorInfo(const string& doctorId) const {
     string filepath = "data/doctors/" + doctorId + ".txt";
     ifstream file(filepath);

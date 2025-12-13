@@ -5,13 +5,13 @@
 #include "User.h"
 #include "AuthSystem.h"
 using namespace std;
-void clearInputBuffer();
-int displayMainMenu();
+void mainMenu();
 int displayRegisterMenu();
 int displayDoctorChoice();
 int displayPatientChoice();
-void wayBackMenu();
-void mainMenu();
 void handleRegistration(AuthSystem& authSystem);
 void handleUserSession(AuthSystem& authSystem, User* user);
+int displayMainMenu();
+void clearInputBuffer();
+void wayBackMenu();
 #endif 

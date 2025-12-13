@@ -6,16 +6,22 @@
 #include "UI.h"
 #include "AuthSystem.h"
 using namespace std;
+
+/*--------------------------------------------------------------
+                NỘI DUNG HIỂN THỊ TRÊN MENU
+---------------------------------------------------------------*/
 string menuMain[] = {
     "Register",
     "Log in",
     "Exit"
 };
+
 string menuLogIn_Out[] = {
     "Doctor",
     "Patient",
     "Exit"
 };
+
 string menuDoctor[] = {
     "View appointment",
     "Mark as busy",
@@ -25,6 +31,7 @@ string menuDoctor[] = {
     "Change password",
     "Log out"
 };
+
 string menuPatient[] = {
     "Book appointment",
     "View upcomming appointment",
@@ -35,26 +42,92 @@ string menuPatient[] = {
     "Change password",
     "Log out"
 };
-void clearInputBuffer() {
-    cin.clear();
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+/*--------------------------------------------------------------
+                        MENU CHÍNH
+---------------------------------------------------------------*/
+void mainMenu(){
+    SetConsoleOutputCP(65001);
+    SetConsoleCP(65001);
+    system("cls");
+    const int boxX = 50, boxY = 10, boxW = 80, boxH = 12;
+    SetColor(2);
+    drawBox(boxX,boxY,boxW,boxH);
+    SetColor(7);
+    gotoXY(boxX + 30, boxY + 1);
+    SetColor(6);
+    cout << "PBL2: DO AN LAP TRINH CO SO";
+    gotoXY(boxX + 20, boxY + 2);
+    cout << "DE TAI: XAY DUNG UNG DUNG DAT LICH KHAM BENH";
+    SetColor(7);
+    gotoXY(boxX + 20, boxY + 5);
+    cout << "LOP: 24T_KHDL";
+    gotoXY(boxX + 20, boxY + 6);
+    cout << "GVHG: ThS. Tran Ho Thuy Tien";
+    gotoXY(boxX + 20, boxY + 9);
+    cout << "MSSV: 102240262 - Phan Vu Long";
+    gotoXY(boxX + 20, boxY + 10);
+    cout << "MSSV: 102240282 - Tran Thi Tuyet Trinh\n\n\n\n\n\n";
+    system("pause");
+    AuthSystem authSystem;
+    bool exit = false;
+    system("cls");
+    while (!exit) {
+        showTitle("title.txt");
+        int choice = displayMainMenu();
+        switch (choice) {
+                case 1:{ // đăng ký
+                system("cls");
+                showTitle("title.txt");
+                handleRegistration(authSystem);
+                clearInputBuffer();
+                User* user = authSystem.handleLogin(authSystem);
+                if (user != nullptr) {
+                    handleUserSession(authSystem, user);
+                }
+                break;
+            }
+            case 2:{ // đăng nhập
+                system("cls");
+                User* user = authSystem.handleLogin(authSystem);
+                if (user != nullptr) {
+                    handleUserSession(authSystem, user);
+                }
+                break;
+            }
+            case 3:{ // thoát
+                showTitle("title.txt");
+                system("cls");
+                cout << "\nThank you for using the system! Goodbye" << endl;
+                exit = true;
+                break;
+            }
+        }
+    }
 }
+
+/*--------------------------------------------------------------
+                    HIỂN THỊ CÁC MENU CHÍNH
+---------------------------------------------------------------*/
 int displayMainMenu() {
     return runMenu(menuMain,3);
 }
+
 int displayRegisterMenu() {
     return runMenu(menuLogIn_Out,3);
 }
+
 int displayDoctorChoice(){
     return runMenu(menuDoctor,7);
 }
+
 int displayPatientChoice(){
     return runMenu(menuPatient,8);
 }
-void wayBackMenu(){
-    cout << "Please press any key to way back main menu ..." << endl;
-    _getch();
-}
+
+/*--------------------------------------------------------------
+            HIỂN THỊ MENU ĐĂNG KÝ VAI TRÒ CỦA TÀI KHOẢN
+---------------------------------------------------------------*/
 void handleRegistration(AuthSystem& authSystem) {
     int choice;
         SetColor(2);
@@ -80,6 +153,10 @@ void handleRegistration(AuthSystem& authSystem) {
             }
         }
 }
+
+/*--------------------------------------------------------------
+        HIỂN THỊ MENU CHỨC NĂNG CỦA BÁC SĨ - BỆNH NHÂN
+---------------------------------------------------------------*/
 void handleUserSession(AuthSystem& authSystem, User* user) {
     int choice;
     bool logout = false;
@@ -329,62 +406,16 @@ void handleUserSession(AuthSystem& authSystem, User* user) {
         }   
     }
 }
-void mainMenu(){
-    SetConsoleOutputCP(65001);
-    SetConsoleCP(65001);
-    system("cls");
-    const int boxX = 50, boxY = 10, boxW = 80, boxH = 12;
-    SetColor(2);
-    drawBox(boxX,boxY,boxW,boxH);
-    SetColor(7);
-    gotoXY(boxX + 30, boxY + 1);
-    SetColor(6);
-    cout << "PBL2: DO AN LAP TRINH CO SO";
-    gotoXY(boxX + 20, boxY + 2);
-    cout << "DE TAI: XAY DUNG UNG DUNG DAT LICH KHAM BENH";
-    SetColor(7);
-    gotoXY(boxX + 20, boxY + 5);
-    cout << "LOP: 24T_KHDL";
-    gotoXY(boxX + 20, boxY + 6);
-    cout << "GVHG: ThS. Tran Ho Thuy Tien";
-    gotoXY(boxX + 20, boxY + 9);
-    cout << "MSSV: 102240262 - Phan Vu Long";
-    gotoXY(boxX + 20, boxY + 10);
-    cout << "MSSV: 102240282 - Tran Thi Tuyet Trinh\n\n\n\n\n\n";
-    system("pause");
-    AuthSystem authSystem;
-    bool exit = false;
-    system("cls");
-    while (!exit) {
-        showTitle("title.txt");
-        int choice = displayMainMenu();
-        switch (choice) {
-                case 1:{ // đăng ký
-                system("cls");
-                showTitle("title.txt");
-                handleRegistration(authSystem);
-                clearInputBuffer();
-                User* user = authSystem.handleLogin(authSystem);
-                if (user != nullptr) {
-                    handleUserSession(authSystem, user);
-                }
-                break;
-            }
-            case 2:{ // đăng nhập
-                system("cls");
-                User* user = authSystem.handleLogin(authSystem);
-                if (user != nullptr) {
-                    handleUserSession(authSystem, user);
-                }
-                break;
-            }
-            case 3:{ // thoát
-                showTitle("title.txt");
-                system("cls");
-                cout << "\nThank you for using the system! Goodbye" << endl;
-                exit = true;
-                break;
-            }
-        }
-    }
+
+/*--------------------------------------------------------------
+                    CÁC HÀM HỖ TRỢ KHÁC
+---------------------------------------------------------------*/
+void clearInputBuffer() {
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
+
+void wayBackMenu(){
+    cout << "Please press any key to way back main menu ..." << endl;
+    _getch();
 }

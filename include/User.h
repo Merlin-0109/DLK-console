@@ -40,6 +40,7 @@ class User {
         string getPhoneNumber() const;
         string getAddress() const;
         UserType getUserType() const;
+        virtual string getUserTypeString() const;
         void setID(string id);
         void setIdentityCard(string cccd);
         void setPassword(string password);
@@ -50,14 +51,13 @@ class User {
         void setPhoneNumber(string phoneNumber);
         void setAddress(string address);
         void setUserType(UserType type);
-
-        virtual bool isProfileComplete() const;
+        
         virtual bool updateProfile(User& user);
-        bool changePassword();
+        virtual bool isProfileComplete() const;
         virtual void displayInfo() const;
-        virtual string getUserTypeString() const;
+        bool changePassword();
 
-        friend ostream& operator<<(ostream&, const User&);
         friend istream& operator>>(istream&, User&);
+        friend ostream& operator<<(ostream&, const User&);
 };
 #endif 

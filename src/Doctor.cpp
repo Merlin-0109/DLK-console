@@ -223,13 +223,7 @@ bool Doctor::remarkAsBusy(){
 
         bool isAlreadyBusy = false;
         for (const string& date : busyDate){
-            string datePart = date;
-            size_t colonPos = date.find(':');
-            if (colonPos != string::npos) {
-                datePart = date.substr(0, colonPos);
-            }
-            
-            if (datePart == string(buf)){
+            if (date == string(buf)){
                 isAlreadyBusy = true;
                 break;
             }
@@ -311,7 +305,7 @@ bool Doctor::updateAppointmentStatus(){
 }
 
 /*--------------------------------------------------------------
-                
+                ĐẾM SỐ NGÀY BẬN TRONG THÁNG
 ---------------------------------------------------------------*/
 int Doctor::getBusyDaysInCurrentMonth() const {
     DataStore dataStore;
@@ -324,18 +318,14 @@ int Doctor::getBusyDaysInCurrentMonth() const {
     
     int count = 0;
     for (const string& dateStr : busyDates) {
-        string datePart = dateStr;
-        size_t colonPos = dateStr.find(':');
-        if (colonPos != string::npos) {
-            datePart = dateStr.substr(0, colonPos);
-        }
-
-        size_t slashPos = datePart.find('/');
+        // Parse date format "dd/mm"
+        size_t slashPos = dateStr.find('/');
         if (slashPos != string::npos && slashPos > 0) {
             try {
-                int day = stoi(datePart.substr(0, slashPos));
-                int month = stoi(datePart.substr(slashPos + 1));
-
+                int day = stoi(dateStr.substr(0, slashPos));
+                int month = stoi(dateStr.substr(slashPos + 1));
+                
+                // Only count if it's in current month
                 if (month == currentMonth) {
                     count++;
                 }

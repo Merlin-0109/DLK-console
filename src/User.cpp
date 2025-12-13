@@ -9,81 +9,135 @@
 #include "User.h"
 #include "UI.h"
 
+/*--------------------------------------------------------------
+                    CONSTRUCTOR - DESTRUCTOR
+---------------------------------------------------------------*/
 User::User() :id(""), identityCard(""), password(""), email(""), fullName(""), userType(PATIENT) {}
 
-// construct cho đăng ký
 User::User(string id, string identityCard,string password, UserType type)
     :id(id),identityCard(identityCard), password(password), fullName(""), userType(type) {}
 
-// constructor đầy đủ
 User::User(string id, string identityCard, string password, string fullname, string dateofbirth, string gender, string email, string phoneNumber, string address, UserType type)
     :id(id),identityCard(identityCard),  password(password), fullName(fullname), dateOfBirth(dateofbirth), gender(gender), email(email), phoneNumber(phoneNumber),address(address), userType(type) {}
 
-// Destructor
 User::~User() {}
+
+/*--------------------------------------------------------------
+                        CÁC HÀM GET - SET
+---------------------------------------------------------------*/
 string User::getID() const {
     return id;
 }
+
 string User::getPassword() const {
     return password;
 }
+
 string User::getIdentityCard() const{
     return identityCard;
 }
+
 string User::getFullName() const {
     return fullName;
 }
+
 string User::getDateOfBirth() const {
     return dateOfBirth;
 }
+
 string User::getGender() const{
     return gender;
 }
+
 string User::getEmail() const {
     return email;
 }
+
 string User::getPhoneNumber() const {
     return phoneNumber;
 }
+
 string User::getAddress() const {
     return address;
 }
-bool User::isProfileComplete() const {
-    return !fullName.empty();
-}
+
 UserType User::getUserType() const {
     return userType;
 }
+
+string User::getUserTypeString() const {
+    switch (userType) {
+        case DOCTOR:return "Doctor";
+        case PATIENT:return "Patient";
+        default:return "Undefined";
+    }
+}
+
 void User::setID(string id) {
     this->id = id;
 }
+
 void User::setPassword(string password) {
     this->password = password;
 }
+
 void User::setIdentityCard(string Identitycard){
     this->identityCard = Identitycard;
 }
+
 void User::setFullName(string fullName) {
     this->fullName = fullName;
 }
+
 void User::setDateOfBirth(string dateOfBirth) {
     this->dateOfBirth = dateOfBirth;
 }
+
 void User::setGender(string gender){
     this->gender = gender;
 }
+
 void User::setEmail(string email) {
     this->email = email;
 }
+
 void User::setPhoneNumber(string phoneNumber) {
     this->phoneNumber = phoneNumber;
 }
+
 void User::setAddress(string address) {
     this->address = address;
 }
+
 void User::setUserType(UserType type) {
     this->userType = type;
 }
+
+/*--------------------------------------------------------------
+                    CẬP NHẬT THÔNG TIN CÁ NHÂN
+---------------------------------------------------------------*/
+bool User::updateProfile(User& user){
+    cin >> user;
+    return true;
+}
+
+bool User::isProfileComplete() const {
+    return !fullName.empty();
+}
+void User::displayInfo() const {
+    cout << "\t\t\t\t\tID:" << id << endl;
+    cout << "\t\t\t\t\tIdentity card:" << identityCard << endl;
+    cout << "\t\t\t\t\tPassword:" << password << endl;
+    cout << "\t\t\t\t\tFull name:" << (fullName.empty() ? "[Not updated]" :fullName) << endl;
+    cout << "\t\t\t\t\tEmail:" << (email.empty()?"[Not updated]" : email) << endl;
+    cout << "\t\t\t\t\tDate of birth:" << (dateOfBirth.empty() ? "[Not updated]" : dateOfBirth) << endl;
+    cout << "\t\t\t\t\tGender:" << (gender.empty() ? "[Not updated]" : gender) << endl;
+    cout << "\t\t\t\t\tAddress:" << (address.empty() ? "[Not updated]" : address) << endl;
+}
+
+/*--------------------------------------------------------------
+                    ĐỔI MẬT KHẨU TÀI KHOẢN
+---------------------------------------------------------------*/
 bool User::changePassword() {
     string oldPassword = User::getPassword();
     string oldPass, newPass, confirmNewPass;
@@ -154,39 +208,10 @@ bool User::changePassword() {
     }
     return true;
 }
-void User::displayInfo() const {
-    cout << "\t\t\t\t\tID:" << id << endl;
-    cout << "\t\t\t\t\tIdentity card:" << identityCard << endl;
-    cout << "\t\t\t\t\tPassword:" << password << endl;
-    cout << "\t\t\t\t\tFull name:" << (fullName.empty() ? "[Not updated]" :fullName) << endl;
-    cout << "\t\t\t\t\tEmail:" << (email.empty()?"[Not updated]" : email) << endl;
-    cout << "\t\t\t\t\tDate of birth:" << (dateOfBirth.empty() ? "[Not updated]" : dateOfBirth) << endl;
-    cout << "\t\t\t\t\tGender:" << (gender.empty() ? "[Not updated]" : gender) << endl;
-    cout << "\t\t\t\t\tAddress:" << (address.empty() ? "[Not updated]" : address) << endl;
-}
-bool User::updateProfile(User& user){
-    cin >> user;
-    return true;
-}
-string User::getUserTypeString() const {
-    switch (userType) {
-        case DOCTOR:return "Doctor";
-        case PATIENT:return "Patient";
-        default:return "Undefined";
-    }
-}
-ostream& operator<<(ostream& out, const User& user){
-    out << "ID:" << user.getID()
-        << "\nIdentity card:" << user.getIdentityCard()
-        << "\nPassword:" << user.getPassword()
-        << "\nFull name:" << user.getFullName() 
-        << "\nDate of birth:" << user.getDateOfBirth()
-        << "\nGender:" << user.getGender()
-        << "\nEmail:" << user.getEmail()
-        << "\nPhone number:" << user.getPhoneNumber()
-        << "\nAddress:" << user.getAddress() << endl;
-        return out;
-}
+
+/*--------------------------------------------------------------
+                    ĐA NĂNG HÓA TOÁN TỬ NHẬP - XUẤT
+---------------------------------------------------------------*/
 istream& operator>>(istream& in, User& user){
     bool isInteract = (&in == &cin);
     if (!isInteract){
@@ -327,3 +352,17 @@ istream& operator>>(istream& in, User& user){
     }
     return in;
 }
+
+ostream& operator<<(ostream& out, const User& user){
+    out << "ID:" << user.getID()
+        << "\nIdentity card:" << user.getIdentityCard()
+        << "\nPassword:" << user.getPassword()
+        << "\nFull name:" << user.getFullName() 
+        << "\nDate of birth:" << user.getDateOfBirth()
+        << "\nGender:" << user.getGender()
+        << "\nEmail:" << user.getEmail()
+        << "\nPhone number:" << user.getPhoneNumber()
+        << "\nAddress:" << user.getAddress() << endl;
+        return out;
+}
+
