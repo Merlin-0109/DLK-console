@@ -2,6 +2,7 @@
 #include <iostream>
 #include <functional>
 using namespace std;
+
 template <typename K, typename V>
 class HashTable {
     public:
@@ -27,6 +28,7 @@ class HashTable {
         size_t capacity;
         size_t hash(const K& key) const;
 };
+
 template<typename K, typename V>
 HashTable<K,V>::HashTable(size_t size): tableSize(size), capacity(0) {
     table = new HashNode*[tableSize];
@@ -34,6 +36,7 @@ HashTable<K,V>::HashTable(size_t size): tableSize(size), capacity(0) {
         table[i] = nullptr;
     }
 }
+
 template<typename K, typename V>
 HashTable<K,V>::~HashTable() {
     for(size_t i = 0; i < tableSize; i++) {
@@ -46,6 +49,7 @@ HashTable<K,V>::~HashTable() {
     }
     delete[] table;
 }
+
 template<typename K, typename V>
 void HashTable<K,V>::insert(const K& key, const V& value) {
     if ((double)capacity / tableSize > 0.7) {
@@ -65,6 +69,7 @@ void HashTable<K,V>::insert(const K& key, const V& value) {
     table[index] = newNode;
     capacity++;
 }
+
 template<typename K, typename V>
 bool HashTable<K,V>::remove(const K& key) {
     size_t index = hash(key);
@@ -86,6 +91,7 @@ bool HashTable<K,V>::remove(const K& key) {
     }
     return false;  
 }
+
 template<typename K, typename V>
 bool HashTable<K,V>::find(const K& key, V& value) const {
     size_t index = hash(key);
@@ -99,6 +105,7 @@ bool HashTable<K,V>::find(const K& key, V& value) const {
     }
     return false;
 }
+
 template<typename K, typename V>
 size_t HashTable<K,V>::hash(const K& key) const {
     size_t hash = 0;
@@ -108,6 +115,7 @@ size_t HashTable<K,V>::hash(const K& key) const {
     }
     return hash % tableSize;
 }
+
 template<typename K, typename V>
 void HashTable<K,V>::rehash() {
     size_t oldTableSize = tableSize;

@@ -8,10 +8,9 @@
 #include "DataStore.h"
 #include "UI.h"
 
-// Khởi tạo biến static
-int Doctor::busyDaysCount = 0;
-int Doctor::lastResetMonth = -1;
-
+/*--------------------------------------------------------------
+                    CONSTRUCTOR - DESTRUCTOR
+---------------------------------------------------------------*/
 Doctor::Doctor() :User(){
     specialization = "";
     doctorRole = "";
@@ -27,33 +26,39 @@ Doctor::Doctor(string id, string identityCard, string password)
 Doctor::Doctor(string id, string identityCard, string password,string fullName,string dateofbirth, string gender, string email, string phoneNumber, string address ,string specialization, string doctorRole, string clinic)
     :User(id,identityCard,password,fullName,dateofbirth,gender,email,phoneNumber,address, DOCTOR),
     specialization(specialization), doctorRole(doctorRole), clinic(clinic) {}
+
 Doctor::~Doctor() {}
+
+/*--------------------------------------------------------------
+                        CÁC HÀM GET - SET
+---------------------------------------------------------------*/
 string Doctor::getSpecialization() const {
     return specialization;
 }
+
 string Doctor::getDoctorRole() const{
     return doctorRole;
 }
+
 string Doctor::getClinic() const{
     return clinic;
 }
+
 void Doctor::setSpecialization(string specialization) {
     this->specialization = specialization;
 }
+
 void Doctor::setDoctorRole(string doctorRole){
     this->doctorRole = doctorRole;
 }
+
 void Doctor::setClinic(string clinic){
     this->clinic = clinic;
 }
-void Doctor::displayInfo() const {
-    cout << "\t\t\t\t\t==================================" << endl;
-    User::displayInfo();
-    cout << "\t\t\t\t\tSpecialization:" << (specialization.empty() ? "[Not updated]" :specialization) << endl;
-    cout << "\t\t\t\t\tRole:" << (doctorRole.empty()?"[Not updated]" :doctorRole) << endl;
-    cout << "\t\t\t\t\tClinic:" << (clinic.empty()?"[Not updated]" :clinic) << endl;
-    cout << "\t\t\t\t\t==================================" << endl;
-}
+
+/*--------------------------------------------------------------
+                CẬP NHẬT VÀ HIỂN THỊ THÔNG TIN CÁ NHÂN
+---------------------------------------------------------------*/
 bool Doctor::updateProfile(Doctor& doctor){
     User::updateProfile(doctor);
     SetColor(9);
@@ -82,6 +87,30 @@ bool Doctor::updateProfile(Doctor& doctor){
     }
     return true;
 }
+
+void Doctor::displayInfo() const {
+    cout << "\t\t\t\t\t==================================" << endl;
+    User::displayInfo();
+    cout << "\t\t\t\t\tSpecialization:" << (specialization.empty() ? "[Not updated]" :specialization) << endl;
+    cout << "\t\t\t\t\tRole:" << (doctorRole.empty()?"[Not updated]" :doctorRole) << endl;
+    cout << "\t\t\t\t\tClinic:" << (clinic.empty()?"[Not updated]" :clinic) << endl;
+    cout << "\t\t\t\t\t==================================" << endl;
+}
+
+bool Doctor::isProfileComplete() const {
+    return !fullName.empty() && 
+           !dateOfBirth.empty() && 
+           !gender.empty() && 
+           !phoneNumber.empty() && 
+           !address.empty() &&
+           !specialization.empty() &&
+           !doctorRole.empty()&&
+           !clinic.empty();
+}
+
+/*--------------------------------------------------------------
+                ĐA NĂNG HÓA TOÁN TỬ NHẬP - XUẤT
+---------------------------------------------------------------*/
 ostream& operator<<(ostream& o, const Doctor& doctor){
     o << static_cast<const User&>(doctor);
     o << "Specialization:" << doctor.getSpecialization()
@@ -89,6 +118,7 @@ ostream& operator<<(ostream& o, const Doctor& doctor){
         << "\nClinic:" << doctor.getClinic() << endl;
     return o;
 }
+
 istream& operator>>(istream& in, Doctor& doctor){
     bool isInteract = (&in == &cin);
     if (!isInteract) {
@@ -130,16 +160,10 @@ istream& operator>>(istream& in, Doctor& doctor){
     }
     return in;
 }
-bool Doctor::isProfileComplete() const {
-    return !fullName.empty() && 
-           !dateOfBirth.empty() && 
-           !gender.empty() && 
-           !phoneNumber.empty() && 
-           !address.empty() &&
-           !specialization.empty() &&
-           !doctorRole.empty()&&
-           !clinic.empty();
-}
+
+/*--------------------------------------------------------------
+                CÁC CHỨC NĂNG DÀNH CHO BÁC SĨ
+---------------------------------------------------------------*/
 bool Doctor::viewAppointment(){
     vector<string> appointments = DataStore::getDoctorAppointments(this->id);
     if (appointments.empty()) {
@@ -160,20 +184,10 @@ bool Doctor::viewAppointment(){
 }
 
 bool Doctor::remarkAsBusy(){
-    // Kiểm tra và reset nếu sang tháng mới
     time_t now = std::time(nullptr);
-    tm* currentTime = localtime(&now);
-    int currentMonth = currentTime->tm_mon;
     
-    if (lastResetMonth != currentMonth) {
-        busyDaysCount = 0;
-        lastResetMonth = currentMonth;
-    }
-    DataStore dataStore;
-    vector<string> busyDate = dataStore.getBusyDate(this->id);
+    int busyDaysCount = getBusyDaysInCurrentMonth();
 
-    busyDaysCount = busyDate.size();
-    // Kiểm tra đã đủ 3 ngày bận chưa
     if (busyDaysCount >= 3) {
         SetColor(12);
         cout << "\n✘ You have reached the maximum limit of 3 busy days per month!" << endl;
@@ -182,6 +196,9 @@ bool Doctor::remarkAsBusy(){
         system("pause");
         return false;
     }
+    
+    DataStore dataStore;
+    vector<string> busyDate = dataStore.getBusyDate(this->id);
     
     Calendar calendar;
     calendar.showCalendar(this->id);
@@ -202,12 +219,17 @@ bool Doctor::remarkAsBusy(){
     for (int i = 0; i < 7; i++){
         char buf[6];
         strftime(buf,sizeof(buf),"%d/%m", &dates[i]);
-        if (dates[i].tm_wday == 0) continue; // Bỏ qua Chủ nhật
+        if (dates[i].tm_wday == 0) continue; 
 
-        // Kiểm tra ngày này đã được đánh dấu bận chưa
         bool isAlreadyBusy = false;
         for (const string& date : busyDate){
-            if (date == string(buf)){
+            string datePart = date;
+            size_t colonPos = date.find(':');
+            if (colonPos != string::npos) {
+                datePart = date.substr(0, colonPos);
+            }
+            
+            if (datePart == string(buf)){
                 isAlreadyBusy = true;
                 break;
             }
@@ -246,7 +268,8 @@ bool Doctor::remarkAsBusy(){
 
     calendar.saveCalendarToFile(this->id, chosenDate);
 
-    busyDaysCount++;
+    // Recalculate busy days count after adding new busy day
+    busyDaysCount = getBusyDaysInCurrentMonth();
     
     SetColor(2);
     cout << "\n✔ Successfully marked " << chosenDate << " as busy day!" << endl;
@@ -255,6 +278,7 @@ bool Doctor::remarkAsBusy(){
     
     return true;
 }
+
 bool Doctor::updateAppointmentStatus(){
     vector<string> appointments = DataStore::getDoctorAppointments(this->id);
     Doctor::viewAppointment();
@@ -284,4 +308,42 @@ bool Doctor::updateAppointmentStatus(){
     }
     else DataStore::updateVisitAppointmentStatus(appointmentId,"Done");
     return false;
+}
+
+/*--------------------------------------------------------------
+                
+---------------------------------------------------------------*/
+int Doctor::getBusyDaysInCurrentMonth() const {
+    DataStore dataStore;
+    vector<string> busyDates = dataStore.getBusyDate(this->id);
+ 
+    time_t now = std::time(nullptr);
+    tm* currentTime = localtime(&now);
+    int currentMonth = currentTime->tm_mon + 1; 
+    int currentYear = currentTime->tm_year + 1900;
+    
+    int count = 0;
+    for (const string& dateStr : busyDates) {
+        string datePart = dateStr;
+        size_t colonPos = dateStr.find(':');
+        if (colonPos != string::npos) {
+            datePart = dateStr.substr(0, colonPos);
+        }
+
+        size_t slashPos = datePart.find('/');
+        if (slashPos != string::npos && slashPos > 0) {
+            try {
+                int day = stoi(datePart.substr(0, slashPos));
+                int month = stoi(datePart.substr(slashPos + 1));
+
+                if (month == currentMonth) {
+                    count++;
+                }
+            } catch (...) {
+                continue;
+            }
+        }
+    }
+    
+    return count;
 }

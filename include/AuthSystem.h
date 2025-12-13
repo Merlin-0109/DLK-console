@@ -1,6 +1,7 @@
 #pragma once
 #ifndef AUTHSYSTEM_H
 #define AUTHSYSTEM_H
+
 #include <vector>
 #include <fstream>
 
@@ -27,7 +28,7 @@ class AuthSystem{
         ~AuthSystem();
         
         bool usernameExists(string username);
-
+        
         void registerUser(UserType type);
         bool registerDoctor(string username, string password);
         bool registerPatient(string username, string password);
@@ -39,8 +40,6 @@ class AuthSystem{
         bool updateUserProfile(User* user);
         bool saveUserData(User* user);
         
-        // Getters
-        User* getCurrentUser() const;
         DataStore* getDataStore() const;
 };
 #endif

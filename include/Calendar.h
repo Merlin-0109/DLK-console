@@ -12,6 +12,7 @@ class Calendar{
     public:
         Calendar();
         ~Calendar();
+        
         void showCalendar(string doctorID);
         bool saveCalendarToFile(string doctorID, string date);
         void printTicket(string appointmentId, string fullName, string doctor, 

@@ -9,10 +9,12 @@
 #include "UI.h"
 #include "Menu.h"
 
-// Constructor
+/*--------------------------------------------------------------
+                    CONSTRUCTOR - DESTRUCTOR
+---------------------------------------------------------------*/
 AuthSystem::AuthSystem() : currentUser(nullptr) {
     dataStore = new DataStore();
-    
+
     // Khởi tạo HashTables với kích thước hợp lý
     userByIdentityCard = new HashTable<string, User*>(1009);  // Số nguyên tố cho phân bổ tốt
     userByID = new HashTable<string, User*>(1009);
@@ -20,68 +22,28 @@ AuthSystem::AuthSystem() : currentUser(nullptr) {
     loadUsersFromDataStore();
 }
 
-// Destructor
 AuthSystem::~AuthSystem() {
     for (User* user : users) {
         delete user;
     }
     users.clear();
-    
+
     // Giải phóng HashTables
     delete userByIdentityCard;
     delete userByID;
     delete dataStore;
 }
 
-// Load dữ liệu từ DataStore
-void AuthSystem::loadUsersFromDataStore() {
-    // Load Patients
-    vector<string> patientIDs = dataStore->getAllPatientIDs();
-    for (const string& id : patientIDs) {
-        string data = dataStore->loadPatientData(id);
-        if (!data.empty()) {
-            stringstream ss(data);
-            Patient* patient = new Patient;
-            ss >> *patient;
-            users.push_back(patient);
-            
-            // Thêm vào HashTables để tìm kiếm O(1)
-            userByIdentityCard->insert(patient->getIdentityCard(), patient);
-            userByID->insert(patient->getID(), patient);
-        }
-    }
-    
-    // Load Doctors
-    vector<string> doctorIDs = dataStore->getAllDoctorIDs();
-    for (const string& id : doctorIDs) {
-        string data = dataStore->loadDoctorData(id);
-        if (!data.empty()) {
-            stringstream ss(data); // stringstream tao ra mot luong input ao - luc nay data chua co gi ne
-            Doctor* doctor = new Doctor;
-            ss >> *doctor;
-            users.push_back(doctor);
-            
-            // Thêm vào HashTables để tìm kiếm O(1)
-            userByIdentityCard->insert(doctor->getIdentityCard(), doctor);
-            userByID->insert(doctor->getID(), doctor);
-        }
-    }
-}
-
-// Tìm user theo username - SỬ DỤNG HASHTABLE O(1)
-User* AuthSystem::findUser(string identityCard) {
-    User* result = nullptr;
-    if (userByIdentityCard->find(identityCard, result)) {
-        return result;
-    }
-    return nullptr;
-}
-
-// Kiểm tra số CCCD đã tồn tại
+/*--------------------------------------------------------------
+                        KIỂM TRA TỒN TẠI
+---------------------------------------------------------------*/
 bool AuthSystem::usernameExists(string identityCard) {
     return findUser(identityCard) != nullptr;
 }
 
+/*--------------------------------------------------------------
+                        ĐĂNG KÝ TÀI KHOẢN
+---------------------------------------------------------------*/
 void AuthSystem::registerUser(UserType type) {
     const string temp = (type == DOCTOR) ? "DOCTOR" : "PATIENT";
     const int boxX = 55, boxY = 15;
@@ -305,6 +267,9 @@ User* AuthSystem::handleLogin(AuthSystem& authSystem) {
     }
 }
 
+/*--------------------------------------------------------------
+                    XỬ LÝ ĐĂNG NHẬP, ĐĂNG XUẤT
+---------------------------------------------------------------*/
 // Đăng nhập
 User* AuthSystem::login(string identityCard, string password) {
     User* user = findUser(identityCard);
@@ -345,6 +310,9 @@ void AuthSystem::logout() {
     }
 }
 
+/*--------------------------------------------------------------
+                CẬP NHẬT VÀ LƯU TRỮ DỮ LIỆU NGƯỜI DÙNG
+---------------------------------------------------------------*/
 // Cập nhật thông tin người dùng
 bool AuthSystem::updateUserProfile(User* user) {
     if (user == nullptr) return false;
@@ -402,5 +370,52 @@ DataStore* AuthSystem::getDataStore() const {
     return dataStore;
 }
 
+/*--------------------------------------------------------------
+                LẤY DỮ LIỆU TỪ DATASTORE (DataStore.cpp)
+---------------------------------------------------------------*/
+void AuthSystem::loadUsersFromDataStore() {
+    // Load Patients
+    vector<string> patientIDs = dataStore->getAllPatientIDs();
+    for (const string& id : patientIDs) {
+        string data = dataStore->loadPatientData(id);
+        if (!data.empty()) {
+            stringstream ss(data);
+            Patient* patient = new Patient;
+            ss >> *patient;
+            users.push_back(patient);
+            
+            // Thêm vào HashTables để tìm kiếm O(1)
+            userByIdentityCard->insert(patient->getIdentityCard(), patient);
+            userByID->insert(patient->getID(), patient);
+        }
+    }
+    
+    // Load Doctors
+    vector<string> doctorIDs = dataStore->getAllDoctorIDs();
+    for (const string& id : doctorIDs) {
+        string data = dataStore->loadDoctorData(id);
+        if (!data.empty()) {
+            stringstream ss(data); // stringstream tao ra mot luong input ao - luc nay data chua co gi ne
+            Doctor* doctor = new Doctor;
+            ss >> *doctor;
+            users.push_back(doctor);
+            
+            // Thêm vào HashTables để tìm kiếm O(1)
+            userByIdentityCard->insert(doctor->getIdentityCard(), doctor);
+            userByID->insert(doctor->getID(), doctor);
+        }
+    }
+}
+
+/*--------------------------------------------------------------
+                TÌM KIẾM NGƯỜI DÙNG THEO SỐ CCCD
+---------------------------------------------------------------*/
+User* AuthSystem::findUser(string identityCard) {
+    User* result = nullptr;
+    if (userByIdentityCard->find(identityCard, result)) {
+        return result;
+    }
+    return nullptr;
+}
 
 
