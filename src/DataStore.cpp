@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cctype>
 #include <sstream>
 #include <fstream>
 #include <iomanip>
@@ -232,34 +233,105 @@ bool DataStore::saveDoctorData(const string& id, const string& data) {
 bool DataStore::saveBusyCalendarToFile(const string& doctorID, string date){
     string filePath = DataStore::getBusyFilePath(doctorID);
 
-    ofstream createFile(filePath, ios::app);
-    createFile.close();
+    // Ensure file exists
+    {
+        ofstream createFile(filePath, ios::app);
+    }
 
+    // Load all lines
     ifstream file(filePath);
     if (!file.is_open()){
         cout << "Can not open the busy file! _ save" << endl;
         return false;
     }
 
-    string line;
     vector<string> lines;
+    string line;
     while(getline(file,line)){
-        if (line != date)
-            lines.push_back(line);
+        lines.push_back(line);
     }
     file.close();
-    lines.push_back(date);
 
-    ofstream file1(filePath);
-    if (!file1.is_open()){
+    // Current month/year as MM/YYYY
+    time_t now = time(0);
+    tm* ltm = localtime(&now);
+    char monthYearBuf[8];
+    strftime(monthYearBuf, sizeof(monthYearBuf), "%m/%Y", ltm);
+    string currentMonthYear = string(monthYearBuf);
+
+    auto isMonthYear = [](const string& s)->bool{
+        if (s.size() != 7) return false;
+        if (!isdigit(s[0]) || !isdigit(s[1]) || s[2] != '/' ||
+            !isdigit(s[3]) || !isdigit(s[4]) || !isdigit(s[5]) || !isdigit(s[6])) return false;
+        int mm = stoi(s.substr(0,2));
+        int yyyy = stoi(s.substr(3));
+        return mm >= 1 && mm <= 12 && yyyy >= 1900;
+    };
+
+    // Find block for current month/year
+    bool foundBlock = false;
+    int blockStart = -1;
+    vector<string> blockDates;
+    for (int i = 0; i < (int)lines.size(); ){ 
+        if (lines[i].empty()) { i++; continue; }
+        if (isMonthYear(lines[i])){
+            int j = i + 1;
+            vector<string> dates;
+            for (int c = 0; c < 3 && j < (int)lines.size(); c++, j++){
+                if (lines[j].empty()) break;
+                dates.push_back(lines[j]);
+            }
+            if (lines[i] == currentMonthYear){
+                foundBlock = true;
+                blockStart = i;
+                blockDates = dates;
+                break;
+            }
+            i = j;
+        } else {
+            // Legacy format line or stray content; skip
+            i++;
+        }
+    }
+
+    if (foundBlock){
+        // Avoid duplicates
+        if (find(blockDates.begin(), blockDates.end(), date) != blockDates.end()){
+            // Already present; nothing to do
+        } else if ((int)blockDates.size() >= 3){
+            // Reached monthly limit
+            cout << "You have reached the maximum of 3 busy days for this month." << endl;
+            // Do not modify file
+        } else {
+            // Insert the new date after the existing dates in this block
+            int insertPos = blockStart + 1 + (int)blockDates.size();
+            lines.insert(lines.begin() + insertPos, date);
+            // If it just reached 3 dates, ensure a blank line after the 4th line of the block
+            if ((int)blockDates.size() + 1 == 3){
+                int blankPos = blockStart + 4; // month/year + 3 dates
+                if (blankPos >= (int)lines.size() || !lines[blankPos].empty()){
+                    lines.insert(lines.begin() + blankPos, "");
+                }
+            }
+        }
+    } else {
+        // Create a new block at the end: month/year then the date
+        // If the last line is non-empty and the last block was complete, a separator blank line may already exist.
+        lines.push_back(currentMonthYear);
+        lines.push_back(date);
+        // No blank line yet; will be added once 3 dates are reached
+    }
+
+    // Write back
+    ofstream out(filePath);
+    if (!out.is_open()){
         cout << "Can not open the busy file!" << endl;
         return false;
     }
-
-    for (const auto& line : lines)
-        file1 << line << endl;
-
-    file1.close();
+    for (const auto& l : lines){
+        out << l << endl;
+    }
+    out.close();
     return true;
 }
 
@@ -267,19 +339,78 @@ vector<string> DataStore::getBusyDate(const string& doctorID){
     string filePath = DataStore::getBusyFilePath(doctorID);
 
     ifstream file(filePath);
-
     if (!file.is_open()){
         cout << "Can not open the busy file! _ getDate" << endl;
         return {};
     }
 
-    vector<string> dateBusy;
-
+    vector<string> allLines;
     string line;
     while(getline(file,line)){
-        dateBusy.push_back(line);
+        allLines.push_back(line);
     }
     file.close();
+
+    // Build current month/year
+    time_t now = time(0);
+    tm* ltm = localtime(&now);
+    char monthYearBuf[8];
+    strftime(monthYearBuf, sizeof(monthYearBuf), "%m/%Y", ltm);
+    string currentMonthYear = string(monthYearBuf);
+
+    auto isMonthYear = [](const string& s)->bool{
+        if (s.size() != 7) return false;
+        if (!isdigit(s[0]) || !isdigit(s[1]) || s[2] != '/' ||
+            !isdigit(s[3]) || !isdigit(s[4]) || !isdigit(s[5]) || !isdigit(s[6])) return false;
+        int mm = stoi(s.substr(0,2));
+        int yyyy = stoi(s.substr(3));
+        return mm >= 1 && mm <= 12 && yyyy >= 1900;
+    };
+
+    vector<string> dateBusy;
+
+    bool hasMonthHeaders = false;
+    for (int i = 0; i < (int)allLines.size();){
+        if (allLines[i].empty()){ i++; continue; }
+        if (isMonthYear(allLines[i])){
+            hasMonthHeaders = true;
+            string monthHeader = allLines[i];
+            int j = i + 1;
+            vector<string> dates;
+            for (int c = 0; c < 3 && j < (int)allLines.size(); c++, j++){
+                if (allLines[j].empty()) break;
+                dates.push_back(allLines[j]);
+            }
+            if (monthHeader == currentMonthYear){
+                // Return only busy dates for the current month
+                dateBusy = dates;
+                break;
+            }
+            i = j;
+        } else {
+            // Non-header content (legacy format), skip here; handled below if no headers found
+            i++;
+        }
+    }
+
+    if (!hasMonthHeaders){
+        // Legacy format: each line is a busy date (dd/mm). Filter for current month.
+        for (const auto& l : allLines){
+            if (l.empty()) continue;
+            size_t slashPos = l.find('/');
+            if (slashPos == string::npos) continue;
+            try{
+                int month = stoi(l.substr(slashPos + 1));
+                int currentMonth = ltm->tm_mon + 1;
+                if (month == currentMonth){
+                    dateBusy.push_back(l);
+                }
+            }catch(...){
+                continue;
+            }
+        }
+    }
+
     return dateBusy;
 }
 
