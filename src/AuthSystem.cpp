@@ -35,7 +35,7 @@ AuthSystem::~AuthSystem() {
 }
 
 /*--------------------------------------------------------------
-                        KIỂM TRA TỒN TẠI
+                        KIỂM TRA NGƯỜI DÙNG TỒN TẠI
 ---------------------------------------------------------------*/
 bool AuthSystem::usernameExists(string identityCard) {
     return findUser(identityCard) != nullptr;

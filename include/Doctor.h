@@ -32,6 +32,5 @@ class Doctor :public User {
         bool viewAppointment();
         bool remarkAsBusy();
         bool updateAppointmentStatus();
-        
 };
 #endif

@@ -29,7 +29,6 @@ public:
     bool cancelAppointment(const string& appointmentId);
     bool viewAppointmentHistory() const;
     
-    void displayAppointmentDetails(const DataStore::AppointmentDetails& details) const;
     int countActiveAppointments() const;
     vector<string> getDoctorInfo(const string& doctorId) const;  
 };
