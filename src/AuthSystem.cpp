@@ -15,8 +15,7 @@
 AuthSystem::AuthSystem() : currentUser(nullptr) {
     dataStore = new DataStore();
 
-    // Khởi tạo HashTables với kích thước hợp lý
-    userByIdentityCard = new HashTable<string, User*>(1009);  // Số nguyên tố cho phân bổ tốt
+    userByIdentityCard = new HashTable<string, User*>(1009);  
     userByID = new HashTable<string, User*>(1009);
     
     loadUsersFromDataStore();
@@ -28,7 +27,6 @@ AuthSystem::~AuthSystem() {
     }
     users.clear();
 
-    // Giải phóng HashTables
     delete userByIdentityCard;
     delete userByID;
     delete dataStore;
