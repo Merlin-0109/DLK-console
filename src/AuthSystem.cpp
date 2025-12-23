@@ -37,8 +37,10 @@ AuthSystem::~AuthSystem() {
 /*--------------------------------------------------------------
                         KIỂM TRA NGƯỜI DÙNG TỒN TẠI
 ---------------------------------------------------------------*/
-bool AuthSystem::usernameExists(string identityCard) {
-    return findUser(identityCard) != nullptr;
+bool AuthSystem::usernameExists(string identityCard, UserType type) {
+    User* user = findUser(identityCard);
+    if (user == nullptr) return false;
+    return user->getUserType() == type;
 }
 
 /*--------------------------------------------------------------
@@ -141,7 +143,7 @@ void AuthSystem::registerUser(UserType type) {
 
 // Đăng ký Doctor
 bool AuthSystem::registerDoctor(string identityCard, string password) {
-    if (usernameExists(identityCard)) {
+    if (usernameExists(identityCard, DOCTOR)) {
         cout << "\n\n\t\t\t\t\t\tError: The identity card number already exists!" << endl;
         return false;
     }
@@ -176,7 +178,7 @@ bool AuthSystem::registerDoctor(string identityCard, string password) {
 
 // Đăng ký Patient
 bool AuthSystem::registerPatient(string identityCard, string password) {
-    if (usernameExists(identityCard)) {
+    if (usernameExists(identityCard, PATIENT)) {
         cout << "\n\n\t\t\t\t\tError: The identity card number already exists!" << endl;
         return false;
     }

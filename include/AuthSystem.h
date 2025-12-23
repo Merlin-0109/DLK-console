@@ -27,7 +27,7 @@ class AuthSystem{
         AuthSystem();
         ~AuthSystem();
         
-        bool usernameExists(string username);
+        bool usernameExists(string username, UserType type);
         
         void registerUser(UserType type);
         bool registerDoctor(string username, string password);

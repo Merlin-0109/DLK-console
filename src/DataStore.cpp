@@ -232,13 +232,8 @@ bool DataStore::saveDoctorData(const string& id, const string& data) {
 ---------------------------------------------------------------*/
 bool DataStore::saveBusyCalendarToFile(const string& doctorID, string date){
     string filePath = DataStore::getBusyFilePath(doctorID);
+    ofstream createFile(filePath, ios::app);
 
-    // Ensure file exists
-    {
-        ofstream createFile(filePath, ios::app);
-    }
-
-    // Load all lines
     ifstream file(filePath);
     if (!file.is_open()){
         cout << "Can not open the busy file! _ save" << endl;
@@ -252,7 +247,6 @@ bool DataStore::saveBusyCalendarToFile(const string& doctorID, string date){
     }
     file.close();
 
-    // Current month/year as MM/YYYY
     time_t now = time(0);
     tm* ltm = localtime(&now);
     char monthYearBuf[8];
@@ -268,7 +262,6 @@ bool DataStore::saveBusyCalendarToFile(const string& doctorID, string date){
         return mm >= 1 && mm <= 12 && yyyy >= 1900;
     };
 
-    // Find block for current month/year
     bool foundBlock = false;
     int blockStart = -1;
     vector<string> blockDates;
@@ -289,24 +282,17 @@ bool DataStore::saveBusyCalendarToFile(const string& doctorID, string date){
             }
             i = j;
         } else {
-            // Legacy format line or stray content; skip
             i++;
         }
     }
 
     if (foundBlock){
-        // Avoid duplicates
         if (find(blockDates.begin(), blockDates.end(), date) != blockDates.end()){
-            // Already present; nothing to do
         } else if ((int)blockDates.size() >= 3){
-            // Reached monthly limit
-            cout << "You have reached the maximum of 3 busy days for this month." << endl;
-            // Do not modify file
+            cout << "You have reached the maximum of 3 busy days for this month" << endl;
         } else {
-            // Insert the new date after the existing dates in this block
             int insertPos = blockStart + 1 + (int)blockDates.size();
             lines.insert(lines.begin() + insertPos, date);
-            // If it just reached 3 dates, ensure a blank line after the 4th line of the block
             if ((int)blockDates.size() + 1 == 3){
                 int blankPos = blockStart + 4; // month/year + 3 dates
                 if (blankPos >= (int)lines.size() || !lines[blankPos].empty()){
@@ -315,14 +301,10 @@ bool DataStore::saveBusyCalendarToFile(const string& doctorID, string date){
             }
         }
     } else {
-        // Create a new block at the end: month/year then the date
-        // If the last line is non-empty and the last block was complete, a separator blank line may already exist.
         lines.push_back(currentMonthYear);
         lines.push_back(date);
-        // No blank line yet; will be added once 3 dates are reached
     }
 
-    // Write back
     ofstream out(filePath);
     if (!out.is_open()){
         cout << "Can not open the busy file!" << endl;
@@ -351,7 +333,6 @@ vector<string> DataStore::getBusyDate(const string& doctorID){
     }
     file.close();
 
-    // Build current month/year
     time_t now = time(0);
     tm* ltm = localtime(&now);
     char monthYearBuf[8];
@@ -382,19 +363,16 @@ vector<string> DataStore::getBusyDate(const string& doctorID){
                 dates.push_back(allLines[j]);
             }
             if (monthHeader == currentMonthYear){
-                // Return only busy dates for the current month
                 dateBusy = dates;
                 break;
             }
             i = j;
         } else {
-            // Non-header content (legacy format), skip here; handled below if no headers found
             i++;
         }
     }
 
     if (!hasMonthHeaders){
-        // Legacy format: each line is a busy date (dd/mm). Filter for current month.
         for (const auto& l : allLines){
             if (l.empty()) continue;
             size_t slashPos = l.find('/');
